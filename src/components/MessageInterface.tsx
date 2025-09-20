@@ -150,8 +150,7 @@ const MessageInterface = () => {
           }, 1000);
         }
         
-        // Trigger auto-response
-        triggerAutoResponse('left');
+        // No auto-response - only global variable inputs
       }
       
       // Check Person B input
@@ -167,8 +166,7 @@ const MessageInterface = () => {
         chatActions.setPersonTwoInput(''); // Reset after adding
         chatActions.setTruthVerification(null); // Reset verification
         
-        // Trigger auto-response
-        triggerAutoResponse('right');
+        // No auto-response - only global variable inputs
       }
     };
 
@@ -199,33 +197,7 @@ const MessageInterface = () => {
     };
   }, [currentParagraph]);
 
-  /**
-   * Trigger auto-response from the opposite sender
-   * Simulates real-time conversation with 500ms + 2s delays
-   */
-  const triggerAutoResponse = (fromSender: 'left' | 'right') => {
-    setTimeout(() => {
-      setIsTyping(true);  // Show typing indicator
-      setTimeout(() => {
-        // Random response selection
-        const responses = [
-          'That\'s interesting!',
-          'I totally agree!',
-          'Thanks for sharing!',
-          'Cool perspective!',
-          'Tell me more about that.',
-        ];
-        const response: Message = {
-          id: (Date.now() + Math.random()).toString(),
-          text: responses[Math.floor(Math.random() * responses.length)],
-          sender: fromSender === 'left' ? 'right' : 'left',  // Opposite sender
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, response]);
-        setIsTyping(false);
-      }, 2000);  // 2 second typing simulation
-    }, 500);     // 0.5 second delay before typing starts
-  };
+  // Auto-responses removed - Person A and B only respond via global variables
 
   /**
    * Send message and trigger auto-response
@@ -244,8 +216,7 @@ const MessageInterface = () => {
     setMessages(prev => [...prev, newMessage]);
     setInput('');
 
-    // Trigger auto-response
-    triggerAutoResponse(currentSender);
+    // No auto-response - only global variable inputs
   };
 
   /**
