@@ -22,6 +22,8 @@ const ImageCarousel = () => {
   const viewportWidthRef = useRef(0);
   const rafIdRef = useRef<number | null>(null);
   const lastActiveIndexRef = useRef(0);
+  const isGalleryActiveRef = useRef(false);
+  const showCarouselRef = useRef(false);
 
   // Light state that changes infrequently
   const [activeIndex, setActiveIndex] = useState(0);
@@ -58,10 +60,16 @@ const ImageCarousel = () => {
 
         // Visibility controls (update state only when value changes)
         const shouldShowCarousel = rect.top < windowHeight * 0.8;
-        if (shouldShowCarousel !== showCarousel) setShowCarousel(shouldShowCarousel);
+        if (shouldShowCarousel !== showCarouselRef.current) {
+          showCarouselRef.current = shouldShowCarousel;
+          setShowCarousel(shouldShowCarousel);
+        }
 
         const shouldBeActive = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
-        if (shouldBeActive !== isGalleryActive) setIsGalleryActive(shouldBeActive);
+        if (shouldBeActive !== isGalleryActiveRef.current) {
+          isGalleryActiveRef.current = shouldBeActive;
+          setIsGalleryActive(shouldBeActive);
+        }
 
         // Progress (no state updates here)
         const scrolled = Math.max(0, -rect.top);
@@ -92,41 +100,27 @@ const ImageCarousel = () => {
         
         trackRef.current.style.transform = `translate3d(${trackTranslateX}px, 0, 0)`;
         
-        // Update each image scale based on distance from center
+        // Update each image scale based on distance from center (lightweight: transform + opacity only)
         images.forEach((_, index) => {
           const distanceFromCenter = Math.abs(index - centerProgress);
-          
-          // Enhanced scale: center image gets much bigger, others smaller
-          let scale, opacity, filter, boxShadow;
-          
+          let scale: number;
+          let opacity: number;
+
           if (distanceFromCenter < 0.1) {
-            // Center image - make it really stand out
-            scale = 1.3; // Much larger zoom
+            scale = 1.3;
             opacity = 1;
-            filter = 'brightness(1.1) contrast(1.1) saturate(1.2)';
-            boxShadow = '0 20px 60px rgba(255, 165, 132, 0.4), 0 0 30px rgba(255, 165, 132, 0.3)'; // Peach glow
           } else if (distanceFromCenter < 0.6) {
-            // Adjacent images
             scale = Math.max(0.7, 1.3 - distanceFromCenter * 0.8);
             opacity = Math.max(0.4, 1 - distanceFromCenter * 0.6);
-            filter = 'brightness(0.8) saturate(0.8)';
-            boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
           } else {
-            // Far images
             scale = Math.max(0.3, 1 - distanceFromCenter * 0.4);
             opacity = Math.max(0.2, 1 - distanceFromCenter * 0.5);
-            filter = 'brightness(0.6) saturate(0.6) blur(1px)';
-            boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
           }
-          
+
           const imageEl = trackRef.current?.children[index] as HTMLElement;
           if (imageEl) {
             imageEl.style.transform = `scale(${scale})`;
             imageEl.style.opacity = opacity.toString();
-            imageEl.style.filter = filter;
-            imageEl.style.boxShadow = boxShadow;
-            imageEl.style.willChange = 'transform, opacity, filter, box-shadow';
-            imageEl.style.zIndex = distanceFromCenter < 0.1 ? '50' : '10';
           }
         });
 
@@ -146,7 +140,7 @@ const ImageCarousel = () => {
       window.removeEventListener('scroll', onScroll);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
-  }, [isGalleryActive, showCarousel]);
+  }, []);
 
   const skipGallery = () => {
     if (!sectionRef.current) return;
@@ -195,14 +189,15 @@ const ImageCarousel = () => {
           {images.map((img, idx) => (
             <div 
               key={idx} 
-              className="relative rounded-xl overflow-hidden transition-all duration-300 ease-out flex-shrink-0"
-              style={{ width: '320px', height: '200px' }}
+              className="relative rounded-xl overflow-hidden transition-transform duration-200 ease-out flex-shrink-0"
+              style={{ width: '320px', height: '200px', willChange: 'transform, opacity' }}
             >
               <img
                 src={img}
                 alt={`Gallery image ${idx + 1}`}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
               <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
                 {idx + 1}
