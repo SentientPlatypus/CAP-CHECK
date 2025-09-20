@@ -1,6 +1,23 @@
+/**
+ * TextReader Component
+ * 
+ * Interactive text reader with auto-progression and highlighting:
+ * - Simulates podcast/audiobook experience with synchronized text
+ * - Auto-scrolling keeps current paragraph centered in view
+ * - Progress tracking with visual progress bar
+ * - Play/pause/reset controls with smooth transitions
+ * - Dynamic text styling based on reading position
+ * 
+ * Reading mechanics:
+ * - 5 seconds per paragraph (100 steps × 50ms intervals)
+ * - Smooth scroll animation to keep text in view
+ * - Color transitions: active (full), read (dimmed), unread (faded)
+ * - Auto-stop at end with completion message
+ */
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 
+// Demo podcast/article content
 const podcastText = [
   "Welcome to our interactive podcast experience. This is a revolutionary way to consume audio content with synchronized text highlighting.",
   "As you listen or read along, each paragraph automatically becomes highlighted, creating an immersive reading experience that's both engaging and accessible.",
@@ -13,62 +30,81 @@ const podcastText = [
 ];
 
 const TextReader = () => {
-  const [currentParagraph, setCurrentParagraph] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const paragraphRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+  // Reading state management
+  const [currentParagraph, setCurrentParagraph] = useState(0);  // Current active paragraph index
+  const [isPlaying, setIsPlaying] = useState(false);            // Play/pause state
+  const [progress, setProgress] = useState(0);                  // Progress within current paragraph (0-100)
+  const containerRef = useRef<HTMLDivElement>(null);            // Container for scrolling
+  const paragraphRefs = useRef<(HTMLParagraphElement | null)[]>([]); // Individual paragraph refs
 
+  // Auto-progression timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
+    // Only run timer when playing and not at the end
     if (isPlaying && currentParagraph < podcastText.length) {
       interval = setInterval(() => {
         setProgress(prev => {
           const newProgress = prev + 1;
+          
+          // When paragraph is complete (100%), move to next
           if (newProgress >= 100) {
             setCurrentParagraph(curr => {
               const next = curr + 1;
+              
+              // Auto-stop at the end
               if (next >= podcastText.length) {
                 setIsPlaying(false);
                 return curr;
               }
               return next;
             });
-            return 0;
+            return 0; // Reset progress for next paragraph
           }
           return newProgress;
         });
-      }, 50); // 5 seconds per paragraph (100 * 50ms)
+      }, 50); // 50ms intervals = 5 seconds per paragraph (100 × 50ms)
     }
 
     return () => clearInterval(interval);
   }, [isPlaying, currentParagraph]);
 
+  // Auto-scroll current paragraph to center of view
   useEffect(() => {
-    // Scroll current paragraph into view
     if (paragraphRefs.current[currentParagraph]) {
       paragraphRefs.current[currentParagraph]?.scrollIntoView({
         behavior: 'smooth',
-        block: 'center'
+        block: 'center'  // Keep current paragraph centered
       });
     }
   }, [currentParagraph]);
 
+  /**
+   * Toggle play/pause, or restart if finished
+   */
   const togglePlayback = () => {
     if (currentParagraph >= podcastText.length) {
-      resetReader();
+      resetReader();  // Restart from beginning if finished
     } else {
       setIsPlaying(!isPlaying);
     }
   };
 
+  /**
+   * Reset reader to initial state
+   */
   const resetReader = () => {
     setCurrentParagraph(0);
     setProgress(0);
     setIsPlaying(false);
   };
 
+  /**
+   * Dynamic styling based on paragraph position relative to current
+   * - Current: Full opacity and highlight color
+   * - Past: Dimmed but still readable
+   * - Future: Very faded to show what's coming
+   */
   const getParagraphClass = (index: number) => {
     if (index === currentParagraph) {
       return 'text-foreground text-highlight transition-all duration-500';

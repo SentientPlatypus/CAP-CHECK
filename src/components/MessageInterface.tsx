@@ -1,32 +1,59 @@
+/**
+ * MessageInterface Component
+ * 
+ * Interactive chat interface demonstrating real-time messaging:
+ * - Dual-sender system (Person A/B) with toggle functionality
+ * - Auto-response system with random replies and typing indicators
+ * - Smooth auto-scrolling to newest messages
+ * - Message timestamps and bubble styling
+ * - Keyboard shortcuts (Enter to send, Shift+Enter for new line)
+ * 
+ * Features:
+ * - Simulated typing delay (2s) with animated dots
+ * - Automatic scroll-to-bottom on new messages
+ * - Responsive design with gradient sends button
+ * - Real-time timestamp formatting
+ */
 import { useState, useEffect, useRef } from 'react';
 import { Send } from 'lucide-react';
 
+// Message data structure
 interface Message {
   id: string;
   text: string;
-  sender: 'left' | 'right';
+  sender: 'left' | 'right';  // Which side of the chat (Person A/B)
   timestamp: Date;
 }
 
 const MessageInterface = () => {
+  // Chat state management
+  // Initial demo messages
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', text: 'Hey! How are you doing?', sender: 'left', timestamp: new Date() },
     { id: '2', text: 'I\'m great! Just checking out this amazing interface.', sender: 'right', timestamp: new Date() },
     { id: '3', text: 'The animations are so smooth!', sender: 'left', timestamp: new Date() },
   ]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [currentSender, setCurrentSender] = useState<'left' | 'right'>('right');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState('');                    // Current message input
+  const [isTyping, setIsTyping] = useState(false);           // Show typing indicator
+  const [currentSender, setCurrentSender] = useState<'left' | 'right'>('right'); // Active sender
+  const messagesEndRef = useRef<HTMLDivElement>(null);       // For auto-scrolling
 
+  /**
+   * Smooth scroll to the bottom of messages when new ones arrive
+   */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Auto-scroll on new messages or typing indicators
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  /**
+   * Send message and trigger auto-response
+   * Simulates real-time conversation with 500ms + 2s delays
+   */
   const handleSend = () => {
     if (!input.trim()) return;
     
@@ -40,10 +67,11 @@ const MessageInterface = () => {
     setMessages(prev => [...prev, newMessage]);
     setInput('');
 
-    // Simulate response from the other side
+    // Simulate response from the other person after delays
     setTimeout(() => {
-      setIsTyping(true);
+      setIsTyping(true);  // Show typing indicator
       setTimeout(() => {
+        // Random response selection
         const responses = [
           'That\'s interesting!',
           'I totally agree!',
@@ -54,15 +82,18 @@ const MessageInterface = () => {
         const response: Message = {
           id: (Date.now() + 1).toString(),
           text: responses[Math.floor(Math.random() * responses.length)],
-          sender: currentSender === 'left' ? 'right' : 'left',
+          sender: currentSender === 'left' ? 'right' : 'left',  // Opposite sender
           timestamp: new Date()
         };
         setMessages(prev => [...prev, response]);
         setIsTyping(false);
-      }, 2000);
-    }, 500);
+      }, 2000);  // 2 second typing simulation
+    }, 500);     // 0.5 second delay before typing starts
   };
 
+  /**
+   * Handle keyboard shortcuts - Enter to send, Shift+Enter for new line
+   */
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();

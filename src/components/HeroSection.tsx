@@ -1,26 +1,48 @@
+/**
+ * HeroSection Component
+ * 
+ * Landing page hero with interactive scroll effects:
+ * - Parallax text fade and scale based on scroll position
+ * - Smooth scroll animation to carousel section using cubic easing
+ * - Gradient background with radial overlays for visual depth
+ * - Animated scroll indicator with pulsing effects
+ * 
+ * Performance optimizations:
+ * - Uses requestAnimationFrame for smooth scroll animations
+ * - Minimal re-renders with direct style manipulation
+ * - Passive scroll listener for better performance
+ */
 import { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 const HeroSection = () => {
+  // Track scroll position for parallax effects
   const [scrollY, setScrollY] = useState(0);
 
+  // Set up scroll listener for parallax effects
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  /**
+   * Smooth scroll to carousel section using custom easing
+   * Uses requestAnimationFrame for 60fps smooth animation
+   */
   const scrollToCarousel = () => {
     const carouselSection = document.querySelector('[data-section="carousel"]') as HTMLElement | null;
     if (!carouselSection) return;
 
     const startY = window.pageYOffset;
     const targetY = window.pageYOffset + carouselSection.getBoundingClientRect().top;
-    const duration = 1200; // faster smooth scroll (ms)
+    const duration = 1200; // Animation duration in milliseconds
     const startTime = performance.now();
 
+    // Cubic easing for smooth acceleration/deceleration
     const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
+    // Animation step function - called each frame
     const step = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(1, elapsed / duration);
@@ -32,8 +54,9 @@ const HeroSection = () => {
     requestAnimationFrame(step);
   };
 
-  const textOpacity = Math.max(0, 1 - scrollY / 300);
-  const textScale = Math.max(0.5, 1 - scrollY / 600);
+  // Parallax calculations: fade out and scale down as user scrolls
+  const textOpacity = Math.max(0, 1 - scrollY / 300);  // Fade out over 300px
+  const textScale = Math.max(0.5, 1 - scrollY / 600);  // Scale down to 50% over 600px
 
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
