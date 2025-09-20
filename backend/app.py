@@ -25,8 +25,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
-import serial
-import cap_button
+# import serial  # Commented out - no hardware needed
+# import cap_button  # Commented out - no hardware needed
 
 # ---------------------------
 # App / DB setup
@@ -43,7 +43,7 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 db = SQLAlchemy(app)
 
-btn = cap_button.CapButton(port="COM10")
+# btn = cap_button.CapButton(port="COM10")  # Commented out for testing - no hardware needed
 
 # ---------------------------
 # Models
@@ -238,15 +238,15 @@ def api_put_globals():
 
 
 #---------------------------
-# Arduino Endpoints
+# Arduino Endpoints - COMMENTED OUT FOR TESTING
 #---------------------------
-@app.get("/api/blinker/<int:player>/<int:command>")
-def api_blinker(player: int, command: int):
-    try:
-        btn.send_command(player, command)
-        return jsonify(ok=True, player=player, command=command)
-    except Exception as e:
-        return jsonify(ok=False, error=str(e)), 500
+# @app.get("/api/blinker/<int:player>/<int:command>")
+# def api_blinker(player: int, command: int):
+#     try:
+#         btn.send_command(player, command)
+#         return jsonify(ok=True, player=player, command=command)
+#     except Exception as e:
+#         return jsonify(ok=False, error=str(e)), 500
     
 
 if __name__ == '__main__':
