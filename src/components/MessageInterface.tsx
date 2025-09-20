@@ -208,7 +208,7 @@ const MessageInterface = () => {
   };
 
   // Handle AI prompt submission
-  const handleAiPromptSubmit = () => {
+  const handleAiPromptSubmit = async () => {
     if (!aiPrompt.trim()) return;
 
     const timestamp = Date.now();
@@ -239,14 +239,50 @@ const MessageInterface = () => {
     
     setMessages(prev => [...prev, capCheckMessage, analyzingMessage, aiPromptMessage]);
     
-    // Simulate AI processing and result
-    setTimeout(() => {
-      setCapCheckResult(Math.random() > 0.5); // Random true/false for demo
-    }, 2000);
-    
-    // Close modal and reset
+    // Close modal and reset immediately
     setShowModal(false);
     setAiPrompt('');
+    
+    // Try to get AI response from backend, fallback to hardcoded
+    try {
+      // Attempt backend connection (for future implementation)
+      // const aiResponse = await chatActions.sendLastMessageToBackend();
+      
+      // For now, use hardcoded AI analysis response
+      const hardcodedResponse = `AI Analysis Result: Based on the conversation analysis, the statement appears to contain factual inaccuracies. The claim about "95% efficiency" lacks proper scientific backing and contradicts established research data. Key indicators suggest potential misinformation: 1) Unrealistic percentage claims 2) Lack of credible sources 3) Emotional language rather than factual presentation. Recommendation: Verify claims with peer-reviewed sources before accepting as accurate.`;
+      
+      setTimeout(() => {
+        const aiResponseMessage: Message = {
+          id: `ai-response-${timestamp + 3}`,
+          text: hardcodedResponse,
+          sender: 'center',
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, aiResponseMessage]);
+        
+        // Set result after response
+        setCapCheckResult(false); // Hardcoded as false for now since the response indicates misinformation
+      }, 3000);
+      
+    } catch (error) {
+      console.log('Backend connection failed, using hardcoded response');
+      
+      // Fallback hardcoded response
+      const fallbackResponse = `AI Analysis: Unable to connect to verification server. Using local analysis: The statement requires further verification. Please cross-reference with reliable sources before accepting as factual information.`;
+      
+      setTimeout(() => {
+        const aiResponseMessage: Message = {
+          id: `ai-response-fallback-${timestamp + 3}`,
+          text: fallbackResponse,
+          sender: 'center',
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, aiResponseMessage]);
+        setCapCheckResult(null); // null indicates inconclusive
+      }, 3000);
+    }
   };
 
   const handleSend = () => {
