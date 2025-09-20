@@ -37,10 +37,10 @@ const CenterImage = () => {
 
   const clipPath = useMotionTemplate`polygon(${clip1}% ${clip1}%, ${clip2}% ${clip1}%, ${clip2}% ${clip2}%, ${clip1}% ${clip2}%)`;
 
-  const backgroundSize = useTransform(
+  const scale = useTransform(
     scrollY,
     [0, SECTION_HEIGHT + 500],
-    ["170%", "100%"]
+    [1, 0.3]
   );
   const opacity = useTransform(
     scrollY,
@@ -50,17 +50,52 @@ const CenterImage = () => {
 
   return (
     <motion.div
-      className="sticky top-0 h-screen w-full"
+      className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden"
       style={{
         clipPath,
-        backgroundSize,
         opacity,
-        backgroundImage:
-          "url(https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3)",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
       }}
-    />
+    >
+      <motion.div
+        className="w-full h-full bg-gradient-to-br from-background via-card to-background relative"
+        style={{
+          scale,
+          background: `
+            radial-gradient(circle at 30% 40%, hsl(15, 85%, 65%, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 70% 60%, hsl(25, 90%, 70%, 0.1) 0%, transparent 50%),
+            linear-gradient(135deg, hsl(220, 26%, 4%) 0%, hsl(220, 26%, 8%) 100%)
+          `
+        }}
+      >
+        {/* Landing page content that shrinks */}
+        <div className="absolute inset-0 flex">
+          {/* Phone side */}
+          <div className="w-1/2 h-full flex items-center justify-center">
+            <div className="text-purple-500 text-8xl">📱</div>
+          </div>
+          
+          {/* Text side */}
+          <div className="w-1/2 h-full flex items-center justify-start pl-12">
+            <div className="text-left">
+              <h1 className="text-8xl font-bold text-purple-500 mb-6">
+                Interactive
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-lg mb-8">
+                Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
+              </p>
+              <div className="flex gap-4">
+                <div className="bg-orange-500 text-white px-6 py-3 rounded-lg font-medium">
+                  CAP CHECK ⌄
+                </div>
+                <div className="text-muted-foreground px-6 py-3 font-medium">
+                  View Gallery ⌄
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
