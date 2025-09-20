@@ -223,22 +223,15 @@ const MessageInterface = () => {
                     <div key={message.id} className="w-full mb-4">
                       <div className="w-full p-6 rounded-lg bg-card/50 border border-border/50">
                         <div className="flex justify-center items-center space-x-4 mb-4">
-                          <button
-                            onClick={() => speakText(message.text)}
-                            disabled={isSpeaking}
-                            className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-all"
-                          >
-                            <Volume2 size={16} />
-                            <span>{isSpeaking ? 'Reading...' : hasApiKey ? 'Start Reading' : 'Demo Reading'}</span>
-                          </button>
-                          {!hasApiKey && (
-                            <button
-                              onClick={setApiKey}
-                              className="px-3 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-all"
-                            >
-                              Set API Key
-                            </button>
-                          )}
+                          <div className={`px-6 py-3 rounded-lg font-semibold text-lg border-2 ${
+                            capCheckResult === true 
+                              ? 'bg-green-500/20 text-green-300 border-green-400' 
+                              : capCheckResult === false
+                              ? 'bg-red-500/20 text-red-300 border-red-400'
+                              : 'bg-muted text-muted-foreground border-border'
+                          }`}>
+                            {capCheckResult === true ? 'TRUE' : capCheckResult === false ? 'FALSE' : 'ANALYZING...'}
+                          </div>
                         </div>
                         <p className={`text-base leading-relaxed transition-all duration-300 ${
                           isSpeaking ? 'opacity-100' : 'opacity-100'
