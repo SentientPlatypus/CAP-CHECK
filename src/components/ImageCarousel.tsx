@@ -27,6 +27,12 @@ const ImageCarousel = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isGalleryActive, setIsGalleryActive] = useState(false);
   const [showCarousel, setShowCarousel] = useState(false);
+  const [isAutoAnimating, setIsAutoAnimating] = useState(false);
+
+  // Auto-center variables
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastScrollProgressRef = useRef(0);
+  const animationIdRef = useRef<number | null>(null);
 
   // Measure sizes
   const measure = () => {
@@ -47,7 +53,7 @@ const ImageCarousel = () => {
 
   useEffect(() => {
     const onScroll = () => {
-      if (rafIdRef.current) return; // throttle to one paint
+      if (rafIdRef.current || isAutoAnimating) return; // throttle to one paint or skip during auto-animation
       rafIdRef.current = requestAnimationFrame(() => {
         rafIdRef.current = null;
         if (!sectionRef.current || !trackRef.current) return;
@@ -72,63 +78,14 @@ const ImageCarousel = () => {
         const startThreshold = 0.2;
         const finalProgress = rawProgress < startThreshold ? 0 : (rawProgress - startThreshold) / (1 - startThreshold);
 
+        lastScrollProgressRef.current = finalProgress;
+
         // Update progress bar width imperatively (show actual scroll progress)
         if (progressBarRef.current) {
           progressBarRef.current.style.width = `${rawProgress * 100}%`;
         }
 
-        // Calculate center position in the viewport
-        const centerProgress = finalProgress * (images.length - 1);
-        
-        // Move the entire track horizontally based on scroll progress
-        const imageWidth = 320 + 48; // image width + gap
-        const viewportCenter = viewportWidthRef.current / 2;
-        const firstImageCenter = imageWidth / 2; // Center of first image
-        
-        // Start with first image centered, then move through others
-        const baseOffset = viewportCenter - firstImageCenter;
-        const scrollOffset = -finalProgress * imageWidth * (images.length - 1);
-        const trackTranslateX = baseOffset + scrollOffset;
-        
-        trackRef.current.style.transform = `translate3d(${trackTranslateX}px, 0, 0)`;
-        
-        // Update each image scale based on distance from center
-        images.forEach((_, index) => {
-          const distanceFromCenter = Math.abs(index - centerProgress);
-          
-          // Enhanced scale: center image gets much bigger, others smaller
-          let scale, opacity, filter, boxShadow;
-          
-          if (distanceFromCenter < 0.1) {
-            // Center image - make it really stand out
-            scale = 1.3; // Much larger zoom
-            opacity = 1;
-            filter = 'brightness(1.1) contrast(1.1) saturate(1.2)';
-            boxShadow = '0 20px 60px rgba(255, 165, 132, 0.4), 0 0 30px rgba(255, 165, 132, 0.3)'; // Peach glow
-          } else if (distanceFromCenter < 0.6) {
-            // Adjacent images
-            scale = Math.max(0.7, 1.3 - distanceFromCenter * 0.8);
-            opacity = Math.max(0.4, 1 - distanceFromCenter * 0.6);
-            filter = 'brightness(0.8) saturate(0.8)';
-            boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
-          } else {
-            // Far images
-            scale = Math.max(0.3, 1 - distanceFromCenter * 0.4);
-            opacity = Math.max(0.2, 1 - distanceFromCenter * 0.5);
-            filter = 'brightness(0.6) saturate(0.6) blur(1px)';
-            boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
-          }
-          
-          const imageEl = trackRef.current?.children[index] as HTMLElement;
-          if (imageEl) {
-            imageEl.style.transform = `scale(${scale})`;
-            imageEl.style.opacity = opacity.toString();
-            imageEl.style.filter = filter;
-            imageEl.style.boxShadow = boxShadow;
-            imageEl.style.willChange = 'transform, opacity, filter, box-shadow';
-            imageEl.style.zIndex = distanceFromCenter < 0.1 ? '50' : '10';
-          }
-        });
+        updateCarouselPosition(finalProgress);
 
         // Discrete active index for display purposes
         const newActive = Math.round(finalProgress * (images.length - 1));
@@ -136,6 +93,18 @@ const ImageCarousel = () => {
           lastActiveIndexRef.current = newActive;
           setActiveIndex(newActive);
         }
+
+        // Auto-center: Reset timeout on scroll
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+        
+        // Set timeout to auto-center when scrolling stops
+        scrollTimeoutRef.current = setTimeout(() => {
+          if (!isAutoAnimating && shouldBeActive) {
+            startAutoCenter();
+          }
+        }, 150); // Wait 150ms after scroll stops
       });
     };
 
@@ -145,8 +114,105 @@ const ImageCarousel = () => {
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
     };
-  }, [isGalleryActive, showCarousel]);
+  }, [isGalleryActive, showCarousel, isAutoAnimating]);
+
+  const updateCarouselPosition = (finalProgress: number) => {
+    if (!trackRef.current) return;
+    
+    // Calculate center position in the viewport
+    const centerProgress = finalProgress * (images.length - 1);
+    
+    // Move the entire track horizontally based on scroll progress
+    const imageWidth = 320 + 48; // image width + gap
+    const viewportCenter = viewportWidthRef.current / 2;
+    const firstImageCenter = imageWidth / 2; // Center of first image
+    
+    // Start with first image centered, then move through others
+    const baseOffset = viewportCenter - firstImageCenter;
+    const scrollOffset = -finalProgress * imageWidth * (images.length - 1);
+    const trackTranslateX = baseOffset + scrollOffset;
+    
+    trackRef.current.style.transform = `translate3d(${trackTranslateX}px, 0, 0)`;
+    
+    // Update each image scale based on distance from center
+    images.forEach((_, index) => {
+      const distanceFromCenter = Math.abs(index - centerProgress);
+      
+      // Enhanced scale: center image gets much bigger, others smaller
+      let scale, opacity, filter, boxShadow;
+      
+      if (distanceFromCenter < 0.1) {
+        // Center image - make it really stand out
+        scale = 1.3; // Much larger zoom
+        opacity = 1;
+        filter = 'brightness(1.1) contrast(1.1) saturate(1.2)';
+        boxShadow = '0 20px 60px rgba(255, 165, 132, 0.4), 0 0 30px rgba(255, 165, 132, 0.3)'; // Peach glow
+      } else if (distanceFromCenter < 0.6) {
+        // Adjacent images
+        scale = Math.max(0.7, 1.3 - distanceFromCenter * 0.8);
+        opacity = Math.max(0.4, 1 - distanceFromCenter * 0.6);
+        filter = 'brightness(0.8) saturate(0.8)';
+        boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
+      } else {
+        // Far images
+        scale = Math.max(0.3, 1 - distanceFromCenter * 0.4);
+        opacity = Math.max(0.2, 1 - distanceFromCenter * 0.5);
+        filter = 'brightness(0.6) saturate(0.6) blur(1px)';
+        boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+      }
+      
+      const imageEl = trackRef.current?.children[index] as HTMLElement;
+      if (imageEl) {
+        imageEl.style.transform = `scale(${scale})`;
+        imageEl.style.opacity = opacity.toString();
+        imageEl.style.filter = filter;
+        imageEl.style.boxShadow = boxShadow;
+        imageEl.style.willChange = 'transform, opacity, filter, box-shadow';
+        imageEl.style.zIndex = distanceFromCenter < 0.1 ? '50' : '10';
+      }
+    });
+  };
+
+  const startAutoCenter = () => {
+    if (!sectionRef.current) return;
+    
+    const currentProgress = lastScrollProgressRef.current;
+    const nearestImageIndex = Math.round(currentProgress * (images.length - 1));
+    const targetProgress = nearestImageIndex / (images.length - 1);
+    
+    // Don't animate if already centered
+    if (Math.abs(currentProgress - targetProgress) < 0.01) return;
+    
+    setIsAutoAnimating(true);
+    
+    const startProgress = currentProgress;
+    const progressDiff = targetProgress - startProgress;
+    const duration = 600; // 600ms animation
+    const startTime = performance.now();
+    
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      
+      // Smooth easing
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const newProgress = startProgress + progressDiff * eased;
+      
+      updateCarouselPosition(newProgress);
+      
+      if (progress < 1) {
+        animationIdRef.current = requestAnimationFrame(animate);
+      } else {
+        setIsAutoAnimating(false);
+        animationIdRef.current = null;
+      }
+    };
+    
+    animationIdRef.current = requestAnimationFrame(animate);
+  };
 
   const skipGallery = () => {
     if (!sectionRef.current) return;
