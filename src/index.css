@@ -10,51 +10,51 @@ All colors MUST be HSL for 8-bit aesthetic.
 
 @layer base {
   :root {
-    /* 8-bit Color Palette */
-    --background: 240 100% 6%;  /* Deep dark blue like classic arcade */
-    --foreground: 60 100% 95%;  /* Bright yellow-white */
+    /* 8-bit Color Palette - Fixed HSL values */
+    --background: 240 50% 8%;  /* Dark blue */
+    --foreground: 0 0% 95%;  /* Near white */
 
-    --card: 240 100% 12%;
-    --card-foreground: 60 100% 95%;
+    --card: 240 40% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 240 100% 12%;
-    --popover-foreground: 60 100% 95%;
+    --popover: 240 40% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 0 100% 50%;  /* Classic red */
-    --primary-foreground: 60 100% 95%;
+    --primary: 0 80% 60%;  /* Red */
+    --primary-foreground: 0 0% 95%;
 
-    --secondary: 120 100% 40%;  /* Bright green */
-    --secondary-foreground: 60 100% 95%;
+    --secondary: 120 70% 45%;  /* Green */
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 240 100% 20%;
-    --muted-foreground: 60 50% 70%;
+    --muted: 240 30% 20%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 240 100% 60%;  /* Electric blue */
-    --accent-foreground: 60 100% 95%;
+    --accent: 240 80% 65%;  /* Blue */
+    --accent-foreground: 0 0% 95%;
 
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 60 100% 95%;
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 240 100% 25%;
-    --input: 240 100% 15%;
-    --ring: 0 100% 50%;
+    --border: 240 40% 25%;
+    --input: 240 40% 15%;
+    --ring: 0 80% 60%;
 
     --radius: 0px;  /* Sharp, pixelated corners */
 
     /* 8-bit design tokens */
-    --gradient-primary: linear-gradient(90deg, hsl(0, 100%, 50%) 0%, hsl(30, 100%, 50%) 50%, hsl(60, 100%, 50%) 100%);
-    --gradient-background: linear-gradient(180deg, hsl(240, 100%, 6%) 0%, hsl(270, 100%, 12%) 50%, hsl(300, 100%, 8%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(240, 100%, 12%) 0%, hsl(260, 100%, 18%) 100%);
-    --gradient-power: linear-gradient(90deg, hsl(120, 100%, 40%) 0%, hsl(180, 100%, 50%) 100%);
-    --gradient-danger: linear-gradient(90deg, hsl(0, 100%, 50%) 0%, hsl(340, 100%, 60%) 100%);
+    --gradient-primary: linear-gradient(90deg, hsl(0, 80%, 60%) 0%, hsl(30, 90%, 55%) 50%, hsl(60, 85%, 55%) 100%);
+    --gradient-background: linear-gradient(180deg, hsl(240, 50%, 8%) 0%, hsl(270, 40%, 12%) 50%, hsl(300, 35%, 10%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(240, 40%, 12%) 0%, hsl(260, 35%, 18%) 100%);
+    --gradient-power: linear-gradient(90deg, hsl(120, 70%, 45%) 0%, hsl(180, 75%, 50%) 100%);
+    --gradient-danger: linear-gradient(90deg, hsl(0, 80%, 60%) 0%, hsl(340, 75%, 65%) 100%);
     
-    --glow-primary: 0 0 20px hsl(0, 100%, 50%), 0 0 40px hsl(0, 100%, 50%), 0 0 60px hsl(0, 100%, 50%);
-    --glow-secondary: 0 0 20px hsl(120, 100%, 40%), 0 0 40px hsl(120, 100%, 40%);
-    --glow-accent: 0 0 20px hsl(240, 100%, 60%), 0 0 40px hsl(240, 100%, 60%);
-    --glow-power: 0 0 15px hsl(60, 100%, 50%), 0 0 30px hsl(60, 100%, 50%);
+    --glow-primary: 0 0 20px hsl(0, 80%, 60%), 0 0 40px hsl(0, 80%, 60%);
+    --glow-secondary: 0 0 20px hsl(120, 70%, 45%), 0 0 40px hsl(120, 70%, 45%);
+    --glow-accent: 0 0 20px hsl(240, 80%, 65%), 0 0 40px hsl(240, 80%, 65%);
+    --glow-power: 0 0 15px hsl(60, 85%, 55%), 0 0 30px hsl(60, 85%, 55%);
     
-    --pixel-shadow: 4px 4px 0px hsl(240, 100%, 25%);
-    --pixel-shadow-pressed: 2px 2px 0px hsl(240, 100%, 25%);
+    --pixel-shadow: 4px 4px 0px hsl(240, 40%, 15%);
+    --pixel-shadow-pressed: 2px 2px 0px hsl(240, 40%, 15%);
     
     --transition-pixel: all 0.1s steps(2, end);  /* Choppy, digital transitions */
     --transition-bounce: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -106,16 +106,16 @@ All colors MUST be HSL for 8-bit aesthetic.
   
   .ai-status-true {
     background: var(--gradient-power);
-    border-color: hsl(120, 100%, 40%);
+    border-color: hsl(120, 70%, 45%);
     box-shadow: var(--glow-secondary);
-    color: hsl(240, 100%, 6%);
+    color: hsl(240, 50%, 8%);
   }
   
   .ai-status-false {
     background: var(--gradient-danger);
-    border-color: hsl(0, 100%, 50%);
+    border-color: hsl(0, 80%, 60%);
     box-shadow: var(--glow-primary);
-    color: hsl(60, 100%, 95%);
+    color: hsl(0, 0%, 95%);
   }
   
   .pixel-input {
@@ -124,7 +124,7 @@ All colors MUST be HSL for 8-bit aesthetic.
     @apply transition-all duration-100;
     font-family: 'Orbitron', monospace;
     background: var(--gradient-card);
-    box-shadow: inset 2px 2px 0px hsl(240, 100%, 25%);
+    box-shadow: inset 2px 2px 0px hsl(240, 40%, 15%);
   }
   
   .message-bubble-left {
@@ -175,7 +175,7 @@ All colors MUST be HSL for 8-bit aesthetic.
     line-height: 1.6;
     background: var(--gradient-power);
     box-shadow: var(--pixel-shadow);
-    color: hsl(240, 100%, 6%);
+    color: hsl(240, 50%, 8%);
   }
   
   .power-button:hover {
@@ -195,7 +195,7 @@ All colors MUST be HSL for 8-bit aesthetic.
     @apply px-2 py-1 border-2 border-primary;
     background: var(--gradient-primary);
     box-shadow: var(--glow-primary);
-    color: hsl(60, 100%, 95%);
+    color: hsl(0, 0%, 95%);
     font-family: 'Press Start 2P', monospace;
     font-size: 10px;
     transition: var(--transition-pixel);
@@ -237,7 +237,7 @@ All colors MUST be HSL for 8-bit aesthetic.
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Press Start 2P', monospace;
     line-height: 1.6;
-    text-shadow: 2px 2px 0px hsl(240, 100%, 25%);
+    text-shadow: 2px 2px 0px hsl(240, 40%, 15%);
   }
   
   .pixelated {
