@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 
 // Import all carousel images
 import carousel1 from '@/assets/carousel-1.jpg';
@@ -12,6 +13,7 @@ const images = [carousel1, carousel2, carousel3, carousel4, carousel5, carousel6
 
 const ImageCarousel = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isGalleryActive, setIsGalleryActive] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -21,6 +23,10 @@ const ImageCarousel = () => {
       const rect = sectionRef.current.getBoundingClientRect();
       const sectionHeight = sectionRef.current.offsetHeight;
       const windowHeight = window.innerHeight;
+      
+      // Check if gallery section is in view
+      const isInView = rect.top < windowHeight && rect.bottom > 0;
+      setIsGalleryActive(isInView);
       
       // Calculate how much of the section has been scrolled through
       const scrolled = Math.max(0, windowHeight - rect.top);
@@ -35,6 +41,16 @@ const ImageCarousel = () => {
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const skipGallery = () => {
+    if (sectionRef.current) {
+      const sectionBottom = sectionRef.current.offsetTop + sectionRef.current.offsetHeight;
+      window.scrollTo({
+        top: sectionBottom,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Calculate current image index based on scroll progress
   const getCurrentImageIndex = () => {
@@ -84,20 +100,29 @@ const ImageCarousel = () => {
       ref={sectionRef}
       className="h-[200vh] relative bg-gradient-to-b from-background to-card"
     >
-      {/* Title that fades out as we scroll */}
+      {/* Fixed title that stays throughout gallery */}
       <div 
-        className="text-center py-20"
-        style={{
-          opacity: Math.max(0, 1 - scrollProgress * 2),
-          transform: `translateY(${scrollProgress * 50}px)`
-        }}
+        className={`fixed top-20 left-1/2 transform -translate-x-1/2 text-center z-30 transition-opacity duration-300 ${
+          isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
       >
-        <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
           Scroll to Explore Gallery
         </h2>
-        <p className="text-muted-foreground mt-4">
+        <p className="text-muted-foreground mb-6">
           Keep scrolling to see the horizontal carousel in action
         </p>
+        
+        {/* Skip button */}
+        <button
+          onClick={skipGallery}
+          className="bg-secondary/80 hover:bg-secondary text-secondary-foreground px-6 py-3 rounded-full transition-all duration-200 hover:scale-105 backdrop-blur-sm border border-border"
+        >
+          <div className="flex items-center space-x-2">
+            <span>Skip Gallery</span>
+            <ChevronDown size={18} />
+          </div>
+        </button>
       </div>
 
       {/* Sticky carousel container */}
@@ -125,8 +150,12 @@ const ImageCarousel = () => {
         </div>
       </div>
 
-      {/* Progress indicator */}
-      <div className="sticky bottom-8 flex justify-center">
+      {/* Fixed progress indicator */}
+      <div 
+        className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30 transition-opacity duration-300 ${
+          isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
         <div className="bg-background/80 backdrop-blur-sm rounded-full px-6 py-3 border border-border">
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">Progress:</span>
