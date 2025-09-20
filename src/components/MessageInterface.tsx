@@ -50,7 +50,6 @@ const MessageInterface = () => {
   // Modal state for CAP CHECK
   const [showModal, setShowModal] = useState(false);
   const [flashingValue, setFlashingValue] = useState(true);
-  const [showFlashing, setShowFlashing] = useState(false);
   const [finalResult, setFinalResult] = useState<boolean | null>(null);
 
   // Check for API key and fetch AI verification status on mount
@@ -207,7 +206,7 @@ const MessageInterface = () => {
   };
 
   // Handle CAP CHECK - exact same as home page
-  const handleCapCheck = async () => {
+  const handleCapCheck = () => {
     const timestamp = Date.now();
     
     // Add CAP CHECK message
@@ -228,9 +227,8 @@ const MessageInterface = () => {
     
     setMessages(prev => [...prev, capCheckMessage, analyzingMessage]);
     
-    // Show the CAP CHECK modal (exact same as home page)
+    // Show the CAP CHECK modal and start flashing
     setShowModal(true);
-    setShowFlashing(true);
     setFlashingValue(true);
     
     // Faster flashing between True/False (every 300ms)
@@ -246,7 +244,7 @@ const MessageInterface = () => {
         setFinalResult(result);
         setCapCheckResult(result);
         
-        // Close modal and add result to chat
+        // Close modal and add result to chat after showing final result
         setTimeout(() => {
           setShowModal(false);
           
@@ -319,7 +317,7 @@ const MessageInterface = () => {
       
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Original AI Status - for scroll detection */}
-        {capCheckResult !== null && (
+        {capCheckResult !== null && !showModal && (
           <div ref={statusRef} className="mb-12 animate-slide-up">
             <div className={`ai-status-card mx-auto max-w-md ${
               capCheckResult ? 'ai-status-true' : 'ai-status-false'
@@ -347,7 +345,7 @@ const MessageInterface = () => {
         )}
 
         {/* Sticky AI Status - only visible when scrolled */}
-        {capCheckResult !== null && isStatusSticky && (
+        {capCheckResult !== null && isStatusSticky && !showModal && (
           <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
             <div className={`ai-status-card ${
               capCheckResult ? 'ai-status-true' : 'ai-status-false'
