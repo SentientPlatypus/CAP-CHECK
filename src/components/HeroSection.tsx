@@ -44,7 +44,7 @@ const HeroSection = () => {
   };
 
   /**
-   * CAP CHECK - Show modal with fading True/False
+   * CAP CHECK - Show modal with fading True/False, then scroll to Text Reader
    */
   const startCapCheck = () => {
     setShowModal(true);
@@ -72,6 +72,14 @@ const HeroSection = () => {
         setTimeout(() => {
           setShowModal(false);
           setShowFlashing(false);
+          
+          // Scroll to text reader after modal closes
+          setTimeout(() => {
+            const textReaderSection = document.querySelector('[data-section="text-reader"]') as HTMLElement | null;
+            if (textReaderSection) {
+              performSmoothScroll(textReaderSection);
+            }
+          }, 300); // Small delay to ensure modal is fully closed
         }, 1500);
       }
     }, 1500); // Slower fade transition

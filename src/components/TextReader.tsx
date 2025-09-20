@@ -127,7 +127,7 @@ const TextReader = () => {
   };
 
   return (
-    <section className="py-20 px-8 bg-gradient-to-b from-muted to-background relative">
+    <section data-section="text-reader" className="py-20 px-8 bg-gradient-to-b from-muted to-background relative">
       <div className="max-w-4xl mx-auto">
         {/* CAP CHECK Result Display - More Apparent */}
         {capCheckResult !== null && (
