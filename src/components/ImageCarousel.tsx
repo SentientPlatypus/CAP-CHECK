@@ -24,13 +24,14 @@ const ImageCarousel = () => {
       const sectionHeight = sectionRef.current.offsetHeight;
       const windowHeight = window.innerHeight;
       
-      // Check if gallery section is in view
-      const isInView = rect.top < windowHeight && rect.bottom > 0;
+      // More precise gallery active detection - only show when section is more centered
+      const sectionCenter = rect.top + rect.height / 2;
+      const isInView = sectionCenter < windowHeight * 0.8 && sectionCenter > -windowHeight * 0.2;
       setIsGalleryActive(isInView);
       
-      // Calculate how much of the section has been scrolled through
-      const scrolled = Math.max(0, windowHeight - rect.top);
-      const maxScroll = sectionHeight + windowHeight;
+      // Better progress calculation to ensure we reach 100%
+      const scrolled = Math.max(0, -rect.top);
+      const maxScroll = sectionHeight - windowHeight;
       const progress = Math.min(1, Math.max(0, scrolled / maxScroll));
       
       setScrollProgress(progress);
