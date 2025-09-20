@@ -27,7 +27,7 @@ import { chatGlobals, chatActions, truthUtils } from '@/lib/globalState';
 interface Message {
   id: string;
   text: string;
-  sender: 'left' | 'right';  // Which side of the chat (Person A/B)
+  sender: 'left' | 'right' | 'center';  // Added 'center' for full-width messages
   timestamp: Date;
   truthVerification?: boolean | null; // Truth status for this message
 }
@@ -62,8 +62,6 @@ const MessageInterface = () => {
   const [isPlaying, setIsPlaying] = useState(false);            // Play/pause state
   const [progress, setProgress] = useState(0);                  // Progress within current paragraph (0-100)
   const [capCheckResult, setCapCheckResult] = useState<boolean | null>(null); // CAP CHECK result display
-  const [showTextReader, setShowTextReader] = useState(false);  // Toggle text reader visibility
-  const paragraphRefs = useRef<(HTMLParagraphElement | null)[]>([]); // Individual paragraph refs
 
   /**
    * Smooth scroll to the bottom of messages when new ones arrive
@@ -82,7 +80,7 @@ const MessageInterface = () => {
     let interval: NodeJS.Timeout;
     
     // Only run timer when playing and not at the end
-    if (isPlaying && currentParagraph < podcastText.length && showTextReader) {
+    if (isPlaying && currentParagraph < podcastText.length) {
       interval = setInterval(() => {
         setProgress(prev => {
           const newProgress = prev + 1;
@@ -107,17 +105,7 @@ const MessageInterface = () => {
     }
 
     return () => clearInterval(interval);
-  }, [isPlaying, currentParagraph, showTextReader]);
-
-  // Auto-scroll current paragraph to center of view
-  useEffect(() => {
-    if (showTextReader && paragraphRefs.current[currentParagraph]) {
-      paragraphRefs.current[currentParagraph]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'  // Keep current paragraph centered
-      });
-    }
-  }, [currentParagraph, showTextReader]);
+  }, [isPlaying, currentParagraph]);
 
   /**
    * Monitor global variables and automatically add messages when they change
@@ -138,9 +126,22 @@ const MessageInterface = () => {
         chatActions.setPersonOneInput(''); // Reset after adding
         chatActions.setTruthVerification(null); // Reset verification
         
-        // Show text reader when CAP CHECK is received
+        // Start text reader when CAP CHECK is received
         if (newMessage.text === 'CAP CHECK') {
-          setShowTextReader(true);
+          // Add text content as messages
+          setTimeout(() => {
+            podcastText.forEach((paragraph, index) => {
+              setTimeout(() => {
+                const textMessage: Message = {
+                  id: `text-${index}`,
+                  text: paragraph,
+                  sender: 'center' as any, // Special sender for full-width
+                  timestamp: new Date()
+                };
+                setMessages(prev => [...prev, textMessage]);
+              }, index * 200); // Stagger the messages
+            });
+          }, 1000);
         }
         
         // Trigger auto-response
@@ -172,9 +173,9 @@ const MessageInterface = () => {
 
     const handleStartTextReader = () => {
       // Auto-start the text reader when triggered by CAP CHECK
-      setShowTextReader(true);
       if (currentParagraph >= podcastText.length) {
-        resetReader(); // Reset if already finished
+        setCurrentParagraph(0); // Reset if finished
+        setProgress(0);
       }
       setIsPlaying(true);
     };
@@ -292,10 +293,10 @@ const MessageInterface = () => {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Real-time Communication {showTextReader && '& Interactive Text Reader'}
+            Real-time Communication
           </h2>
           <p className="text-muted-foreground mb-4 max-w-2xl mx-auto">
-            {showTextReader ? 'Interactive text reader now active within the chat interface' : chatGlobals.chatExplanation}
+            {chatGlobals.chatExplanation}
           </p>
 
           {/* CAP CHECK Result Display - More Apparent */}
@@ -342,163 +343,96 @@ const MessageInterface = () => {
         </div>
 
         <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-border">
-          {!showTextReader ? (
-            /* Regular Chat Interface */
-            <>
-              <div className="h-96 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.sender === 'right' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className={`${message.sender === 'left' ? 'message-bubble-left' : 'message-bubble-right'} relative`}>
-                      <p className="text-sm">{message.text}</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs opacity-60">
-                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        {/* Truth verification badge */}
-                        {message.truthVerification !== undefined && (
-                          <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${truthUtils.getVerificationColor(message.truthVerification)}`}>
-                            {message.truthVerification === true && <Shield size={10} />}
-                            {message.truthVerification === false && <AlertTriangle size={10} />}
-                            {message.truthVerification === null && <Clock size={10} />}
-                            <span>{truthUtils.getVerificationText(message.truthVerification)}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          {/* Chat Messages Area */}
+          <div className="h-96 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
+            {messages.map((message, index) => {
+              // Full-width text content messages
+              if (message.sender === 'center') {
+                const textIndex = parseInt(message.id.replace('text-', ''));
+                const isActive = textIndex === currentParagraph && isPlaying;
+                const isRead = textIndex < currentParagraph;
                 
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="typing-indicator">
-                      <div className="typing-dot" style={{ animationDelay: '0ms' }} />
-                      <div className="typing-dot" style={{ animationDelay: '200ms' }} />
-                      <div className="typing-dot" style={{ animationDelay: '400ms' }} />
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-              
-              <div className="flex space-x-3">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder={`Type as ${currentSender === 'left' ? 'Person A' : 'Person B'}...`}
-                  className="flex-1 px-4 py-3 bg-input border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={!input.trim()}
-                  className="bg-gradient-to-r from-primary to-accent text-primary-foreground p-3 rounded-xl transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                >
-                  <Send size={20} />
-                </button>
-              </div>
-            </>
-          ) : (
-            /* Integrated Text Reader Interface */
-            <>
-              {/* Text Reader Controls */}
-              <div className="flex items-center justify-center space-x-4 mb-6">
-                <button
-                  onClick={togglePlayback}
-                  className="bg-gradient-to-r from-primary to-accent text-primary-foreground p-4 rounded-full transition-all duration-200 hover:scale-105 shadow-lg"
-                >
-                  {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-                </button>
-                <button
-                  onClick={resetReader}
-                  className="bg-secondary text-secondary-foreground p-4 rounded-full transition-all duration-200 hover:scale-105 hover:bg-secondary/80"
-                >
-                  <RotateCcw size={24} />
-                </button>
-                <div className="text-sm text-muted-foreground">
-                  {currentParagraph + 1} / {podcastText.length}
-                </div>
-                <button
-                  onClick={() => setShowTextReader(false)}
-                  className="bg-muted text-muted-foreground px-4 py-2 rounded-lg transition-all duration-200 hover:bg-muted/80"
-                >
-                  Minimize Reader
-                </button>
-              </div>
-
-              {/* Progress bar */}
-              <div className="w-full bg-muted rounded-full h-2 mb-6 overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-100 ease-out"
-                  style={{ 
-                    width: `${(currentParagraph * 100 + progress) / podcastText.length}%` 
-                  }}
-                />
-              </div>
-
-              {/* Interactive Text Content - Full Width */}
-              <div className="space-y-6 text-lg leading-relaxed mb-6">
-                {podcastText.map((paragraph, index) => (
-                  <div
-                    key={index}
-                    ref={el => paragraphRefs.current[index] = el}
-                    className={`w-full p-4 rounded-lg border transition-all duration-500 ${getParagraphClass(index)}`}
-                    style={{
-                      backgroundColor: index === currentParagraph 
-                        ? 'hsl(var(--primary) / 0.1)' 
-                        : 'hsl(var(--muted) / 0.3)',
-                      borderColor: index === currentParagraph 
-                        ? 'hsl(var(--primary) / 0.3)' 
-                        : 'hsl(var(--border))'
-                    }}
-                  >
-                    {paragraph}
-                  </div>
-                ))}
-              </div>
-
-              {/* Condensed Chat Messages - Show recent activity */}
-              <div className="border-t border-border pt-4">
-                <div className="text-sm text-muted-foreground mb-2">Recent Messages:</div>
-                <div className="flex flex-wrap gap-2">
-                  {messages.slice(-3).map((message) => (
-                    <div
-                      key={message.id}
-                      className={`inline-flex items-center space-x-2 px-3 py-2 rounded-full text-xs ${
-                        message.sender === 'left' 
-                          ? 'bg-secondary/50 text-secondary-foreground' 
-                          : 'bg-primary/20 text-primary'
+                return (
+                  <div key={message.id} className="w-full">
+                    <div 
+                      className={`w-full p-4 rounded-lg border transition-all duration-500 ${
+                        isActive 
+                          ? 'bg-primary/20 border-primary/50 text-foreground shadow-lg scale-[1.02]'
+                          : isRead
+                          ? 'bg-muted/50 border-muted text-muted-foreground opacity-70'
+                          : 'bg-card/50 border-border text-muted-foreground opacity-50'
                       }`}
                     >
-                      <span className="font-medium">
-                        {message.sender === 'left' ? 'A:' : 'B:'}
-                      </span>
-                      <span>{message.text}</span>
-                      {message.truthVerification !== undefined && (
-                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border ${truthUtils.getVerificationColor(message.truthVerification)}`}>
-                          {message.truthVerification === true && <Shield size={8} />}
-                          {message.truthVerification === false && <AlertTriangle size={8} />}
-                          <span className="text-xs">{truthUtils.getVerificationText(message.truthVerification)}</span>
+                      <p className="text-base leading-relaxed">{message.text}</p>
+                      {isActive && (
+                        <div className="mt-2 w-full bg-muted rounded-full h-1 overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-100 ease-out"
+                            style={{ width: `${progress}%` }}
+                          />
                         </div>
                       )}
                     </div>
-                  ))}
+                  </div>
+                );
+              }
+              
+              // Regular chat messages
+              return (
+                <div
+                  key={message.id}
+                  className={`flex ${message.sender === 'right' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`${message.sender === 'left' ? 'message-bubble-left' : 'message-bubble-right'} relative`}>
+                    <p className="text-sm">{message.text}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs opacity-60">
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      {/* Truth verification badge */}
+                      {message.truthVerification !== undefined && (
+                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${truthUtils.getVerificationColor(message.truthVerification)}`}>
+                          {message.truthVerification === true && <Shield size={10} />}
+                          {message.truthVerification === false && <AlertTriangle size={10} />}
+                          {message.truthVerification === null && <Clock size={10} />}
+                          <span>{truthUtils.getVerificationText(message.truthVerification)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="typing-indicator">
+                  <div className="typing-dot" style={{ animationDelay: '0ms' }} />
+                  <div className="typing-dot" style={{ animationDelay: '200ms' }} />
+                  <div className="typing-dot" style={{ animationDelay: '400ms' }} />
                 </div>
               </div>
-
-              {currentParagraph >= podcastText.length && (
-                <div className="text-center mt-6 p-4 bg-primary/10 rounded-xl border border-primary/20">
-                  <p className="text-primary font-semibold mb-2">Reading Complete!</p>
-                  <p className="text-muted-foreground text-sm">
-                    Click reset to start over or minimize to continue with other features.
-                  </p>
-                </div>
-              )}
-            </>
-          )}
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          
+          <div className="flex space-x-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={`Type as ${currentSender === 'left' ? 'Person A' : 'Person B'}...`}
+              className="flex-1 px-4 py-3 bg-input border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim()}
+              className="bg-gradient-to-r from-primary to-accent text-primary-foreground p-3 rounded-xl transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              <Send size={20} />
+            </button>
+          </div>
         </div>
       </div>
     </section>
