@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
-import Navigation from '@/components/Navigation';
+
 import redButton8bit from '@/assets/red-button-8bit.png';
 
 const SECTION_HEIGHT = 1500;
@@ -66,7 +66,6 @@ const Index = () => {
 
   return (
     <div className="bg-background">
-      <Navigation />
       {/* Fixed Background Hero Image */}
       <div
         ref={backgroundRef}
