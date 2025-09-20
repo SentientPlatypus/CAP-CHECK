@@ -14,11 +14,18 @@
  * console.log(chatGlobals.chatExplanation);
  */
 
+import { 
+  fetchGlobalVariables, 
+  saveGlobalVariables, 
+  pollingManager,
+  type GlobalVariables 
+} from './apiService';
+
 /**
  * Global chat state object
  * Contains reactive variables for chat interface
  */
-let chatGlobals = {
+let chatGlobals: GlobalVariables = {
   /**
    * Current input text for Person A (left side of chat)
    */
@@ -42,39 +49,20 @@ let chatGlobals = {
   chatExplanation: 'This AI-powered fact-checking system analyzes statements in real-time. Switch between Person A and Person B to simulate conversations while the system verifies the truthfulness of each statement.'
 };
 
-// Flask API base URL - update this to your Flask server URL
-const FLASK_API_URL = 'http://localhost:5000/api';
-
 /**
  * Load global state from Flask API
  */
 const loadGlobalState = async () => {
-  try {
-    const response = await fetch(`${FLASK_API_URL}/variables`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  const data = await fetchGlobalVariables();
+  if (data) {
+    const hasChanges = JSON.stringify(chatGlobals) !== JSON.stringify(data);
+    chatGlobals = { ...data };
     
-    if (response.ok) {
-      const data = await response.json();
-      const hasChanges = JSON.stringify(chatGlobals) !== JSON.stringify(data);
-      
-      // Update local state with Flask data
-      chatGlobals.personOneInput = data.person_one_input || data.personOneInput || '';
-      chatGlobals.personTwoInput = data.person_two_input || data.personTwoInput || '';
-      chatGlobals.truthVerification = data.truth_verification !== undefined ? data.truth_verification : data.truthVerification;
-      chatGlobals.chatExplanation = data.chat_explanation || data.chatExplanation || chatGlobals.chatExplanation;
-      
-      if (hasChanges) {
-        console.log('Global state updated from Flask API:', data);
-        // Trigger custom event for components to react to changes
-        window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
-      }
+    if (hasChanges) {
+      console.log('Global state updated from Flask API:', data);
+      // Trigger custom event for components to react to changes
+      window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
     }
-  } catch (error) {
-    console.log('Flask API not available, using local state:', error);
   }
 };
 
@@ -82,47 +70,32 @@ const loadGlobalState = async () => {
  * Save global state to Flask API
  */
 const saveGlobalState = async () => {
-  try {
-    const response = await fetch(`${FLASK_API_URL}/variables`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        person_one_input: chatGlobals.personOneInput,
-        person_two_input: chatGlobals.personTwoInput,
-        truth_verification: chatGlobals.truthVerification,
-        chat_explanation: chatGlobals.chatExplanation
-      }),
-    });
-    
-    if (response.ok) {
-      console.log('Global state saved to Flask API');
-    }
-  } catch (error) {
-    console.log('Failed to save to Flask API:', error);
-  }
+  await saveGlobalVariables(chatGlobals);
 };
 
 /**
  * Start polling Flask API for changes
  */
 const startPolling = () => {
-  // Poll every 3 seconds for changes from Flask
-  setInterval(loadGlobalState, 3000);
+  pollingManager.start((data) => {
+    if (data) {
+      const hasChanges = JSON.stringify(chatGlobals) !== JSON.stringify(data);
+      chatGlobals = { ...data };
+      
+      if (hasChanges) {
+        console.log('Global state updated from Flask API:', data);
+        window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
+      }
+    }
+  });
 };
 
 /**
- * Stop polling (if needed)
+ * Stop polling
  */
-let pollingInterval: NodeJS.Timeout | null = null;
 const stopPolling = () => {
-  if (pollingInterval) {
-    clearInterval(pollingInterval);
-    pollingInterval = null;
-  }
+  pollingManager.stop();
 };
-
 
 // Initialize state on module load
 loadGlobalState().then(() => {
@@ -175,6 +148,7 @@ export const chatActions = {
     chatGlobals.personOneInput = '';
     chatGlobals.personTwoInput = '';
     chatGlobals.truthVerification = null;
+    saveGlobalState();
   },
   
   /**
@@ -194,14 +168,6 @@ export const chatActions = {
       chatGlobals.personTwoInput = input;
     }
     saveGlobalState();
-  },
-
-  /**
-   * Export current state as JSON (for external services)
-   */
-  exportState: () => {
-    saveGlobalState();
-    return chatGlobals;
   },
 
   /**
@@ -227,15 +193,7 @@ export const chatActions = {
    * Start/stop automatic polling
    */
   startPolling,
-  stopPolling,
-
-  /**
-   * Update Flask API URL
-   */
-  setFlaskURL: (url: string) => {
-    // This would update the FLASK_API_URL - you can modify as needed
-    console.log('Flask API URL updated to:', url);
-  }
+  stopPolling
 };
 
 /**

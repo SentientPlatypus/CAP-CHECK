@@ -7,21 +7,20 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, FileText, Database, RefreshCw } from 'lucide-react';
-import { 
-  exportGlobalVariables, 
-  exportAsTextFile, 
-  getVariablesForFlask,
-  getCurrentVariables 
-} from '@/lib/dataExporter';
-import { chatActions } from '@/lib/globalState';
-import { flaskAPI } from '@/lib/flaskAPI';
 import { useToast } from '@/hooks/use-toast';
+import { chatActions, chatGlobals } from '@/lib/globalState';
+import { 
+  testFlaskConnection, 
+  exportToJSON, 
+  exportToText,
+  getDatabaseStatus 
+} from '@/lib/apiService';
 
 export const DataExportPanel = () => {
   const { toast } = useToast();
 
   const handleExportJSON = () => {
-    exportGlobalVariables();
+    exportToJSON(chatGlobals);
     toast({
       title: "JSON Exported",
       description: "Global variables exported as JSON file",
@@ -29,7 +28,7 @@ export const DataExportPanel = () => {
   };
 
   const handleExportText = () => {
-    exportAsTextFile();
+    exportToText(chatGlobals);
     toast({
       title: "Text File Exported", 
       description: "Global variables exported as text file",
@@ -37,7 +36,16 @@ export const DataExportPanel = () => {
   };
 
   const handleViewFlaskFormat = () => {
-    const flaskData = getVariablesForFlask();
+    const flaskData = {
+      status: 'success',
+      data: {
+        person_one_input: chatGlobals.personOneInput,
+        person_two_input: chatGlobals.personTwoInput,
+        truth_verification: chatGlobals.truthVerification,
+        chat_explanation: chatGlobals.chatExplanation
+      },
+      timestamp: new Date().toISOString()
+    };
     console.log('Flask Format:', flaskData);
     toast({
       title: "Flask Format Logged",
@@ -63,7 +71,7 @@ export const DataExportPanel = () => {
 
   const handleTestFlaskConnection = async () => {
     try {
-      const status = await flaskAPI.testConnection();
+      const status = await testFlaskConnection();
       toast({
         title: status.connected ? "Connection Successful" : "Connection Failed",
         description: status.connected ? "Flask API is responding" : `Error: ${status.error}`,
@@ -78,7 +86,7 @@ export const DataExportPanel = () => {
     }
   };
 
-  const currentVars = getCurrentVariables();
+  const currentVars = chatGlobals;
 
   return (
     <Card className="w-full max-w-2xl">
