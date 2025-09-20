@@ -178,6 +178,20 @@ const MessageInterface = () => {
     chatActions.setLastUserMessage(input, currentSender);
 
     setMessages(prev => [...prev, newMessage]);
+    
+    // Check if the input is "kkk" and add a new block after it
+    if (input.trim().toLowerCase() === 'kkk') {
+      setTimeout(() => {
+        const newBlockMessage: Message = {
+          id: `new-block-${Date.now()}`,
+          text: 'NEW CONTENT BLOCK - This is a completely new block that appears after "kkk"',
+          sender: 'center',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, newBlockMessage]);
+      }, 500); // Small delay to show the new block after the user message
+    }
+    
     setInput('');
   };
 
