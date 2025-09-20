@@ -24,9 +24,8 @@ const ImageCarousel = () => {
       const sectionHeight = sectionRef.current.offsetHeight;
       const windowHeight = window.innerHeight;
       
-      // More precise gallery active detection - only show when section is more centered
-      const sectionCenter = rect.top + rect.height / 2;
-      const isInView = sectionCenter < windowHeight * 0.8 && sectionCenter > -windowHeight * 0.2;
+      // Show when carousel section is fully visible or mostly visible
+      const isInView = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
       setIsGalleryActive(isInView);
       
       // Better progress calculation to ensure we reach 100%
@@ -123,6 +122,21 @@ const ImageCarousel = () => {
             <span>Skip Gallery</span>
             <ChevronDown size={18} />
           </div>
+        </button>
+      </div>
+
+      {/* Top-right skip button */}
+      <div 
+        className={`fixed top-8 right-8 z-30 transition-opacity duration-300 ${
+          isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <button
+          onClick={skipGallery}
+          className="bg-background/80 hover:bg-background text-foreground p-4 rounded-full transition-all duration-200 hover:scale-105 backdrop-blur-sm border border-border shadow-lg"
+          title="Skip Gallery"
+        >
+          <ChevronDown size={24} />
         </button>
       </div>
 
