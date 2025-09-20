@@ -42,34 +42,74 @@ let chatGlobals = {
   chatExplanation: 'This AI-powered fact-checking system analyzes statements in real-time. Switch between Person A and Person B to simulate conversations while the system verifies the truthfulness of each statement.'
 };
 
+// Flask API base URL - update this to your Flask server URL
+const FLASK_API_URL = 'http://localhost:5000/api';
+
 /**
- * Load global state from JSON file
+ * Load global state from Flask API
  */
 const loadGlobalState = async () => {
   try {
-    const response = await fetch('/globalState.json?t=' + Date.now()); // Cache busting
+    const response = await fetch(`${FLASK_API_URL}/variables`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
     if (response.ok) {
       const data = await response.json();
       const hasChanges = JSON.stringify(chatGlobals) !== JSON.stringify(data);
-      chatGlobals = { ...chatGlobals, ...data };
+      
+      // Update local state with Flask data
+      chatGlobals.personOneInput = data.person_one_input || data.personOneInput || '';
+      chatGlobals.personTwoInput = data.person_two_input || data.personTwoInput || '';
+      chatGlobals.truthVerification = data.truth_verification !== undefined ? data.truth_verification : data.truthVerification;
+      chatGlobals.chatExplanation = data.chat_explanation || data.chatExplanation || chatGlobals.chatExplanation;
       
       if (hasChanges) {
-        console.log('Global state updated from JSON file:', data);
+        console.log('Global state updated from Flask API:', data);
         // Trigger custom event for components to react to changes
         window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
       }
     }
   } catch (error) {
-    console.log('Using default global state values');
+    console.log('Flask API not available, using local state:', error);
   }
 };
 
 /**
- * Start polling for JSON file changes
+ * Save global state to Flask API
+ */
+const saveGlobalState = async () => {
+  try {
+    const response = await fetch(`${FLASK_API_URL}/variables`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        person_one_input: chatGlobals.personOneInput,
+        person_two_input: chatGlobals.personTwoInput,
+        truth_verification: chatGlobals.truthVerification,
+        chat_explanation: chatGlobals.chatExplanation
+      }),
+    });
+    
+    if (response.ok) {
+      console.log('Global state saved to Flask API');
+    }
+  } catch (error) {
+    console.log('Failed to save to Flask API:', error);
+  }
+};
+
+/**
+ * Start polling Flask API for changes
  */
 const startPolling = () => {
-  // Poll every 2 seconds for changes
-  setInterval(loadGlobalState, 2000);
+  // Poll every 3 seconds for changes from Flask
+  setInterval(loadGlobalState, 3000);
 };
 
 /**
@@ -83,24 +123,6 @@ const stopPolling = () => {
   }
 };
 
-/**
- * Save global state to JSON file (for external access)
- * Note: This creates a downloadable file for external services to access
- */
-const saveGlobalState = () => {
-  const dataStr = JSON.stringify(chatGlobals, null, 2);
-  const dataBlob = new Blob([dataStr], { type: 'application/json' });
-  
-  // Create download link for external access
-  const url = URL.createObjectURL(dataBlob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'globalState.json';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
 
 // Initialize state on module load
 loadGlobalState().then(() => {
@@ -183,22 +205,37 @@ export const chatActions = {
   },
 
   /**
-   * Load state from external JSON file
+   * Load state from Flask API
    */
   loadState: loadGlobalState,
 
   /**
-   * Manually refresh state from JSON file
+   * Manually refresh state from Flask API
    */
-  refreshFromJSON: () => {
+  refreshFromFlask: () => {
     return loadGlobalState();
+  },
+
+  /**
+   * Save current state to Flask API
+   */
+  saveToFlask: () => {
+    return saveGlobalState();
   },
 
   /**
    * Start/stop automatic polling
    */
   startPolling,
-  stopPolling
+  stopPolling,
+
+  /**
+   * Update Flask API URL
+   */
+  setFlaskURL: (url: string) => {
+    // This would update the FLASK_API_URL - you can modify as needed
+    console.log('Flask API URL updated to:', url);
+  }
 };
 
 /**

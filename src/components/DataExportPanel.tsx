@@ -14,6 +14,7 @@ import {
   getCurrentVariables 
 } from '@/lib/dataExporter';
 import { chatActions } from '@/lib/globalState';
+import { flaskAPI } from '@/lib/flaskAPI';
 import { useToast } from '@/hooks/use-toast';
 
 export const DataExportPanel = () => {
@@ -44,12 +45,37 @@ export const DataExportPanel = () => {
     });
   };
 
-  const handleRefreshFromJSON = () => {
-    chatActions.loadState();
-    toast({
-      title: "State Refreshed",
-      description: "Reloaded variables from JSON file",
-    });
+  const handleRefreshFromFlask = async () => {
+    try {
+      await chatActions.refreshFromFlask();
+      toast({
+        title: "State Refreshed",
+        description: "Reloaded variables from Flask API",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Could not connect to Flask API",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleTestFlaskConnection = async () => {
+    try {
+      const status = await flaskAPI.testConnection();
+      toast({
+        title: status.connected ? "Connection Successful" : "Connection Failed",
+        description: status.connected ? "Flask API is responding" : `Error: ${status.error}`,
+        variant: status.connected ? "default" : "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Test Failed",
+        description: "Unable to test Flask API connection",
+        variant: "destructive",
+      });
+    }
   };
 
   const currentVars = getCurrentVariables();
@@ -77,35 +103,41 @@ export const DataExportPanel = () => {
           </div>
         </div>
 
-        {/* Export Buttons */}
+        {/* Flask API Controls */}
         <div className="grid grid-cols-2 gap-3">
+          <Button onClick={handleTestFlaskConnection} variant="outline" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Test Flask API
+          </Button>
+          
+          <Button onClick={handleRefreshFromFlask} variant="outline" className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Refresh from Flask
+          </Button>
+          
           <Button onClick={handleExportJSON} variant="outline" className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             Export JSON
           </Button>
           
-          <Button onClick={handleExportText} variant="outline" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Export Text
-          </Button>
-          
           <Button onClick={handleViewFlaskFormat} variant="outline" className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
-            Flask Format
-          </Button>
-          
-          <Button onClick={handleRefreshFromJSON} variant="outline" className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Refresh Data
+            <FileText className="h-4 w-4" />
+            View API Format
           </Button>
         </div>
 
-        {/* Integration Instructions */}
+        {/* Flask API Instructions */}
         <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-          <h4 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">Flask Integration:</h4>
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            Use the exported JSON files or the Flask Format to sync these variables with your SQLite database.
-            The system automatically polls for changes every 2 seconds.
+          <h4 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">Flask API Endpoints:</h4>
+          <div className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+            <div><code>GET /api/variables</code> - Fetch all variables</div>
+            <div><code>POST /api/variables</code> - Update all variables</div>
+            <div><code>PUT /api/variables/&#123;name&#125;</code> - Update single variable</div>
+            <div><code>GET /api/health</code> - Check API status</div>
+            <div><code>GET /api/database/status</code> - Check SQLite status</div>
+          </div>
+          <p className="text-sm text-blue-800 dark:text-blue-200 mt-2">
+            Frontend polls Flask API every 3 seconds for real-time updates.
           </p>
         </div>
       </CardContent>
