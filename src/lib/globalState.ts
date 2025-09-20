@@ -17,6 +17,7 @@
 import { 
   fetchGlobalVariables, 
   saveGlobalVariables, 
+  sendLastMessageToFlask,
   pollingManager,
   type GlobalVariables 
 } from './apiService';
@@ -48,6 +49,11 @@ let chatGlobals: GlobalVariables = {
    */
   chatExplanation: 'This AI-powered fact-checking system analyzes statements in real-time. Switch between Person A and Person B to simulate conversations while the system verifies the truthfulness of each statement.'
 };
+
+/**
+ * Track the last user message for CAP CHECK functionality
+ */
+let lastUserMessage: { text: string; sender: 'left' | 'right' } | null = null;
 
 /**
  * Load global state from Flask API
@@ -114,6 +120,10 @@ export const chatActions = {
    */
   setPersonOneInput: (input: string) => {
     chatGlobals.personOneInput = input;
+    // Track as last user message if it's not empty
+    if (input.trim()) {
+      lastUserMessage = { text: input.trim(), sender: 'left' };
+    }
     saveGlobalState();
   },
   
@@ -122,6 +132,10 @@ export const chatActions = {
    */
   setPersonTwoInput: (input: string) => {
     chatGlobals.personTwoInput = input;
+    // Track as last user message if it's not empty
+    if (input.trim()) {
+      lastUserMessage = { text: input.trim(), sender: 'right' };
+    }
     saveGlobalState();
   },
   
@@ -193,7 +207,31 @@ export const chatActions = {
    * Start/stop automatic polling
    */
   startPolling,
-  stopPolling
+  stopPolling,
+
+  /**
+   * Get the last user message for CAP CHECK
+   */
+  getLastUserMessage: () => lastUserMessage,
+
+  /**
+   * Send last user message to Flask backend for processing
+   */
+  sendLastMessageToBackend: async () => {
+    if (lastUserMessage) {
+      return await sendLastMessageToFlask(lastUserMessage.text, lastUserMessage.sender);
+    }
+    return false;
+  },
+
+  /**
+   * Set last user message manually (for tracking manual messages)
+   */
+  setLastUserMessage: (text: string, sender: 'left' | 'right') => {
+    if (text.trim()) {
+      lastUserMessage = { text: text.trim(), sender };
+    }
+  }
 };
 
 /**

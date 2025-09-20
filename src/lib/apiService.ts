@@ -108,6 +108,35 @@ export const saveGlobalVariables = async (variables: GlobalVariables): Promise<b
 };
 
 /**
+ * Send the last user message to Flask API for CAP CHECK processing
+ */
+export const sendLastMessageToFlask = async (message: string, sender: 'left' | 'right'): Promise<boolean> => {
+  try {
+    const response = await fetch(`${FLASK_API_URL}/cap-check`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: message,
+        sender: sender,
+        timestamp: new Date().toISOString()
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    console.log('Last message sent to Flask API for CAP CHECK:', { message, sender });
+    return true;
+  } catch (error) {
+    console.log('Failed to send message to Flask API:', error);
+    return false;
+  }
+};
+
+/**
  * Test Flask API connection
  */
 export const testFlaskConnection = async (): Promise<ConnectionStatus> => {

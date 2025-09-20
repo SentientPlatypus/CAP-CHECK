@@ -52,6 +52,9 @@ const HeroSection = () => {
    * On subsequent uses, regenerate AI prompt after the last person's message
    */
   const startCapCheck = () => {
+    // Send last user message to backend regardless of first time or subsequent use
+    chatActions.sendLastMessageToBackend();
+    
     if (hasUsedCapCheck) {
       // If CAP CHECK has been used before, regenerate AI prompt
       // For now, just re-add the AI content message

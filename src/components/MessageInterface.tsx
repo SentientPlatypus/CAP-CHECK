@@ -158,6 +158,9 @@ const MessageInterface = () => {
       timestamp: new Date()
     };
 
+    // Track this message as the last user message
+    chatActions.setLastUserMessage(input, currentSender);
+
     setMessages(prev => [...prev, newMessage]);
     setInput('');
   };
