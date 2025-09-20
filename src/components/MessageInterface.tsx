@@ -110,6 +110,28 @@ const MessageInterface = () => {
       setCapCheckResult(event.detail.result);
     };
 
+    const handleCapCheckStart = () => {
+      // Add CAP CHECK analyzing message when cap check starts
+      const capCheckMessage: Message = {
+        id: `cap-check-${Date.now()}`,
+        text: 'CAP CHECK',
+        sender: 'left',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, capCheckMessage]);
+      
+      // Add analyzing status after a short delay
+      setTimeout(() => {
+        const analyzingMessage: Message = {
+          id: `analyzing-${Date.now()}`,
+          text: '⚠️ ANALYZING...',
+          sender: 'left',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, analyzingMessage]);
+      }, 100);
+    };
+
     const handleStartTextReader = () => {
       // Find the newest AI message (last center message) and speak it
       const centerMessages = messages.filter(m => m.sender === 'center');
@@ -136,11 +158,13 @@ const MessageInterface = () => {
     };
 
     window.addEventListener('capCheckResult', handleCapCheckResult as EventListener);
+    window.addEventListener('capCheckStart', handleCapCheckStart as EventListener);
     window.addEventListener('startTextReader', handleStartTextReader as EventListener);
     window.addEventListener('addAiMessage', handleAddAiMessage as EventListener);
     
     return () => {
       window.removeEventListener('capCheckResult', handleCapCheckResult as EventListener);
+      window.removeEventListener('capCheckStart', handleCapCheckStart as EventListener);
       window.removeEventListener('startTextReader', handleStartTextReader as EventListener);
       window.removeEventListener('addAiMessage', handleAddAiMessage as EventListener);
     };
