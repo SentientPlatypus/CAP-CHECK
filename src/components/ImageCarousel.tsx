@@ -1,3 +1,9 @@
+/**
+ * ImageCarousel
+ * - Scroll-driven, single RAF loop
+ * - Lightweight per-frame updates (transform + opacity only)
+ * - Uses refs to avoid state churn and listener rebinds
+ */
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
@@ -30,7 +36,7 @@ const ImageCarousel = () => {
   const [isGalleryActive, setIsGalleryActive] = useState(false);
   const [showCarousel, setShowCarousel] = useState(false);
 
-  // Measure sizes
+  // Measure sizes: cache viewport width and full track width to avoid layout thrash during scroll
   const measure = () => {
     const wrapper = wrapperRef.current;
     const track = trackRef.current;
@@ -47,6 +53,7 @@ const ImageCarousel = () => {
     return () => ro.disconnect();
   }, []);
 
+  // Scroll handler: throttled to one paint via RAF, updates transforms only
   useEffect(() => {
     const onScroll = () => {
       if (rafIdRef.current) return; // throttle to one paint
@@ -69,6 +76,11 @@ const ImageCarousel = () => {
         if (shouldBeActive !== isGalleryActiveRef.current) {
           isGalleryActiveRef.current = shouldBeActive;
           setIsGalleryActive(shouldBeActive);
+        }
+
+        // Bail out early when the carousel isn't in its sticky active window
+        if (!shouldBeActive) {
+          return;
         }
 
         // Progress (no state updates here)
@@ -189,7 +201,7 @@ const ImageCarousel = () => {
           {images.map((img, idx) => (
             <div 
               key={idx} 
-              className="relative rounded-xl overflow-hidden transition-transform duration-200 ease-out flex-shrink-0"
+              className="relative rounded-xl overflow-hidden flex-shrink-0"
               style={{ width: '320px', height: '200px', willChange: 'transform, opacity' }}
             >
               <img
@@ -198,6 +210,8 @@ const ImageCarousel = () => {
                 className="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
+                width={320}
+                height={200}
               />
               <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
                 {idx + 1}

@@ -1,3 +1,8 @@
+/**
+ * Carousel UI primitives built on Embla.
+ * - Provides context, arrows, and orientation handling.
+ * - Keep per-frame work minimal; Embla handles the heavy lifting.
+ */
 import * as React from "react";
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
