@@ -267,73 +267,45 @@ const MessageInterface = () => {
             )}
             <div ref={messagesEndRef} />
           </div>
-          
-          <div className="flex space-x-3 mb-8">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={`Type as ${currentSender === 'left' ? 'Person A' : 'Person B'}...`}
-              className="flex-1 px-4 py-3 bg-input border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
-            />
-            <button
-              onClick={handleSend}
-              className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:opacity-90 transition-all duration-200 flex items-center justify-center min-w-[60px]"
-            >
-              <Send size={20} />
-            </button>
-          </div>
 
-          {/* AI Content Reader Section */}
-          <div className="border-t border-border/50 pt-8">
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                AI Content Reader
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                AI content with synchronized text highlighting {hasApiKey ? 'and voice reading' : '(set API key for voice)'}
-              </p>
-              
-              {/* TTS Controls */}
-              <div className="flex justify-center items-center space-x-4 mb-6">
+          {/* AI Content Reader - Consolidated Block */}
+          <div className="mb-6 border-t border-border/50 pt-6">
+            <div className="flex justify-center items-center space-x-4 mb-4">
+              <button
+                onClick={() => speakText(aiContent.join(' '))}
+                disabled={isSpeaking}
+                className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-all"
+              >
+                <Volume2 size={16} />
+                <span>{isSpeaking ? 'Reading...' : hasApiKey ? 'Start Reading' : 'Demo Reading'}</span>
+              </button>
+              {!hasApiKey && (
                 <button
-                  onClick={() => speakText(aiContent.join(' '))}
-                  disabled={isSpeaking}
-                  className="flex items-center space-x-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-all"
+                  onClick={setApiKey}
+                  className="px-3 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-all"
                 >
-                  <Volume2 size={20} />
-                  <span>{isSpeaking ? 'Reading...' : hasApiKey ? 'Start Reading' : 'Demo Reading'}</span>
+                  Set API Key
                 </button>
-                {!hasApiKey && (
-                  <button
-                    onClick={setApiKey}
-                    className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-all"
-                  >
-                    Set API Key
-                  </button>
-                )}
-              </div>
+              )}
             </div>
 
-            {/* Content with Word-by-Word Highlighting */}
-            <div className="space-y-4">
-              {aiContent.map((paragraph, paragraphIndex) => {
-                const words = paragraph.split(' ');
-                const paragraphStartIndex = aiContent.slice(0, paragraphIndex)
-                  .reduce((acc, p) => acc + p.split(' ').length, 0);
-                
-                return (
-                  <div
-                    key={paragraphIndex}
-                    className={`p-4 rounded-lg border transition-all duration-500 ${
-                      isSpeaking && currentWordIndex >= paragraphStartIndex && 
-                      currentWordIndex < paragraphStartIndex + words.length
-                        ? 'bg-primary/10 border-primary/30 shadow-lg scale-[1.01]'
-                        : 'bg-card/50 border-border/50'
-                    }`}
-                  >
-                    <p className="text-base leading-relaxed">
+            {/* Consolidated Content Block */}
+            <div className="p-6 rounded-lg border bg-card/50 border-border/50">
+              <div className="space-y-4">
+                {aiContent.map((paragraph, paragraphIndex) => {
+                  const words = paragraph.split(' ');
+                  const paragraphStartIndex = aiContent.slice(0, paragraphIndex)
+                    .reduce((acc, p) => acc + p.split(' ').length, 0);
+                  const paragraphEndIndex = paragraphStartIndex + words.length - 1;
+                  const isParagraphActive = isSpeaking && currentWordIndex >= paragraphStartIndex && currentWordIndex <= paragraphEndIndex;
+                  
+                  return (
+                    <p
+                      key={paragraphIndex}
+                      className={`text-base leading-relaxed transition-all duration-300 ${
+                        isParagraphActive ? 'opacity-100' : isSpeaking ? 'opacity-40' : 'opacity-100'
+                      }`}
+                    >
                       {words.map((word, wordIdx) => {
                         const globalWordIndex = paragraphStartIndex + wordIdx;
                         const isCurrentWord = isSpeaking && globalWordIndex === currentWordIndex;
@@ -352,15 +324,31 @@ const MessageInterface = () => {
                         );
                       })}
                     </p>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
+          </div>
+          
+          <div className="flex space-x-3 mb-8">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={`Type as ${currentSender === 'left' ? 'Person A' : 'Person B'}...`}
+              className="flex-1 px-4 py-3 bg-input border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
+            />
+            <button
+              onClick={handleSend}
+              className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:opacity-90 transition-all duration-200 flex items-center justify-center min-w-[60px]"
+            >
+              <Send size={20} />
+            </button>
           </div>
         </div>
       </div>
     </section>
   );
 };
-
 export default MessageInterface;
