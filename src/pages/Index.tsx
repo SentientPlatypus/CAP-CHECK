@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
+import ParallaxHero from '@/components/ParallaxHero';
 import { Button } from '@/components/ui/button';
 import ScrollPhone from '@/components/ScrollPhone';
 
@@ -80,6 +81,7 @@ const Index = () => {
       )}
       
       <HeroSection showOverlay={showButton} />
+      <ParallaxHero />
       <ImageCarousel />
       
       {/* Call to Action Section */}
