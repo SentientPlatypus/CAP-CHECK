@@ -1,28 +1,12 @@
 /**
- * Index Page - Main Landing Page
+ * Index Page - Home Landing Page
  * 
- * Orchestrates the complete interactive experience:
- * 1. HeroSection - Landing with parallax scroll effects and smooth navigation
- * 2. ImageCarousel - Scroll-driven horizontal carousel with zoom effects
- * 3. MessageInterface - Real-time chat simulation with dual personas
- * 4. TextReader - Auto-progressing text with synchronized highlighting
- * 
- * Each component is designed to be self-contained and performant,
- * using modern web APIs for smooth animations and interactions.
+ * Main landing page with hero section, carousel, and navigation to chat
  */
-import HeroSection from '@/components/HeroSection';
-import ImageCarousel from '@/components/ImageCarousel';
-import MessageInterface from '@/components/MessageInterface';
-import TextReader from '@/components/TextReader';
+import Home from './Home';
 
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-background">
-      <HeroSection />
-      <ImageCarousel />
-      <MessageInterface />
-    </div>
-  );
+  return <Home />;
 };
 
 export default Index;
