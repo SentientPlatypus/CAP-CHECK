@@ -18,11 +18,6 @@ const Index = () => {
   const { scrollY } = useScroll();
   const [showOverlay, setShowOverlay] = useState(false);
 
-  // Clip path animation - starts small and expands as you scroll
-  const clip1 = useTransform(scrollY, [0, SECTION_HEIGHT], [25, 0]);
-  const clip2 = useTransform(scrollY, [0, SECTION_HEIGHT], [75, 100]);
-  const clipPath = useMotionTemplate`polygon(${clip1}% ${clip1}%, ${clip2}% ${clip1}%, ${clip2}% ${clip2}%, ${clip1}% ${clip2}%)`;
-
   // Background size - starts large and gets smaller as you scroll
   const backgroundSize = useTransform(
     scrollY,
@@ -57,7 +52,6 @@ const Index = () => {
       <motion.div
         className="fixed top-0 left-0 w-full h-screen z-10"
         style={{
-          clipPath,
           backgroundSize,
           opacity: backgroundOpacity,
           backgroundImage: "url(https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
