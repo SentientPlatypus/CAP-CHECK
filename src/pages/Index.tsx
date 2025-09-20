@@ -21,7 +21,6 @@ const Index = () => {
       <HeroSection />
       <ImageCarousel />
       <MessageInterface />
-      <TextReader />
     </div>
   );
 };
