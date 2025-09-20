@@ -47,13 +47,39 @@ let chatGlobals = {
  */
 const loadGlobalState = async () => {
   try {
-    const response = await fetch('/globalState.json');
+    const response = await fetch('/globalState.json?t=' + Date.now()); // Cache busting
     if (response.ok) {
       const data = await response.json();
+      const hasChanges = JSON.stringify(chatGlobals) !== JSON.stringify(data);
       chatGlobals = { ...chatGlobals, ...data };
+      
+      if (hasChanges) {
+        console.log('Global state updated from JSON file:', data);
+        // Trigger custom event for components to react to changes
+        window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
+      }
     }
   } catch (error) {
     console.log('Using default global state values');
+  }
+};
+
+/**
+ * Start polling for JSON file changes
+ */
+const startPolling = () => {
+  // Poll every 2 seconds for changes
+  setInterval(loadGlobalState, 2000);
+};
+
+/**
+ * Stop polling (if needed)
+ */
+let pollingInterval: NodeJS.Timeout | null = null;
+const stopPolling = () => {
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+    pollingInterval = null;
   }
 };
 
@@ -77,7 +103,10 @@ const saveGlobalState = () => {
 };
 
 // Initialize state on module load
-loadGlobalState();
+loadGlobalState().then(() => {
+  // Start polling for changes after initial load
+  startPolling();
+});
 
 export { chatGlobals };
 
@@ -156,7 +185,20 @@ export const chatActions = {
   /**
    * Load state from external JSON file
    */
-  loadState: loadGlobalState
+  loadState: loadGlobalState,
+
+  /**
+   * Manually refresh state from JSON file
+   */
+  refreshFromJSON: () => {
+    return loadGlobalState();
+  },
+
+  /**
+   * Start/stop automatic polling
+   */
+  startPolling,
+  stopPolling
 };
 
 /**
