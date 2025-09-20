@@ -15,7 +15,6 @@ import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
-import redButtonImage from '@/assets/red-button.png';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -25,12 +24,12 @@ const Index = () => {
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      const heroHeight = window.innerHeight; // Assuming hero section is viewport height
+      const heroHeight = window.innerHeight;
       const progress = Math.min(scrollTop / heroHeight, 1);
       
       setScrollProgress(progress);
-      setIsPressed(progress > 0.2); // Button gets "pressed" after 20% scroll
-      setShowButton(progress < 1); // Hide when scrolled past landing page
+      setIsPressed(progress > 0.1);
+      setShowButton(progress < 1);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -38,28 +37,30 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Large Red Button on Left Side */}
+    <div className="min-h-screen bg-background relative">
+      {/* Large Red Button covering 50% of landing page */}
       {showButton && (
-        <div className="fixed left-8 top-1/2 transform -translate-y-1/2 z-50">
+        <div className="fixed left-0 top-0 w-1/2 h-screen z-40 flex items-center justify-center">
           <div 
-            className={`transition-all duration-300 ${
-              isPressed ? 'scale-90 brightness-75' : 'scale-100'
-            }`}
+            className={`
+              w-80 h-80 rounded-full bg-red-500 border-8 border-red-600
+              shadow-2xl cursor-pointer select-none flex items-center justify-center
+              transition-all duration-300 ease-out
+              ${isPressed 
+                ? 'transform scale-90 shadow-inner bg-red-600 border-red-700' 
+                : 'transform scale-100 shadow-2xl bg-red-500 border-red-600'
+              }
+            `}
             style={{
-              filter: isPressed ? 'brightness(0.7) contrast(1.3)' : 'none',
-              opacity: 1 - scrollProgress * 0.5 // Fade out as we scroll
+              boxShadow: isPressed 
+                ? 'inset 0 8px 16px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2)' 
+                : '0 12px 24px rgba(0,0,0,0.3), 0 8px 16px rgba(239,68,68,0.4)',
+              opacity: 1 - scrollProgress * 0.3
             }}
           >
-            <img 
-              src={redButtonImage} 
-              alt="Red Button" 
-              className="w-32 h-32 pixelated"
-              style={{ imageRendering: 'pixelated' }}
-            />
-          </div>
-          <div className="text-sm text-center mt-2 text-muted-foreground">
-            {isPressed ? 'PRESSED!' : 'Scroll down...'}
+            <span className="text-white text-2xl font-bold">
+              {isPressed ? 'PRESSED!' : 'SCROLL DOWN'}
+            </span>
           </div>
         </div>
       )}
