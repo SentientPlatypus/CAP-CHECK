@@ -18,33 +18,46 @@ const ImageCarousel = () => {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    let rafId: number;
+    
     const handleScroll = () => {
-      if (!sectionRef.current) return;
+      if (rafId) return; // Skip if already scheduled
       
-      const rect = sectionRef.current.getBoundingClientRect();
-      const sectionHeight = sectionRef.current.offsetHeight;
-      const windowHeight = window.innerHeight;
-      
-      // Show carousel when section starts coming into view
-      const shouldShowCarousel = rect.top < windowHeight * 0.8;
-      setShowCarousel(shouldShowCarousel);
-      
-      // Show controls when carousel section is fully visible or mostly visible
-      const isInView = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
-      setIsGalleryActive(isInView);
-      
-      // Better progress calculation to ensure we reach 100%
-      const scrolled = Math.max(0, -rect.top);
-      const maxScroll = sectionHeight - windowHeight;
-      const progress = Math.min(1, Math.max(0, scrolled / maxScroll));
-      
-      setScrollProgress(progress);
+      rafId = requestAnimationFrame(() => {
+        if (!sectionRef.current) {
+          rafId = 0;
+          return;
+        }
+        
+        const rect = sectionRef.current.getBoundingClientRect();
+        const sectionHeight = sectionRef.current.offsetHeight;
+        const windowHeight = window.innerHeight;
+        
+        // Show carousel when section starts coming into view
+        const shouldShowCarousel = rect.top < windowHeight * 0.8;
+        setShowCarousel(shouldShowCarousel);
+        
+        // Show controls when carousel section is fully visible or mostly visible
+        const isInView = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
+        setIsGalleryActive(isInView);
+        
+        // Better progress calculation to ensure we reach 100%
+        const scrolled = Math.max(0, -rect.top);
+        const maxScroll = sectionHeight - windowHeight;
+        const progress = Math.min(1, Math.max(0, scrolled / maxScroll));
+        
+        setScrollProgress(progress);
+        rafId = 0;
+      });
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial call
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const skipGallery = () => {
@@ -60,8 +73,8 @@ const ImageCarousel = () => {
   };
 
   const getImageStyle = (index: number) => {
-    const currentIndex = getCurrentImageIndex();
     const totalImages = images.length;
+    const progressIndex = scrollProgress * (totalImages - 1);
     
     // Calculate horizontal offset based on scroll progress
     const baseOffset = scrollProgress * (totalImages - 1) * -200;
@@ -69,18 +82,28 @@ const ImageCarousel = () => {
     const finalX = baseOffset + imageOffset;
     
     // Calculate scale and opacity based on distance from center
-    const distanceFromCenter = Math.abs(index - scrollProgress * (totalImages - 1));
+    const distanceFromCenter = Math.abs(index - progressIndex);
     const scale = Math.max(0.4, 1 - distanceFromCenter * 0.3);
     const opacity = Math.max(0.2, 1 - distanceFromCenter * 0.4);
+    
+    // Only show images that are reasonably close to center
+    if (distanceFromCenter > 3) {
+      return {
+        transform: `translate3d(${finalX}px, 0, 0) scale(${scale})`,
+        opacity: 0,
+        zIndex: 1,
+        willChange: 'transform, opacity'
+      };
+    }
     
     // Z-index based on how close to center
     const zIndex = Math.max(1, 10 - Math.floor(distanceFromCenter * 2));
     
     return {
-      transform: `translateX(${finalX}px) scale(${scale})`,
+      transform: `translate3d(${finalX}px, 0, 0) scale(${scale})`,
       opacity,
       zIndex,
-      transition: 'opacity 0.1s ease-out'
+      willChange: 'transform, opacity'
     };
   };
 
@@ -135,25 +158,32 @@ const ImageCarousel = () => {
             showCarousel ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          {images.map((image, index) => (
-            <div
-              key={index}
-              className="absolute transition-transform duration-100 ease-out"
-              style={getImageStyle(index)}
-            >
-              <div className="relative rounded-xl overflow-hidden shadow-2xl">
-                <img
-                  src={image}
-                  alt={`Gallery image ${index + 1}`}
-                  className={`${getImageSize(index)} object-cover`}
-                />
-                {/* Image overlay with index */}
-                <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                  {index + 1}
+          {images.map((image, index) => {
+            const distanceFromCenter = Math.abs(index - scrollProgress * (images.length - 1));
+            // Only render images that are close to center for better performance
+            if (distanceFromCenter > 3) return null;
+            
+            return (
+              <div
+                key={index}
+                className="absolute"
+                style={getImageStyle(index)}
+              >
+                <div className="relative rounded-xl overflow-hidden shadow-2xl">
+                  <img
+                    src={image}
+                    alt={`Gallery image ${index + 1}`}
+                    className={`${getImageSize(index)} object-cover`}
+                    loading="lazy"
+                  />
+                  {/* Image overlay with index */}
+                  <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                    {index + 1}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
