@@ -1,9 +1,16 @@
 /**
- * Centralized API Service
- * Handles all fetching operations for the application
+ * API Service - Flask Backend Integration
+ * 
+ * Centralized service for interacting with Flask API backend.
+ * Handles data fetching, saving, and connection testing.
  */
 
-// Types
+// Base Flask API URL configuration
+let FLASK_API_URL = 'http://localhost:5000';
+
+/**
+ * Type definitions for API responses and data structures
+ */
 export interface GlobalVariables {
   personOneInput: string;
   personTwoInput: string;
@@ -12,33 +19,22 @@ export interface GlobalVariables {
 }
 
 export interface FlaskAPIResponse {
-  person_one_input?: string;
-  person_two_input?: string;
-  truth_verification?: boolean | null;
-  chat_explanation?: string;
-  personOneInput?: string;
-  personTwoInput?: string;
-  truthVerification?: boolean | null;
-  chatExplanation?: string;
+  success: boolean;
+  data?: GlobalVariables;
+  message?: string;
 }
 
 export interface ConnectionStatus {
   connected: boolean;
-  status?: number;
   error?: string;
-  url: string;
+  latency?: number;
 }
 
-// Configuration
-const DEFAULT_FLASK_URL = 'http://localhost:5000/api';
-let FLASK_API_URL = DEFAULT_FLASK_URL;
-
 /**
- * Update Flask API URL
+ * Set the Flask API base URL
  */
 export const setFlaskURL = (url: string) => {
-  FLASK_API_URL = url;
-  console.log('Flask API URL updated to:', url);
+  FLASK_API_URL = url.replace(/\/$/, ''); // Remove trailing slash
 };
 
 /**
@@ -51,7 +47,7 @@ export const getFlaskURL = () => FLASK_API_URL;
  */
 export const fetchGlobalVariables = async (): Promise<GlobalVariables | null> => {
   try {
-    const response = await fetch(`${FLASK_API_URL}/variables`, {
+    const response = await fetch(`${FLASK_API_URL}/api/globals`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -59,20 +55,20 @@ export const fetchGlobalVariables = async (): Promise<GlobalVariables | null> =>
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error('Failed to fetch global variables:', response.status, response.statusText);
+      return null;
     }
 
     const data: FlaskAPIResponse = await response.json();
     
-    // Normalize the response to match our internal format
-    return {
-      personOneInput: data.person_one_input || data.personOneInput || '',
-      personTwoInput: data.person_two_input || data.personTwoInput || '',
-      truthVerification: data.truth_verification !== undefined ? data.truth_verification : data.truthVerification,
-      chatExplanation: data.chat_explanation || data.chatExplanation || 'This AI-powered fact-checking system analyzes statements in real-time.'
-    };
+    if (data.success && data.data) {
+      return data.data;
+    }
+    
+    console.error('Invalid response format:', data);
+    return null;
   } catch (error) {
-    console.log('Flask API not available:', error);
+    console.error('Error fetching global variables:', error);
     return null;
   }
 };
@@ -82,27 +78,23 @@ export const fetchGlobalVariables = async (): Promise<GlobalVariables | null> =>
  */
 export const saveGlobalVariables = async (variables: GlobalVariables): Promise<boolean> => {
   try {
-    const response = await fetch(`${FLASK_API_URL}/variables`, {
+    const response = await fetch(`${FLASK_API_URL}/api/globals`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        person_one_input: variables.personOneInput,
-        person_two_input: variables.personTwoInput,
-        truth_verification: variables.truthVerification,
-        chat_explanation: variables.chatExplanation
-      }),
+      body: JSON.stringify(variables),
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error('Failed to save global variables:', response.status, response.statusText);
+      return false;
     }
 
-    console.log('Global variables saved to Flask API');
-    return true;
+    const data: FlaskAPIResponse = await response.json();
+    return data.success;
   } catch (error) {
-    console.log('Failed to save to Flask API:', error);
+    console.error('Error saving global variables:', error);
     return false;
   }
 };
@@ -110,9 +102,9 @@ export const saveGlobalVariables = async (variables: GlobalVariables): Promise<b
 /**
  * Fetch AI verification status from Flask API
  */
-export const fetchAiVerificationStatus = async (): Promise<boolean> => {
+export const fetchAiVerificationStatus = async (): Promise<{ verified: boolean; status: string } | null> => {
   try {
-    const response = await fetch(`${FLASK_API_URL}/ai-verification-status`, {
+    const response = await fetch(`${FLASK_API_URL}/api/ai-verification`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -120,147 +112,149 @@ export const fetchAiVerificationStatus = async (): Promise<boolean> => {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error('Failed to fetch AI verification status:', response.status, response.statusText);
+      return null;
     }
 
-    const data = await response.json();
-    return data.isTrue || false; // Default to false if not specified
+    return await response.json();
   } catch (error) {
-    console.log('Failed to fetch AI verification status:', error);
-    return false; // Default to false on error
+    console.error('Error fetching AI verification status:', error);
+    return null;
   }
 };
 
 /**
- * Send the last user message to Flask API for CAP CHECK processing
+ * Send last user message to Flask for CAP CHECK processing
  */
 export const sendLastMessageToFlask = async (message: string, sender: 'left' | 'right'): Promise<boolean> => {
   try {
-    const response = await fetch(`${FLASK_API_URL}/cap-check`, {
+    const response = await fetch(`${FLASK_API_URL}/api/cap-check`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        message: message,
-        sender: sender,
-        timestamp: new Date().toISOString()
-      }),
+      body: JSON.stringify({ message, sender }),
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error('Failed to send message for CAP CHECK:', response.status, response.statusText);
+      return false;
     }
 
-    console.log('Last message sent to Flask API for CAP CHECK:', { message, sender });
-    return true;
+    const data = await response.json();
+    return data.success || false;
   } catch (error) {
-    console.log('Failed to send message to Flask API:', error);
+    console.error('Error sending message for CAP CHECK:', error);
     return false;
   }
 };
 
 /**
- * Test Flask API connection
+ * Test connection to Flask backend
  */
 export const testFlaskConnection = async (): Promise<ConnectionStatus> => {
+  const startTime = Date.now();
+  
   try {
-    const response = await fetch(`${FLASK_API_URL}/health`, {
+    const response = await fetch(`${FLASK_API_URL}/api/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
+    const latency = Date.now() - startTime;
+
+    if (!response.ok) {
+      return {
+        connected: false,
+        error: `HTTP ${response.status}: ${response.statusText}`,
+        latency,
+      };
+    }
+
+    const data = await response.json();
+    
     return {
-      connected: response.ok,
-      status: response.status,
-      url: FLASK_API_URL
+      connected: data.status === 'ok' || data.success === true,
+      latency,
+      error: data.status === 'ok' ? undefined : data.message || 'Health check failed',
     };
   } catch (error) {
     return {
       connected: false,
-      error: error.message,
-      url: FLASK_API_URL
+      error: error instanceof Error ? error.message : 'Unknown connection error',
+      latency: Date.now() - startTime,
     };
   }
 };
 
 /**
- * Export utilities for data export functionality
+ * Data export utilities for development and debugging
  */
-export const exportToJSON = (data: GlobalVariables, filename?: string) => {
-  const timestamp = new Date().toISOString();
-  const exportData = {
-    timestamp,
-    variables: data
-  };
 
-  const dataStr = JSON.stringify(exportData, null, 2);
-  const dataBlob = new Blob([dataStr], { type: 'application/json' });
-  
-  const url = URL.createObjectURL(dataBlob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename || `globalVariables_${timestamp.replace(/[:.]/g, '-')}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
-
-export const exportToText = (data: GlobalVariables, filename?: string) => {
-  const timestamp = new Date().toISOString();
-  const textContent = `Global Variables Export
-Generated: ${timestamp}
-
-Person One Input: ${data.personOneInput || '(empty)'}
-Person Two Input: ${data.personTwoInput || '(empty)'}
-Truth Verification: ${data.truthVerification === null ? 'null' : data.truthVerification}
-Chat Explanation: ${data.chatExplanation}
-
----
-For Flask/SQLite Integration:
-- personOneInput: "${data.personOneInput}"
-- personTwoInput: "${data.personTwoInput}"
-- truthVerification: ${data.truthVerification}
-- chatExplanation: "${data.chatExplanation}"
-`;
-
-  const textBlob = new Blob([textContent], { type: 'text/plain' });
-  const url = URL.createObjectURL(textBlob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename || `globalVariables_${timestamp.replace(/[:.]/g, '-')}.txt`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+/**
+ * Export global variables data to JSON file
+ */
+export const exportToJSON = (data: GlobalVariables, filename: string = 'global_variables.json') => {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 };
 
 /**
- * Polling manager for automatic data fetching
+ * Export global variables data to plain text file
  */
-export class PollingManager {
+export const exportToText = (data: GlobalVariables, filename: string = 'global_variables.txt') => {
+  const textContent = `Global Variables Export
+Generated: ${new Date().toISOString()}
+
+Person One Input: ${data.personOneInput}
+Person Two Input: ${data.personTwoInput}
+Truth Verification: ${data.truthVerification}
+Chat Explanation: ${data.chatExplanation}
+`;
+
+  const blob = new Blob([textContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Polling manager for automatic updates from Flask API
+ */
+class PollingManager {
   private intervalId: NodeJS.Timeout | null = null;
   private isPolling = false;
 
   /**
    * Start polling Flask API for changes
    */
-  start(callback: (data: GlobalVariables | null) => void, interval: number = 3000) {
+  start(callback: (data: GlobalVariables | null) => void, interval: number = 2000) {
     if (this.isPolling) {
-      console.log('Polling already started');
+      console.warn('Polling is already active');
       return;
     }
 
     this.isPolling = true;
-    console.log(`Starting Flask API polling every ${interval}ms`);
-    
     this.intervalId = setInterval(async () => {
       const data = await fetchGlobalVariables();
       callback(data);
     }, interval);
+
+    console.log(`Started polling Flask API every ${interval}ms`);
   }
 
   /**
@@ -270,18 +264,18 @@ export class PollingManager {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
-      this.isPolling = false;
-      console.log('Flask API polling stopped');
     }
+    this.isPolling = false;
+    console.log('Stopped polling Flask API');
   }
 
   /**
-   * Check if currently polling
+   * Check if polling is currently active
    */
   get isActive() {
     return this.isPolling;
   }
 }
 
-// Create and export a singleton polling manager
+// Export singleton polling manager
 export const pollingManager = new PollingManager();

@@ -60,7 +60,7 @@ const MessageInterface = () => {
     // Fetch AI verification status from backend
     const fetchVerificationStatus = async () => {
       const status = await chatActions.fetchAiVerificationStatus();
-      setAiVerificationStatus(status);
+      setAiVerificationStatus(status?.verified || false);
     };
     
     fetchVerificationStatus();
