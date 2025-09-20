@@ -271,7 +271,7 @@ export const truthUtils = {
   getVerificationText: (isTrue: boolean | null) => {
     if (isTrue === true) return 'VERIFIED TRUE';
     if (isTrue === false) return 'FLAGGED FALSE';
-    return 'ANALYZING...';
+    return '';
   },
   
   /**
