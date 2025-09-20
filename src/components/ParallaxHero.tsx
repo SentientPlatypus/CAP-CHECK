@@ -32,22 +32,22 @@ const Hero = () => {
 const CenterImage = () => {
   const { scrollY } = useScroll();
 
-  const clip1 = useTransform(scrollY, [0, 1500], [0, 0]); // Start fully open
-  const clip2 = useTransform(scrollY, [0, 1500], [100, 100]); // Start fully open
+  const clip1 = useTransform(scrollY, [0, 1500], [25, 0]);
+  const clip2 = useTransform(scrollY, [0, 1500], [75, 100]);
 
   const clipPath = useMotionTemplate`polygon(${clip1}% ${clip1}%, ${clip2}% ${clip1}%, ${clip2}% ${clip2}%, ${clip1}% ${clip2}%)`;
 
-  const scale = useTransform(
+  const backgroundSize = useTransform(
     scrollY,
-    [0, SECTION_HEIGHT * 0.8],
-    [0.8, 1.1] // Start at good visible size, grow moderately
+    [0, SECTION_HEIGHT + 500],
+    ["170%", "100%"]
   );
   
-  // Keep the landing page visible much longer as background
+  // Keep visible much longer like the SpaceX rocket
   const opacity = useTransform(
     scrollY,
-    [SECTION_HEIGHT + 1500, SECTION_HEIGHT + 2000], // Stay visible much longer
-    [0.8, 0] // Keep some opacity even when fading
+    [SECTION_HEIGHT, SECTION_HEIGHT + 500],
+    [1, 0]
   );
 
   return (
@@ -61,7 +61,7 @@ const CenterImage = () => {
       <motion.div
         className="w-full h-full relative flex"
         style={{
-          scale,
+          backgroundSize,
           background: `
             radial-gradient(circle at 30% 40%, hsl(15, 85%, 65%, 0.15) 0%, transparent 50%),
             radial-gradient(circle at 70% 60%, hsl(25, 90%, 70%, 0.1) 0%, transparent 50%),
