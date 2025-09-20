@@ -12,12 +12,9 @@ class CapButton:
     P2 = 20
     BOTH = 30
 
-
-
     def __init__(self, port="COM10", baudrate=9600, timeout=1):
         self.ser = serial.Serial(port, baudrate, timeout=timeout)
 
-    
     def send_command(self, player: int, command: int):
         """SEND A COMMAND TO THE BUTTON, SPECIFICALLY FOR THE LIGHTS"""
         msgs = []

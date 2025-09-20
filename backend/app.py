@@ -25,8 +25,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
-# import serial  # Commented out - no hardware needed
-# import cap_button  # Commented out - no hardware needed
+import serial  
+import cap_button 
 
 # ---------------------------
 # App / DB setup
