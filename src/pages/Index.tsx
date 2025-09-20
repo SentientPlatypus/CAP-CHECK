@@ -65,11 +65,11 @@ const Index = () => {
   }, [handleScroll]);
 
   return (
-    <div className="bg-background w-full overflow-x-hidden">
+    <div className="bg-background">
       {/* Fixed Background Hero Image */}
       <div
         ref={backgroundRef}
-        className="fixed top-0 left-0 w-full h-screen z-10"
+        className="fixed top-0 left-0 w-full h-screen z-10 pt-20"
         style={{
           backgroundImage: "url(https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
           backgroundPosition: "center",
@@ -88,7 +88,7 @@ const Index = () => {
             willChange: 'transform'
           }}
         >
-          <div className="w-full px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 items-center gap-8 max-w-7xl mx-auto">
+          <div className="container mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 items-center gap-8">
             {/* Left side - Red Button */}
             <div className="flex justify-center">
               <img 
