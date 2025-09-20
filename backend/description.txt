@@ -1,0 +1,13 @@
+Okay im doing a hackathon rn, entertainment/media theme, here is our idea, CapCheck. 
+for debates, lots of time, debators lie or slip up, saying incorect info. 
+this is a glorified fact checker. hardware+software.
+ we have a central computer, connected to a button and arduino, 
+ connected to 2 more arduinos, each on a debator. the debator arduinos 
+ each have a light and a mic/headset. So during the debate, if one guy 
+ thinks the other guy lied, he can slam the cap check button, which pauses the debate.
+  during the debate, the headsets through arduino streams to the computer,
+   which keeps a log of the transcript, and we use google gemeni to track 
+   the latest thing said, and use their API to factcheck, then the computer's 
+   frontend will display the factcheck, and say the actual info, and if he lied,
+    and if lied, then the red light on the arduino will shine red like pinochio.
+     we plan to use flask backend, react tailwind front end,
