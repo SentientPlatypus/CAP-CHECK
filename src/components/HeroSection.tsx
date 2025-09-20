@@ -56,17 +56,16 @@ const HeroSection = () => {
     chatActions.sendLastMessageToBackend();
     
     if (hasUsedCapCheck) {
-      // If CAP CHECK has been used before, regenerate AI prompt
-      // For now, just re-add the AI content message
+      // If CAP CHECK has been used before, regenerate AI prompt after latest message
       const aiPrompt = "Welcome to our AI-powered content verification system. This technology analyzes statements in real-time to determine their accuracy.";
       
-      // Add AI prompt as a center message after a brief delay
+      // Add AI prompt as a center message after the newest message
       setTimeout(() => {
         // Dispatch custom event to add AI content message
         window.dispatchEvent(new CustomEvent('addAiMessage', { 
           detail: { message: aiPrompt } 
         }));
-      }, 500);
+      }, 200); // Shorter delay to appear right after newest message
       
       return;
     }

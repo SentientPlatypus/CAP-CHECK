@@ -112,7 +112,7 @@ const MessageInterface = () => {
     };
 
     const handleAddAiMessage = (event: CustomEvent) => {
-      // Add AI message as center message
+      // Add AI message as center message after the most recent message
       const newMessage: Message = {
         id: `ai-regenerated-${Date.now()}`,
         text: event.detail.message,
@@ -120,6 +120,11 @@ const MessageInterface = () => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, newMessage]);
+      
+      // Scroll to bottom to show the new AI message
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     };
 
     window.addEventListener('capCheckResult', handleCapCheckResult as EventListener);
