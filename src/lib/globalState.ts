@@ -31,7 +31,7 @@ let chatGlobals: GlobalVariables = {
   /**
    * Current input text for Person A (left side of chat)
    */
-  personOneInput: 'hhh',
+  personOneInput: '',
   
   /**
    * Current input text for Person B (right side of chat)  
@@ -48,7 +48,7 @@ let chatGlobals: GlobalVariables = {
    * Explanation text displayed in the chat interface
    * Describes how the chat system works
    */
-  chatExplanation: 'This AI-powered fact-checking system analyzes statements in real-time. Switch between Person A and Person B to simulate conversations while the system verifies the truthfulness of each statement. (Running in offline mode - backend not accessible)'
+  chatExplanation: 'This AI-powered fact-checking system analyzes statements in real-time. Switch between Person A and Person B to simulate conversations while the system verifies the truthfulness of each statement.'
 };
 
 /**
