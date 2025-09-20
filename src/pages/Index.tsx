@@ -30,9 +30,9 @@ const Index = () => {
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
             Try our AI-powered chat interface with built-in fact-checking and verification system.
           </p>
-          <Link to="/chat">
+          <Link to="/chat-select">
             <Button size="lg" className="gap-2">
-              Start Chatting
+              Choose Chat Experience
             </Button>
           </Link>
         </div>
