@@ -25,7 +25,8 @@ const MessageInterface = () => {
   // Chat state management
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', text: 'Hey! How are you doing?', sender: 'left', timestamp: new Date() },
-    { id: '2', text: 'I\'m great! Just checking out this amazing interface.', sender: 'right', timestamp: new Date() }
+    { id: '2', text: 'I\'m great! Just checking out this amazing interface.', sender: 'right', timestamp: new Date() },
+    { id: 'ai-content', text: aiContent.join(' '), sender: 'center', timestamp: new Date() }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -215,13 +216,62 @@ const MessageInterface = () => {
           <div className="h-96 overflow-y-auto mb-6 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
             {messages.map((message) => {
               if (message.sender === 'center') {
-                return (
-                  <div key={message.id} className="w-full">
-                    <div className="w-full p-4 rounded-lg bg-card/80 border border-border/50 text-muted-foreground">
-                      <p className="text-sm leading-relaxed">{message.text}</p>
+                if (message.id === 'ai-content') {
+                  // AI Content with highlighting
+                  const words = message.text.split(' ');
+                  return (
+                    <div key={message.id} className="w-full mb-4">
+                      <div className="w-full p-6 rounded-lg bg-card/50 border border-border/50">
+                        <div className="flex justify-center items-center space-x-4 mb-4">
+                          <button
+                            onClick={() => speakText(message.text)}
+                            disabled={isSpeaking}
+                            className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-all"
+                          >
+                            <Volume2 size={16} />
+                            <span>{isSpeaking ? 'Reading...' : hasApiKey ? 'Start Reading' : 'Demo Reading'}</span>
+                          </button>
+                          {!hasApiKey && (
+                            <button
+                              onClick={setApiKey}
+                              className="px-3 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-all"
+                            >
+                              Set API Key
+                            </button>
+                          )}
+                        </div>
+                        <p className={`text-base leading-relaxed transition-all duration-300 ${
+                          isSpeaking ? 'opacity-100' : 'opacity-100'
+                        }`}>
+                          {words.map((word, wordIdx) => {
+                            const isCurrentWord = isSpeaking && wordIdx === currentWordIndex;
+                            return (
+                              <span
+                                key={wordIdx}
+                                className={`transition-all duration-200 ${
+                                  isCurrentWord 
+                                    ? 'bg-primary text-primary-foreground px-1 rounded shadow-lg transform scale-105' 
+                                    : ''
+                                }`}
+                              >
+                                {word}{' '}
+                              </span>
+                            );
+                          })}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
+                } else {
+                  // Regular center message
+                  return (
+                    <div key={message.id} className="w-full">
+                      <div className="w-full p-4 rounded-lg bg-card/80 border border-border/50 text-muted-foreground">
+                        <p className="text-sm leading-relaxed">{message.text}</p>
+                      </div>
+                    </div>
+                  );
+                }
               }
               
               return (
@@ -259,68 +309,6 @@ const MessageInterface = () => {
               </div>
             )}
             <div ref={messagesEndRef} />
-          </div>
-
-          {/* AI Content Reader - Consolidated Block */}
-          <div className="mb-6 border-t border-border/50 pt-6">
-            <div className="flex justify-center items-center space-x-4 mb-4">
-              <button
-                onClick={() => speakText(aiContent.join(' '))}
-                disabled={isSpeaking}
-                className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-all"
-              >
-                <Volume2 size={16} />
-                <span>{isSpeaking ? 'Reading...' : hasApiKey ? 'Start Reading' : 'Demo Reading'}</span>
-              </button>
-              {!hasApiKey && (
-                <button
-                  onClick={setApiKey}
-                  className="px-3 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-all"
-                >
-                  Set API Key
-                </button>
-              )}
-            </div>
-
-            {/* Consolidated Content Block */}
-            <div className="p-6 rounded-lg border bg-card/50 border-border/50">
-              <div className="space-y-4">
-                {aiContent.map((paragraph, paragraphIndex) => {
-                  const words = paragraph.split(' ');
-                  const paragraphStartIndex = aiContent.slice(0, paragraphIndex)
-                    .reduce((acc, p) => acc + p.split(' ').length, 0);
-                  const paragraphEndIndex = paragraphStartIndex + words.length - 1;
-                  const isParagraphActive = isSpeaking && currentWordIndex >= paragraphStartIndex && currentWordIndex <= paragraphEndIndex;
-                  
-                  return (
-                    <p
-                      key={paragraphIndex}
-                      className={`text-base leading-relaxed transition-all duration-300 ${
-                        isParagraphActive ? 'opacity-100' : isSpeaking ? 'opacity-40' : 'opacity-100'
-                      }`}
-                    >
-                      {words.map((word, wordIdx) => {
-                        const globalWordIndex = paragraphStartIndex + wordIdx;
-                        const isCurrentWord = isSpeaking && globalWordIndex === currentWordIndex;
-                        
-                        return (
-                          <span
-                            key={wordIdx}
-                            className={`transition-all duration-200 ${
-                              isCurrentWord 
-                                ? 'bg-primary text-primary-foreground px-1 rounded shadow-lg transform scale-105' 
-                                : ''
-                            }`}
-                          >
-                            {word}{' '}
-                          </span>
-                        );
-                      })}
-                    </p>
-                  );
-                })}
-              </div>
-            </div>
           </div>
           
           <div className="flex space-x-3 mb-8">
