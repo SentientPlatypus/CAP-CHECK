@@ -52,11 +52,7 @@ const HeroSection = () => {
           Experience the future of web interaction with scroll-based animations, immersive carousels, and real-time communication.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button className="hero-button text-lg font-semibold">
-            Explore Below
-          </button>
-          
+        <div className="flex justify-center">
           <button
             onClick={scrollToCarousel}
             className="bg-secondary/80 hover:bg-secondary text-secondary-foreground px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-border flex items-center space-x-2"
@@ -69,10 +65,9 @@ const HeroSection = () => {
       
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
         <div className="w-6 h-10 border-2 border-primary rounded-full flex justify-center animate-pulse">
-          <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-bounce" 
+          <div className="w-1 h-3 bg-primary rounded-full mt-2" 
                style={{ 
-                 animationDuration: '2s',
-                 animationTimingFunction: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+                 animation: 'bounce 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                }} />
         </div>
       </div>
