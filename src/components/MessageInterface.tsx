@@ -439,38 +439,54 @@ const MessageInterface = () => {
                 />
               </div>
 
-              {/* Chat Messages (condensed view) */}
-              <div className="h-32 overflow-y-auto mb-4 space-y-2 scrollbar-thin scrollbar-thumb-primary/20">
-                {messages.slice(-3).map((message) => (
+              {/* Interactive Text Content - Full Width */}
+              <div className="space-y-6 text-lg leading-relaxed mb-6">
+                {podcastText.map((paragraph, index) => (
                   <div
-                    key={message.id}
-                    className={`flex ${message.sender === 'right' ? 'justify-end' : 'justify-start'}`}
+                    key={index}
+                    ref={el => paragraphRefs.current[index] = el}
+                    className={`w-full p-4 rounded-lg border transition-all duration-500 ${getParagraphClass(index)}`}
+                    style={{
+                      backgroundColor: index === currentParagraph 
+                        ? 'hsl(var(--primary) / 0.1)' 
+                        : 'hsl(var(--muted) / 0.3)',
+                      borderColor: index === currentParagraph 
+                        ? 'hsl(var(--primary) / 0.3)' 
+                        : 'hsl(var(--border))'
+                    }}
                   >
-                    <div className={`${message.sender === 'left' ? 'message-bubble-left' : 'message-bubble-right'} relative text-xs`}>
-                      <p>{message.text}</p>
+                    {paragraph}
+                  </div>
+                ))}
+              </div>
+
+              {/* Condensed Chat Messages - Show recent activity */}
+              <div className="border-t border-border pt-4">
+                <div className="text-sm text-muted-foreground mb-2">Recent Messages:</div>
+                <div className="flex flex-wrap gap-2">
+                  {messages.slice(-3).map((message) => (
+                    <div
+                      key={message.id}
+                      className={`inline-flex items-center space-x-2 px-3 py-2 rounded-full text-xs ${
+                        message.sender === 'left' 
+                          ? 'bg-secondary/50 text-secondary-foreground' 
+                          : 'bg-primary/20 text-primary'
+                      }`}
+                    >
+                      <span className="font-medium">
+                        {message.sender === 'left' ? 'A:' : 'B:'}
+                      </span>
+                      <span>{message.text}</span>
                       {message.truthVerification !== undefined && (
-                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs border mt-1 ${truthUtils.getVerificationColor(message.truthVerification)}`}>
+                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border ${truthUtils.getVerificationColor(message.truthVerification)}`}>
                           {message.truthVerification === true && <Shield size={8} />}
                           {message.truthVerification === false && <AlertTriangle size={8} />}
                           <span className="text-xs">{truthUtils.getVerificationText(message.truthVerification)}</span>
                         </div>
                       )}
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Interactive Text Content */}
-              <div className="max-h-64 overflow-y-auto space-y-4 text-lg leading-relaxed scrollbar-thin scrollbar-thumb-primary/20 border-t border-border pt-4">
-                {podcastText.map((paragraph, index) => (
-                  <p
-                    key={index}
-                    ref={el => paragraphRefs.current[index] = el}
-                    className={getParagraphClass(index)}
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                  ))}
+                </div>
               </div>
 
               {currentParagraph >= podcastText.length && (
