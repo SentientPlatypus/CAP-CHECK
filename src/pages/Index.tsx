@@ -11,15 +11,48 @@
  * using modern web APIs for smooth animations and interactions.
  */
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
-import ParallaxHero from '@/components/ParallaxHero';
 import { Button } from '@/components/ui/button';
+import PixelButton3D from '@/components/PixelButton3D';
 
 const Index = () => {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isPressed, setIsPressed] = useState(false);
+  const [showButton, setShowButton] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const heroHeight = window.innerHeight;
+      const progress = Math.min(scrollTop / heroHeight, 1);
+      
+      setScrollProgress(progress);
+      setIsPressed(progress > 0.1);
+      setShowButton(progress < 1);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background relative">
-      <ParallaxHero />
+      {/* 3D Pixel Button covering 50% of landing page */}
+      {showButton && (
+        <div className="fixed left-0 top-0 w-1/2 h-screen z-40 flex items-center justify-center">
+          <div 
+            className="w-96 h-96"
+            style={{
+              opacity: 1 - scrollProgress * 0.3
+            }}
+          >
+            <PixelButton3D isPressed={isPressed} scrollProgress={scrollProgress} />
+          </div>
+        </div>
+      )}
+      
       <HeroSection />
       <ImageCarousel />
       
