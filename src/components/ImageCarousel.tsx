@@ -38,11 +38,9 @@ const ImageCarousel = () => {
         const sectionHeight = sectionRef.current.offsetHeight;
 
         // Visibility controls (active only while sticky phase)
-        const shouldShowCarousel = rect.top < windowHeight * 0.8;
-        if (shouldShowCarousel !== showCarousel) setShowCarousel(shouldShowCarousel);
-
-        const shouldBeActive = rect.top <= 0 && rect.bottom >= windowHeight;
-        if (shouldBeActive !== isGalleryActive) setIsGalleryActive(shouldBeActive);
+        const inStickyPhase = rect.top <= 0 && rect.bottom >= windowHeight;
+        if (inStickyPhase !== showCarousel) setShowCarousel(inStickyPhase);
+        if (inStickyPhase !== isGalleryActive) setIsGalleryActive(inStickyPhase);
 
         // Progress calculation
         const scrolled = Math.max(0, -rect.top);
@@ -68,7 +66,7 @@ const ImageCarousel = () => {
         }
         
         // Only enable snapping when gallery is fully active
-        if (shouldBeActive && progress > 0 && progress < 1) {
+        if (inStickyPhase && progress > 0 && progress < 1) {
           scrollTimeoutRef.current = setTimeout(() => {
             if (isGalleryActive && !isSnapping) {
               startSnapAnimation();
