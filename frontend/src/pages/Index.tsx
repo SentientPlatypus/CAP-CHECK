@@ -24,15 +24,15 @@ const Index = () => {
       {/* Call to Action Section */}
       <section className="py-20 bg-gradient-to-b from-background to-muted/20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Ready to Experience Real-time Communication?
+          <h2 className="text-2xl font-bold mb-6 animate-slide-from-left pixelated">
+            READY TO EXPERIENCE REAL-TIME COMMUNICATION?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-from-right font-mono">
             Try our AI-powered chat interface with built-in fact-checking and verification system.
           </p>
           <Link to="/chat-select">
-            <Button size="lg" className="gap-2">
-              Choose Chat Experience
+            <Button className="hero-button animate-retro-glow">
+              CHOOSE CHAT EXPERIENCE
             </Button>
           </Link>
         </div>
