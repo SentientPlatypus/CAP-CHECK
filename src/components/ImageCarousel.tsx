@@ -96,15 +96,37 @@ const ImageCarousel = () => {
         images.forEach((_, index) => {
           const distanceFromCenter = Math.abs(index - centerProgress);
           
-          // Scale: 1.0 at center, gets smaller the further away
-          const scale = Math.max(0.3, 1 - distanceFromCenter * 0.25);
-          const opacity = Math.max(0.2, 1 - distanceFromCenter * 0.3);
+          // Enhanced scale: center image gets much bigger, others smaller
+          let scale, opacity, filter, boxShadow;
+          
+          if (distanceFromCenter < 0.1) {
+            // Center image - make it really stand out
+            scale = 1.3; // Much larger zoom
+            opacity = 1;
+            filter = 'brightness(1.1) contrast(1.1) saturate(1.2)';
+            boxShadow = '0 20px 60px rgba(255, 165, 132, 0.4), 0 0 30px rgba(255, 165, 132, 0.3)'; // Peach glow
+          } else if (distanceFromCenter < 0.6) {
+            // Adjacent images
+            scale = Math.max(0.7, 1.3 - distanceFromCenter * 0.8);
+            opacity = Math.max(0.4, 1 - distanceFromCenter * 0.6);
+            filter = 'brightness(0.8) saturate(0.8)';
+            boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
+          } else {
+            // Far images
+            scale = Math.max(0.3, 1 - distanceFromCenter * 0.4);
+            opacity = Math.max(0.2, 1 - distanceFromCenter * 0.5);
+            filter = 'brightness(0.6) saturate(0.6) blur(1px)';
+            boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+          }
           
           const imageEl = trackRef.current?.children[index] as HTMLElement;
           if (imageEl) {
             imageEl.style.transform = `scale(${scale})`;
             imageEl.style.opacity = opacity.toString();
-            imageEl.style.willChange = 'transform, opacity';
+            imageEl.style.filter = filter;
+            imageEl.style.boxShadow = boxShadow;
+            imageEl.style.willChange = 'transform, opacity, filter, box-shadow';
+            imageEl.style.zIndex = distanceFromCenter < 0.1 ? '50' : '10';
           }
         });
 
@@ -173,7 +195,7 @@ const ImageCarousel = () => {
           {images.map((img, idx) => (
             <div 
               key={idx} 
-              className="relative rounded-xl overflow-hidden shadow-2xl transition-all duration-200 ease-out flex-shrink-0"
+              className="relative rounded-xl overflow-hidden transition-all duration-300 ease-out flex-shrink-0"
               style={{ width: '320px', height: '200px' }}
             >
               <img
