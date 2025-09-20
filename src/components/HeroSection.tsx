@@ -16,7 +16,7 @@ const HeroSection = () => {
 
     const startY = window.pageYOffset;
     const targetY = window.pageYOffset + carouselSection.getBoundingClientRect().top;
-    const duration = 2200; // slower smooth scroll (ms)
+    const duration = 1200; // faster smooth scroll (ms)
     const startTime = performance.now();
 
     const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
