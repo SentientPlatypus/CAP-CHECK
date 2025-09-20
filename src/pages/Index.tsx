@@ -23,11 +23,11 @@ const Index = () => {
   const clip2 = useTransform(scrollY, [0, SECTION_HEIGHT], [75, 100]);
   const clipPath = useMotionTemplate`polygon(${clip1}% ${clip1}%, ${clip2}% ${clip1}%, ${clip2}% ${clip2}%, ${clip1}% ${clip2}%)`;
 
-  // Background size - starts normal and zooms in as you scroll
+  // Background size - starts large and gets smaller as you scroll
   const backgroundSize = useTransform(
     scrollY,
     [0, SECTION_HEIGHT + 500],
-    ["100%", "170%"]
+    ["170%", "100%"]
   );
 
   // Opacity for background fade out
@@ -37,8 +37,8 @@ const Index = () => {
     [1, 0]
   );
 
-  // Overlay content scales in sync with background zoom
-  const overlayScale = useTransform(scrollY, [0, SECTION_HEIGHT + 500], [1, 1.2]);
+  // Overlay content scales down with background zoom
+  const overlayScale = useTransform(scrollY, [0, SECTION_HEIGHT + 500], [1.2, 1]);
 
   // Show overlay content when past initial section
   useEffect(() => {
