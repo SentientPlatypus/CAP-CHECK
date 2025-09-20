@@ -31,12 +31,6 @@ const aiContent = [
 const MessageInterface = () => {
   // Chat state management
   const [messages, setMessages] = useState<Message[]>([
-    { 
-      id: '0', 
-      text: chatGlobals.chatExplanation, 
-      sender: 'center', 
-      timestamp: new Date()
-    },
     { id: '1', text: 'Hey! How are you doing?', sender: 'left', timestamp: new Date() },
     { id: '2', text: 'I\'m great! Just checking out this amazing interface.', sender: 'right', timestamp: new Date() }
   ]);
