@@ -52,7 +52,7 @@ const MessageInterface = () => {
   
   // Modal state for CAP CHECK
   const [showModal, setShowModal] = useState(false);
-  const [aiPrompt, setAiPrompt] = useState('');
+  const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
 
   // Check for API key and fetch AI verification status on mount
   useEffect(() => {
@@ -207,10 +207,8 @@ const MessageInterface = () => {
     setShowModal(true);
   };
 
-  // Handle AI prompt submission
-  const handleAiPromptSubmit = async () => {
-    if (!aiPrompt.trim()) return;
-
+  // Handle verification result selection
+  const handleVerificationSelect = (isTrue: boolean) => {
     const timestamp = Date.now();
     
     // Add CAP CHECK message
@@ -228,61 +226,29 @@ const MessageInterface = () => {
       sender: 'left',
       timestamp: new Date()
     };
-
-    // Add AI Prompt message
-    const aiPromptMessage: Message = {
-      id: `ai-prompt-${timestamp + 2}`,
-      text: `AI Prompt: ${aiPrompt}`,
-      sender: 'center',
-      timestamp: new Date()
-    };
     
-    setMessages(prev => [...prev, capCheckMessage, analyzingMessage, aiPromptMessage]);
+    setMessages(prev => [...prev, capCheckMessage, analyzingMessage]);
     
-    // Close modal and reset immediately
+    // Close modal immediately
     setShowModal(false);
-    setAiPrompt('');
     
-    // Try to get AI response from backend, fallback to hardcoded
-    try {
-      // Attempt backend connection (for future implementation)
-      // const aiResponse = await chatActions.sendLastMessageToBackend();
+    // Show result after delay
+    setTimeout(() => {
+      setCapCheckResult(isTrue);
       
-      // For now, use hardcoded AI analysis response
-      const hardcodedResponse = `AI Analysis Result: Based on the conversation analysis, the statement appears to contain factual inaccuracies. The claim about "95% efficiency" lacks proper scientific backing and contradicts established research data. Key indicators suggest potential misinformation: 1) Unrealistic percentage claims 2) Lack of credible sources 3) Emotional language rather than factual presentation. Recommendation: Verify claims with peer-reviewed sources before accepting as accurate.`;
+      // Add result message to chat
+      const resultMessage: Message = {
+        id: `result-${timestamp + 2}`,
+        text: `Verification Result: ${isTrue ? 'CONFIRMED TRUE' : 'FLAGGED AS FALSE'}`,
+        sender: 'center',
+        timestamp: new Date(),
+        truthVerification: isTrue
+      };
       
-      setTimeout(() => {
-        const aiResponseMessage: Message = {
-          id: `ai-response-${timestamp + 3}`,
-          text: hardcodedResponse,
-          sender: 'center',
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, aiResponseMessage]);
-        
-        // Set result after response
-        setCapCheckResult(false); // Hardcoded as false for now since the response indicates misinformation
-      }, 3000);
-      
-    } catch (error) {
-      console.log('Backend connection failed, using hardcoded response');
-      
-      // Fallback hardcoded response
-      const fallbackResponse = `AI Analysis: Unable to connect to verification server. Using local analysis: The statement requires further verification. Please cross-reference with reliable sources before accepting as factual information.`;
-      
-      setTimeout(() => {
-        const aiResponseMessage: Message = {
-          id: `ai-response-fallback-${timestamp + 3}`,
-          text: fallbackResponse,
-          sender: 'center',
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, aiResponseMessage]);
-        setCapCheckResult(null); // null indicates inconclusive
-      }, 3000);
-    }
+      setMessages(prev => [...prev, resultMessage]);
+    }, 2000);
+    
+    setVerificationResult(null);
   };
 
   const handleSend = () => {
@@ -545,29 +511,38 @@ const MessageInterface = () => {
                 <DialogHeader>
                   <DialogTitle className="text-center text-2xl font-bold">🚨 CAP CHECK</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <p className="text-center text-muted-foreground">
-                    Enter an AI prompt to analyze the conversation:
+                    Verify the truthfulness of the last statement:
                   </p>
-                  <Textarea
-                    placeholder="e.g., Analyze the truthfulness of the last statement about climate change..."
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    className="min-h-24 resize-none"
-                  />
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setShowModal(false)}>
-                      Cancel
+                  
+                  <div className="flex space-x-4">
+                    <Button
+                      onClick={() => handleVerificationSelect(true)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 text-lg"
+                    >
+                      ✅ TRUE
                     </Button>
-                    <Button onClick={handleAiPromptSubmit} disabled={!aiPrompt.trim()}>
-                      Submit Analysis
+                    <Button
+                      onClick={() => handleVerificationSelect(false)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-4 text-lg"
+                    >
+                      ❌ FALSE
                     </Button>
                   </div>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowModal(false)}
+                    className="w-full"
+                  >
+                    Cancel
+                  </Button>
                 </div>
               </DialogContent>
             </Dialog>
             <p className="text-sm text-muted-foreground mt-2">
-              Analyze messages with custom AI prompts
+              Click to verify the last message as true or false
             </p>
           </div>
         </div>
