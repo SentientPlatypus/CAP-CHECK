@@ -235,54 +235,72 @@ const MessageInterface = () => {
   };
 
   return (
-    <section className="py-20 px-8 bg-gradient-to-b from-card to-muted min-h-screen">
-      <div className="max-w-4xl mx-auto">
-        {/* AI Feedback at Top */}
+    <section className="py-20 px-8 min-h-screen relative overflow-hidden">
+      {/* Floating background orbs */}
+      <div className="floating-orb w-96 h-96 top-20 -left-48 animate-float" style={{ animationDelay: '0s' }} />
+      <div className="floating-orb w-64 h-64 top-1/2 -right-32 animate-float" style={{ animationDelay: '2s' }} />
+      <div className="floating-orb w-80 h-80 bottom-20 left-1/4 animate-float" style={{ animationDelay: '4s' }} />
+      
+      {/* Premium gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-muted/50" />
+      
+      <div className="max-w-6xl mx-auto relative z-10">
+        {/* Enhanced AI Feedback Display */}
         {capCheckResult !== null && (
-          <div className="mb-8 animate-fade-in text-center">
-            <div className={`inline-block px-8 py-6 rounded-2xl text-4xl md:text-5xl font-bold border-4 shadow-2xl ${
-              capCheckResult 
-                ? 'bg-green-500/30 text-green-300 border-green-400 shadow-green-500/50' 
-                : 'bg-red-500/30 text-red-300 border-red-400 shadow-red-500/50'
-            }`}>
-              AI: {capCheckResult ? 'TRUE' : 'FALSE'}
+          <div className="mb-12 animate-slide-up">
+            <div className={`ai-status-card mx-auto max-w-md ${
+              capCheckResult ? 'ai-status-true' : 'ai-status-false'
+            } animate-glow-pulse`}>
+              <div className="text-6xl md:text-7xl font-black tracking-tight mb-2">
+                AI: {capCheckResult ? 'TRUE' : 'FALSE'}
+              </div>
             </div>
             {!capCheckResult && (
-              <div className="mt-4 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-300 max-w-md mx-auto">
-                <p className="text-lg font-semibold">⚠️ DECEPTION DETECTED</p>
-                <p className="text-sm text-red-400 mt-1">Statement flagged as potentially false or misleading</p>
+              <div className="mt-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                <div className="deception-alert max-w-lg mx-auto">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">
+                      <span className="text-xl">⚠️</span>
+                    </div>
+                    <p className="text-2xl font-bold text-destructive">DECEPTION DETECTED</p>
+                  </div>
+                  <p className="text-destructive/80 text-lg leading-relaxed">
+                    Statement flagged as potentially false or misleading
+                  </p>
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Combined Communication & AI Content Reader */}
-        <div className="bg-background/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-border">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        {/* Premium Communication Interface */}
+        <div className="glass-card rounded-3xl p-10 shadow-2xl border border-border/20">
+          <div className="text-center mb-10">
+            <h2 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-shimmer bg-[length:200%_auto]">
               Real-time Communication & AI Reader
             </h2>
-            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-xl mb-8 max-w-3xl mx-auto leading-relaxed">
               {chatGlobals.chatExplanation}
             </p>
 
-            <div className="flex justify-center space-x-4 mb-6">
+            {/* Premium Person Selector */}
+            <div className="flex justify-center space-x-6 mb-10">
               <button
                 onClick={() => setCurrentSender('left')}
-                className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                className={`px-8 py-4 rounded-2xl text-lg font-semibold transition-all duration-300 ${
                   currentSender === 'left'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                    ? 'premium-button animate-glow-pulse'
+                    : 'glass-card hover:scale-105'
                 }`}
               >
                 Person A
               </button>
               <button
                 onClick={() => setCurrentSender('right')}
-                className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                className={`px-8 py-4 rounded-2xl text-lg font-semibold transition-all duration-300 ${
                   currentSender === 'right'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                    ? 'premium-button animate-glow-pulse'
+                    : 'glass-card hover:scale-105'
                 }`}
               >
                 Person B
@@ -290,8 +308,8 @@ const MessageInterface = () => {
             </div>
           </div>
 
-          {/* Chat Messages */}
-          <div className="h-64 overflow-y-auto mb-6 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
+          {/* Premium Chat Messages */}
+          <div className="h-64 overflow-y-auto mb-8 space-y-6 scrollbar-thin">
             {messages.map((message, index) => {
               if (message.sender === 'center') {
                 // Find the last center message to apply highlighting to the newest AI prompt
@@ -299,12 +317,12 @@ const MessageInterface = () => {
                 const isNewestAiMessage = message === centerMessages[centerMessages.length - 1];
                 
                 if (isNewestAiMessage) {
-                  // AI Content with highlighting (newest AI message)
+                  // AI Content with premium highlighting (newest AI message)
                   const words = message.text.split(' ');
                   return (
-                    <div key={message.id} className="w-full mb-4">
-                      <div className="w-full p-6 rounded-lg bg-card/50 border border-border/50">
-                        <p className={`text-base leading-relaxed transition-all duration-300 ${
+                    <div key={message.id} className="w-full mb-6 animate-fade-in">
+                      <div className="ai-content-card">
+                        <p className={`text-lg leading-relaxed transition-all duration-300 ${
                           isSpeaking ? 'opacity-100' : 'opacity-100'
                         }`}>
                           {words.map((word, wordIdx) => {
@@ -312,9 +330,9 @@ const MessageInterface = () => {
                             return (
                               <span
                                 key={wordIdx}
-                                className={`transition-all duration-200 ${
+                                className={`transition-all duration-300 ${
                                   isCurrentWord 
-                                    ? 'bg-primary text-primary-foreground px-1 rounded shadow-lg transform scale-105' 
+                                    ? 'text-highlight animate-glow-pulse transform scale-110' 
                                     : ''
                                 }`}
                               >
@@ -329,9 +347,9 @@ const MessageInterface = () => {
                 } else {
                   // Regular center message (older AI messages)
                   return (
-                    <div key={message.id} className="w-full">
-                      <div className="w-full p-4 rounded-lg bg-card/80 border border-border/50 text-muted-foreground">
-                        <p className="text-sm leading-relaxed">{message.text}</p>
+                    <div key={message.id} className="w-full animate-fade-in">
+                      <div className="glass-card p-6 rounded-2xl text-muted-foreground">
+                        <p className="text-base leading-relaxed">{message.text}</p>
                       </div>
                     </div>
                   );
@@ -341,20 +359,21 @@ const MessageInterface = () => {
               return (
                 <div
                   key={message.id}
-                  className={`flex ${message.sender === 'right' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.sender === 'right' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className={`${message.sender === 'left' ? 'message-bubble-left' : 'message-bubble-right'} relative`}>
-                    <p className="text-sm">{message.text}</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs opacity-60">
+                  <div className={`${message.sender === 'left' ? 'message-bubble-left' : 'message-bubble-right'} relative group hover:scale-105 transition-all duration-300`}>
+                    <p className="text-base leading-relaxed">{message.text}</p>
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="text-xs opacity-70">
                         {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       {message.truthVerification !== undefined && (
-                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${truthUtils.getVerificationColor(message.truthVerification)}`}>
-                          {message.truthVerification === true && <Shield size={10} />}
-                          {message.truthVerification === false && <AlertTriangle size={10} />}
-                          {message.truthVerification === null && <Clock size={10} />}
-                          <span>{truthUtils.getVerificationText(message.truthVerification)}</span>
+                        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs border backdrop-blur-sm ${truthUtils.getVerificationColor(message.truthVerification)}`}>
+                          {message.truthVerification === true && <Shield size={12} />}
+                          {message.truthVerification === false && <AlertTriangle size={12} />}
+                          {message.truthVerification === null && <Clock size={12} />}
+                          <span className="font-medium">{truthUtils.getVerificationText(message.truthVerification)}</span>
                         </div>
                       )}
                     </div>
@@ -364,7 +383,7 @@ const MessageInterface = () => {
             })}
             
             {isTyping && (
-              <div className="flex justify-start">
+              <div className="flex justify-start animate-fade-in">
                 <div className="typing-indicator">
                   <div className="typing-dot" style={{ animationDelay: '0ms' }} />
                   <div className="typing-dot" style={{ animationDelay: '200ms' }} />
@@ -375,20 +394,21 @@ const MessageInterface = () => {
             <div ref={messagesEndRef} />
           </div>
           
-          <div className="flex space-x-3 mb-8">
+          {/* Premium Input Section */}
+          <div className="flex space-x-4 mb-6">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={`Type as ${currentSender === 'left' ? 'Person A' : 'Person B'}...`}
-              className="flex-1 px-4 py-3 bg-input border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
+              className="flex-1 premium-input text-foreground placeholder-muted-foreground text-lg"
             />
             <button
               onClick={handleSend}
-              className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:opacity-90 transition-all duration-200 flex items-center justify-center min-w-[60px]"
+              className="premium-button flex items-center justify-center min-w-[80px] text-lg hover:scale-110 transition-all duration-300"
             >
-              <Send size={20} />
+              <Send size={24} />
             </button>
           </div>
         </div>
