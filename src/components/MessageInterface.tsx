@@ -291,7 +291,7 @@ const MessageInterface = () => {
           </div>
 
           {/* Chat Messages */}
-          <div className="h-96 overflow-y-auto mb-6 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
+          <div className="h-64 overflow-y-auto mb-6 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
             {messages.map((message, index) => {
               if (message.sender === 'center') {
                 // Find the last center message to apply highlighting to the newest AI prompt
