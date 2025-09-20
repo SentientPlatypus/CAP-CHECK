@@ -321,7 +321,7 @@ const MessageInterface = () => {
         <div className="glass-card rounded-3xl p-10 shadow-2xl border border-border/20">
           <div className="text-center mb-10">
             <h2 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-shimmer bg-[length:200%_auto]">
-              Real-time Communication & AI Reader
+              Real-time Communication
             </h2>
 
             {/* Premium Person Selector */}
