@@ -4,11 +4,8 @@
  * Interactive chat with AI feedback and text highlighting
  */
 import { useState, useEffect, useRef } from 'react';
-import { Send, Shield, AlertTriangle, Clock, Volume2, X } from 'lucide-react';
+import { Send, Shield, AlertTriangle, Clock, Volume2 } from 'lucide-react';
 import { chatGlobals, chatActions, truthUtils } from '@/lib/globalState';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 
 // Message data structure
 interface Message {
@@ -52,7 +49,9 @@ const MessageInterface = () => {
   
   // Modal state for CAP CHECK
   const [showModal, setShowModal] = useState(false);
-  const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
+  const [flashingValue, setFlashingValue] = useState(true);
+  const [showFlashing, setShowFlashing] = useState(false);
+  const [finalResult, setFinalResult] = useState<boolean | null>(null);
 
   // Check for API key and fetch AI verification status on mount
   useEffect(() => {
@@ -207,7 +206,7 @@ const MessageInterface = () => {
     setShowModal(true);
   };
 
-  // Handle CAP CHECK - automatic verification from backend
+  // Handle CAP CHECK - exact same as home page
   const handleCapCheck = async () => {
     const timestamp = Date.now();
     
@@ -229,23 +228,28 @@ const MessageInterface = () => {
     
     setMessages(prev => [...prev, capCheckMessage, analyzingMessage]);
     
-    // Try to get result from backend, default to false
-    try {
-      // Attempt backend connection (for future implementation)
-      // const result = await chatActions.fetchAiVerificationStatus();
+    // Show the CAP CHECK modal (exact same as home page)
+    setShowModal(true);
+    setShowFlashing(true);
+    setFlashingValue(true);
+    
+    // Faster flashing between True/False (every 300ms)
+    let fadeCount = 0;
+    const fadeInterval = setInterval(() => {
+      setFlashingValue(prev => !prev);
+      fadeCount++;
       
-      // For now, default to false as requested
-      const result = false;
-      
-      // Show flashing animation - start with true, then flash to false
-      setTimeout(() => {
-        setCapCheckResult(true);
+      if (fadeCount >= 6) { // 2 seconds of flashing (6 * 300ms = 1.8s)
+        clearInterval(fadeInterval);
+        const result = false; // Default to false as requested
+        setFlashingValue(result);
+        setFinalResult(result);
+        setCapCheckResult(result);
         
-        // Flash to false after brief moment
+        // Close modal and add result to chat
         setTimeout(() => {
-          setCapCheckResult(false);
+          setShowModal(false);
           
-          // Add result message to chat
           const resultMessage: Message = {
             id: `result-${timestamp + 2}`,
             text: `Verification Result: FLAGGED AS FALSE - Statement contains potential misinformation`,
@@ -255,33 +259,9 @@ const MessageInterface = () => {
           };
           
           setMessages(prev => [...prev, resultMessage]);
-        }, 800); // Flash duration
-        
-      }, 2000); // Initial analyzing delay
-      
-    } catch (error) {
-      console.log('Backend connection failed, using default false result');
-      
-      // Same flashing behavior for fallback
-      setTimeout(() => {
-        setCapCheckResult(true);
-        
-        setTimeout(() => {
-          setCapCheckResult(false);
-          
-          const fallbackMessage: Message = {
-            id: `result-fallback-${timestamp + 2}`,
-            text: `Verification Result: FLAGGED AS FALSE - Unable to verify, marked as potentially false`,
-            sender: 'center',
-            timestamp: new Date(),
-            truthVerification: false
-          };
-          
-          setMessages(prev => [...prev, fallbackMessage]);
-        }, 800);
-        
-      }, 2000);
-    }
+        }, 1000);
+      }
+    }, 300);
   };
 
   const handleSend = () => {
@@ -544,6 +524,31 @@ const MessageInterface = () => {
           </div>
         </div>
       </div>
+
+      {/* CAP CHECK Modal - Exact same as home page */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-background/95 backdrop-blur-md rounded-2xl p-12 border border-border shadow-2xl max-w-md w-full mx-4 animate-scale-in">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+                CAP CHECK
+              </h1>
+              
+              <div className="mb-8">
+                <div className={`inline-block px-12 py-6 rounded-2xl text-6xl font-bold border-4 transition-all duration-200 ease-in-out ${
+                  flashingValue ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-red-500/20 text-red-400 border-red-500'
+                }`}>
+                  {flashingValue ? 'TRUE' : 'FALSE'}
+                </div>
+              </div>
+              
+              <p className="text-muted-foreground text-lg">
+                AI Analysis in Progress...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
