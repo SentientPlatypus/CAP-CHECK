@@ -1,17 +1,13 @@
 /**
- * Chat Page - Real-time Communication Interface
+ * Chat Page 2 - Secondary Chat Interface
  * 
- * Contains the MessageInterface component with all chat functionality:
- * - Real-time chat simulation with dual personas
- * - CAP CHECK button and AI verification
- * - Truth verification system
+ * Empty for now - placeholder for future functionality
  */
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import MessageInterface from '@/components/MessageInterface';
 import { Button } from '@/components/ui/button';
 
-const Chat = () => {
+const Chat2 = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation Header */}
@@ -25,26 +21,33 @@ const Chat = () => {
           </Link>
           
           <div className="flex gap-2">
-            <Button variant="default" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Chat 1
-            </Button>
-            <Link to="/chat2">
+            <Link to="/chat">
               <Button variant="outline" className="gap-2">
-                Chat 2
-                <ArrowRight className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4" />
+                Chat 1
               </Button>
             </Link>
+            <Button variant="default" className="gap-2">
+              Chat 2
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </header>
       
-      {/* Chat Interface */}
-      <div className="pt-16">
-        <MessageInterface />
+      {/* Empty Content Area */}
+      <div className="pt-20 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-muted-foreground mb-4">
+            Chat Page 2
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Coming soon...
+          </p>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Chat;
+export default Chat2;
