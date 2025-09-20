@@ -14,53 +14,51 @@ const PixelatedButton = ({ isPressed, scrollProgress }: { isPressed: boolean; sc
   useFrame(() => {
     if (meshRef.current) {
       // Animate the button press by moving it down
-      const pressDepth = isPressed ? -0.2 : 0;
+      const pressDepth = isPressed ? -0.15 : 0;
       meshRef.current.position.z = pressDepth;
       
       // Add slight rotation based on scroll
+      meshRef.current.rotation.x = Math.sin(scrollProgress * Math.PI) * 0.05;
       meshRef.current.rotation.y = scrollProgress * 0.1;
     }
   });
 
+  const buttonHeight = isPressed ? 0.2 : 0.4;
+  const buttonRadius = 1.2;
+
   return (
     <group ref={meshRef}>
-      {/* Main button body - raised cylinder */}
-      <mesh position={[0, 0, isPressed ? 0.1 : 0.3]}>
-        <cylinderGeometry args={[1.5, 1.5, isPressed ? 0.2 : 0.6, 32]} />
-        <meshLambertMaterial color="#dc2626" />
+      {/* Main button body - single raised cylinder */}
+      <mesh position={[0, 0, buttonHeight / 2]}>
+        <cylinderGeometry args={[buttonRadius, buttonRadius, buttonHeight, 64]} />
+        <meshPhongMaterial 
+          color="#dc2626" 
+          shininess={30}
+          specular="#ffffff"
+        />
       </mesh>
       
-      {/* Button top surface - slightly smaller for beveled effect */}
-      <mesh position={[0, 0, isPressed ? 0.2 : 0.6]}>
-        <cylinderGeometry args={[1.4, 1.4, 0.05, 32]} />
-        <meshLambertMaterial color="#ef4444" />
-      </mesh>
-      
-      {/* Highlight ring on top edge */}
-      <mesh position={[0, 0, isPressed ? 0.22 : 0.62]}>
-        <torusGeometry args={[1.4, 0.05, 16, 32]} />
-        <meshLambertMaterial color="#f87171" />
+      {/* Button top cap with slight bevel */}
+      <mesh position={[0, 0, buttonHeight]}>
+        <cylinderGeometry args={[buttonRadius - 0.05, buttonRadius, 0.1, 64]} />
+        <meshPhongMaterial 
+          color="#ef4444" 
+          shininess={50}
+          specular="#ffffff"
+        />
       </mesh>
       
       {/* Button base/platform */}
-      <mesh position={[0, 0, -0.2]}>
-        <cylinderGeometry args={[1.8, 1.8, 0.3, 32]} />
-        <meshLambertMaterial color="#374151" />
+      <mesh position={[0, 0, -0.15]}>
+        <cylinderGeometry args={[buttonRadius + 0.3, buttonRadius + 0.3, 0.3, 64]} />
+        <meshPhongMaterial color="#1f2937" />
       </mesh>
       
-      {/* Shadow ring around base */}
-      <mesh position={[0, 0, -0.1]}>
-        <torusGeometry args={[1.8, 0.1, 16, 32]} />
-        <meshLambertMaterial color="#1f2937" />
+      {/* Subtle rim around base */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[buttonRadius + 0.25, buttonRadius + 0.3, 0.05, 64]} />
+        <meshPhongMaterial color="#374151" />
       </mesh>
-      
-      {/* Glossy highlight when not pressed */}
-      {!isPressed && (
-        <mesh position={[0.4, 0.4, 0.7]}>
-          <sphereGeometry args={[0.3, 16, 16]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.4} />
-        </mesh>
-      )}
     </group>
   );
 };
@@ -69,12 +67,20 @@ const PixelButton3D = ({ isPressed, scrollProgress }: PixelButton3DProps) => {
   return (
     <div className="w-full h-full">
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 50 }}
+        camera={{ position: [0, 0, 4], fov: 60 }}
         style={{ background: 'transparent' }}
       >
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[10, 10, 5]} intensity={0.8} />
-        <directionalLight position={[-5, -5, 2]} intensity={0.3} color="#ff6b6b" />
+        <ambientLight intensity={0.3} />
+        <directionalLight 
+          position={[5, 5, 5]} 
+          intensity={0.8} 
+          castShadow
+        />
+        <directionalLight 
+          position={[-2, -2, 2]} 
+          intensity={0.2} 
+          color="#ff4444" 
+        />
         <PixelatedButton isPressed={isPressed} scrollProgress={scrollProgress} />
       </Canvas>
     </div>
