@@ -41,6 +41,8 @@ const MessageInterface = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [isStatusSticky, setIsStatusSticky] = useState(false);
+  const statusRef = useRef<HTMLDivElement>(null);
 
   // AI Verification Status
   const [aiVerificationStatus, setAiVerificationStatus] = useState<boolean>(false);
@@ -58,6 +60,20 @@ const MessageInterface = () => {
     
     fetchVerificationStatus();
   }, []);
+
+  // Scroll listener for sticky AI status
+  useEffect(() => {
+    const handleScroll = () => {
+      if (statusRef.current && capCheckResult !== null) {
+        const statusRect = statusRef.current.getBoundingClientRect();
+        const isScrolledPast = statusRect.top < 0;
+        setIsStatusSticky(isScrolledPast);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [capCheckResult]);
 
   // Smooth scroll to bottom
   const scrollToBottom = () => {
@@ -244,35 +260,63 @@ const MessageInterface = () => {
       {/* Premium gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-muted/50" />
       
-      {/* Sticky AI Status - Always visible at top */}
-      {capCheckResult !== null && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-slide-up">
-          <div className={`ai-status-card ${
-            capCheckResult ? 'ai-status-true' : 'ai-status-false'
-          } animate-glow-pulse px-6 py-3`}>
-            <div className="text-2xl md:text-3xl font-black tracking-tight">
-              AI: {capCheckResult ? 'TRUE' : 'FALSE'}
-            </div>
-          </div>
-          {!capCheckResult && (
-            <div className="mt-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <div className="deception-alert max-w-sm mx-auto text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center">
-                    <span className="text-sm">⚠️</span>
-                  </div>
-                  <p className="text-lg font-bold text-destructive">DECEPTION DETECTED</p>
-                </div>
-                <p className="text-destructive/80 text-sm">
-                  Statement flagged as potentially false or misleading
-                </p>
+      <div className="max-w-6xl mx-auto relative z-10">
+        {/* Original AI Status - for scroll detection */}
+        {capCheckResult !== null && (
+          <div ref={statusRef} className="mb-12 animate-slide-up">
+            <div className={`ai-status-card mx-auto max-w-md ${
+              capCheckResult ? 'ai-status-true' : 'ai-status-false'
+            } animate-glow-pulse`}>
+              <div className="text-6xl md:text-7xl font-black tracking-tight mb-2">
+                AI: {capCheckResult ? 'TRUE' : 'FALSE'}
               </div>
             </div>
-          )}
-        </div>
-      )}
+            {!capCheckResult && (
+              <div className="mt-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                <div className="deception-alert max-w-lg mx-auto">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">
+                      <span className="text-xl">⚠️</span>
+                    </div>
+                    <p className="text-2xl font-bold text-destructive">DECEPTION DETECTED</p>
+                  </div>
+                  <p className="text-destructive/80 text-lg leading-relaxed">
+                    Statement flagged as potentially false or misleading
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
-      <div className="max-w-6xl mx-auto relative z-10" style={{ marginTop: capCheckResult !== null ? '120px' : '0px' }}>
+        {/* Sticky AI Status - only visible when scrolled */}
+        {capCheckResult !== null && isStatusSticky && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
+            <div className={`ai-status-card ${
+              capCheckResult ? 'ai-status-true' : 'ai-status-false'
+            } animate-glow-pulse px-6 py-3`}>
+              <div className="text-2xl md:text-3xl font-black tracking-tight">
+                AI: {capCheckResult ? 'TRUE' : 'FALSE'}
+              </div>
+            </div>
+            {!capCheckResult && (
+              <div className="mt-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                <div className="deception-alert max-w-sm mx-auto text-center">
+                  <div className="flex items-center justify-center space-x-2 mb-2">
+                    <div className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center">
+                      <span className="text-sm">⚠️</span>
+                    </div>
+                    <p className="text-lg font-bold text-destructive">DECEPTION DETECTED</p>
+                  </div>
+                  <p className="text-destructive/80 text-sm">
+                    Statement flagged as potentially false or misleading
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Premium Communication Interface */}
         <div className="glass-card rounded-3xl p-10 shadow-2xl border border-border/20">
           <div className="text-center mb-10">
