@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
-import ScrollButton from '@/components/ScrollButton';
+import ScrollPhone from '@/components/ScrollPhone';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -39,7 +39,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Interactive Button on left side */}
+      {/* Interactive Phone Animation on left side */}
       {showButton && (
         <div className="fixed left-0 top-0 w-1/2 h-screen z-40 flex items-center justify-center">
           <div 
@@ -47,7 +47,7 @@ const Index = () => {
               opacity: 1 - scrollProgress * 0.3
             }}
           >
-            <ScrollButton scrollProgress={scrollProgress} />
+            <ScrollPhone scrollProgress={scrollProgress} />
           </div>
         </div>
       )}
