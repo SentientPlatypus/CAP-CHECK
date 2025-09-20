@@ -15,7 +15,6 @@ import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
-import PixelButton3D from '@/components/PixelButton3D';
 import ScrollPhone from '@/components/ScrollPhone';
 
 const Index = () => {
@@ -40,16 +39,24 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* 3D Pixel Button covering 50% of landing page */}
+      {/* Title Section on left half */}
       {showButton && (
         <div className="fixed left-0 top-0 w-1/2 h-screen z-40 flex items-center justify-center">
           <div 
-            className="w-96 h-96"
+            className="text-center px-8"
             style={{
               opacity: 1 - scrollProgress * 0.3
             }}
           >
-            <PixelButton3D isPressed={isPressed} scrollProgress={scrollProgress} />
+            <h1 className="text-6xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-6">
+              Experience
+            </h1>
+            <h2 className="text-4xl font-semibold text-foreground mb-4">
+              Real-time Communication
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-md mx-auto">
+              AI-powered chat interface with built-in fact-checking and verification system
+            </p>
           </div>
         </div>
       )}
