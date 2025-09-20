@@ -90,7 +90,7 @@ const MessageInterface = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Monitor for CAP CHECK results
+  // Monitor for CAP CHECK results and AI message events
   useEffect(() => {
     const handleCapCheckResult = (event: CustomEvent) => {
       setCapCheckResult(event.detail.result);
@@ -100,12 +100,25 @@ const MessageInterface = () => {
       speakText(aiContent.join(' '));
     };
 
+    const handleAddAiMessage = (event: CustomEvent) => {
+      // Add AI message as center message
+      const newMessage: Message = {
+        id: `ai-regenerated-${Date.now()}`,
+        text: event.detail.message,
+        sender: 'center',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, newMessage]);
+    };
+
     window.addEventListener('capCheckResult', handleCapCheckResult as EventListener);
     window.addEventListener('startTextReader', handleStartTextReader as EventListener);
+    window.addEventListener('addAiMessage', handleAddAiMessage as EventListener);
     
     return () => {
       window.removeEventListener('capCheckResult', handleCapCheckResult as EventListener);
       window.removeEventListener('startTextReader', handleStartTextReader as EventListener);
+      window.removeEventListener('addAiMessage', handleAddAiMessage as EventListener);
     };
   }, []);
 

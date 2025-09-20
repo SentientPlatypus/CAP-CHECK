@@ -26,6 +26,8 @@ const HeroSection = () => {
   const [showFlashing, setShowFlashing] = useState(false);
   const [flashingValue, setFlashingValue] = useState<boolean | null>(null);
   const [finalResult, setFinalResult] = useState<boolean | null>(null);
+  // Track if CAP CHECK has been used before
+  const [hasUsedCapCheck, setHasUsedCapCheck] = useState(false);
 
   // Set up scroll listener for parallax effects
   useEffect(() => {
@@ -47,8 +49,28 @@ const HeroSection = () => {
 
   /**
    * CAP CHECK - Show modal with faster True/False flashing, send to chat, then start text reader
+   * On subsequent uses, regenerate AI prompt after the last person's message
    */
   const startCapCheck = () => {
+    if (hasUsedCapCheck) {
+      // If CAP CHECK has been used before, regenerate AI prompt
+      // For now, just re-add the AI content message
+      const aiPrompt = "Welcome to our AI-powered content verification system. This technology analyzes statements in real-time to determine their accuracy.";
+      
+      // Add AI prompt as a center message after a brief delay
+      setTimeout(() => {
+        // Dispatch custom event to add AI content message
+        window.dispatchEvent(new CustomEvent('addAiMessage', { 
+          detail: { message: aiPrompt } 
+        }));
+      }, 500);
+      
+      return;
+    }
+    
+    // First time CAP CHECK usage - run normal flow
+    setHasUsedCapCheck(true);
+    
     // Send "CAP CHECK" message to chat interface
     chatActions.setPersonOneInput('CAP CHECK');
     
