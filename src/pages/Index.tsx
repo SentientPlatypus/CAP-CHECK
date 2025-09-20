@@ -83,7 +83,7 @@ const Index = () => {
                 className="font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
                 style={{ fontSize: 'clamp(2rem, 8vw, 5rem)' }}
               >
-                Interactive
+                CAP CHECK
               </h1>
               <p className="text-lg md:text-xl text-foreground/80 max-w-xl mb-8">
                 Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
