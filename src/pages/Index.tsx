@@ -101,15 +101,23 @@ const Index = () => {
 
             {/* Right side - Text */}
             <div className="text-left">
-              <h1
+              <motion.h1
                 className="font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
                 style={{ fontSize: 'clamp(2rem, 8vw, 5rem)' }}
+                initial={{ opacity: 0, x: -100 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
               >
                 CAP CHECK
-              </h1>
-              <p className="text-lg md:text-xl text-foreground/80 max-w-xl mb-8">
+              </motion.h1>
+              <motion.p 
+                className="text-lg md:text-xl text-foreground/80 max-w-xl mb-8"
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+              >
                 Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
-              </p>
+              </motion.p>
               <div className="flex gap-4">
                 <button className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium shadow-lg transition hover:opacity-90">
                   CAP CHECK ⌄
