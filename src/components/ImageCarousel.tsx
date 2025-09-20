@@ -37,11 +37,11 @@ const ImageCarousel = () => {
         const windowHeight = window.innerHeight;
         const sectionHeight = sectionRef.current.offsetHeight;
 
-        // Visibility controls
+        // Visibility controls (active only while sticky phase)
         const shouldShowCarousel = rect.top < windowHeight * 0.8;
         if (shouldShowCarousel !== showCarousel) setShowCarousel(shouldShowCarousel);
 
-        const shouldBeActive = rect.top <= windowHeight * 0.1 && rect.bottom >= windowHeight * 0.9;
+        const shouldBeActive = rect.top <= 0 && rect.bottom >= windowHeight;
         if (shouldBeActive !== isGalleryActive) setIsGalleryActive(shouldBeActive);
 
         // Progress calculation
