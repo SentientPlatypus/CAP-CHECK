@@ -39,7 +39,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Interactive Phone Animation on left side */}
+      {/* Interactive Button on left side */}
       {showButton && (
         <div className="fixed left-0 top-0 w-1/2 h-screen z-40 flex items-center justify-center">
           <div 
