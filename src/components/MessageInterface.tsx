@@ -308,12 +308,15 @@ const MessageInterface = () => {
           {/* CAP CHECK Result Display - More Apparent */}
           {capCheckResult !== null && (
             <div className="mb-8 animate-fade-in">
+              <div className="text-center mb-4">
+                <h3 className="text-3xl md:text-4xl font-bold text-primary mb-2">CAP CHECK</h3>
+              </div>
               <div className={`inline-block px-8 py-4 rounded-2xl text-2xl md:text-3xl font-bold border-4 shadow-2xl ${
                 capCheckResult 
                   ? 'bg-green-500/30 text-green-300 border-green-400 shadow-green-500/50' 
                   : 'bg-red-500/30 text-red-300 border-red-400 shadow-red-500/50'
               }`}>
-                ANALYSIS RESULT: {capCheckResult ? 'TRUE' : 'FALSE'}
+                {capCheckResult ? 'TRUE' : 'FALSE'}
               </div>
               {!capCheckResult && (
                 <div className="mt-4 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-300 max-w-md mx-auto">
