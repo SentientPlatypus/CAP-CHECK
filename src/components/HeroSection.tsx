@@ -11,14 +11,25 @@ const HeroSection = () => {
   }, []);
 
   const scrollToCarousel = () => {
-    // Find the carousel section and scroll to it
-    const carouselSection = document.querySelector('[data-section="carousel"]');
-    if (carouselSection) {
-      carouselSection.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
+    const carouselSection = document.querySelector('[data-section="carousel"]') as HTMLElement | null;
+    if (!carouselSection) return;
+
+    const startY = window.pageYOffset;
+    const targetY = window.pageYOffset + carouselSection.getBoundingClientRect().top;
+    const duration = 2200; // slower smooth scroll (ms)
+    const startTime = performance.now();
+
+    const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const eased = easeInOutCubic(progress);
+      window.scrollTo(0, startY + (targetY - startY) * eased);
+      if (progress < 1) requestAnimationFrame(step);
+    };
+
+    requestAnimationFrame(step);
   };
 
   const textOpacity = Math.max(0, 1 - scrollY / 300);
@@ -67,7 +78,7 @@ const HeroSection = () => {
         <div className="w-6 h-10 border-2 border-primary rounded-full flex justify-center animate-pulse">
           <div className="w-1 h-3 bg-primary rounded-full mt-2" 
                style={{ 
-                 animation: 'bounce 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                 animation: 'bounce 6s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                }} />
         </div>
       </div>
