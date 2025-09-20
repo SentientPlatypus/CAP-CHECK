@@ -11,56 +11,10 @@ interface PixelButton3DProps {
 const PixelatedButton = ({ isPressed, scrollProgress }: { isPressed: boolean; scrollProgress: number }) => {
   const meshRef = useRef<Group>(null);
 
-  // Create the exact pixelated button pattern from the reference image
-  const pixels = useMemo(() => {
-    const pixelData = [];
-    const pixelSize = 0.12;
-    
-    // Red button top pattern (oval shape)
-    const redPattern = [
-      // Row by row, creating the oval red button top
-      { x: -2, y: 3, color: '#dc2626' }, { x: -1, y: 3, color: '#dc2626' }, { x: 0, y: 3, color: '#dc2626' }, { x: 1, y: 3, color: '#dc2626' }, { x: 2, y: 3, color: '#dc2626' },
-      { x: -3, y: 2, color: '#dc2626' }, { x: -2, y: 2, color: '#ef4444' }, { x: -1, y: 2, color: '#ef4444' }, { x: 0, y: 2, color: '#f87171' }, { x: 1, y: 2, color: '#ef4444' }, { x: 2, y: 2, color: '#ef4444' }, { x: 3, y: 2, color: '#dc2626' },
-      { x: -4, y: 1, color: '#dc2626' }, { x: -3, y: 1, color: '#ef4444' }, { x: -2, y: 1, color: '#f87171' }, { x: -1, y: 1, color: '#fca5a5' }, { x: 0, y: 1, color: '#fca5a5' }, { x: 1, y: 1, color: '#f87171' }, { x: 2, y: 1, color: '#ef4444' }, { x: 3, y: 1, color: '#ef4444' }, { x: 4, y: 1, color: '#dc2626' },
-      { x: -4, y: 0, color: '#dc2626' }, { x: -3, y: 0, color: '#ef4444' }, { x: -2, y: 0, color: '#f87171' }, { x: -1, y: 0, color: '#f87171' }, { x: 0, y: 0, color: '#f87171' }, { x: 1, y: 0, color: '#f87171' }, { x: 2, y: 0, color: '#ef4444' }, { x: 3, y: 0, color: '#ef4444' }, { x: 4, y: 0, color: '#dc2626' },
-      { x: -4, y: -1, color: '#dc2626' }, { x: -3, y: -1, color: '#dc2626' }, { x: -2, y: -1, color: '#ef4444' }, { x: -1, y: -1, color: '#ef4444' }, { x: 0, y: -1, color: '#ef4444' }, { x: 1, y: -1, color: '#ef4444' }, { x: 2, y: -1, color: '#dc2626' }, { x: 3, y: -1, color: '#dc2626' }, { x: 4, y: -1, color: '#dc2626' },
-      { x: -3, y: -2, color: '#dc2626' }, { x: -2, y: -2, color: '#dc2626' }, { x: -1, y: -2, color: '#dc2626' }, { x: 0, y: -2, color: '#dc2626' }, { x: 1, y: -2, color: '#dc2626' }, { x: 2, y: -2, color: '#dc2626' }, { x: 3, y: -2, color: '#dc2626' },
-      { x: -2, y: -3, color: '#dc2626' }, { x: -1, y: -3, color: '#dc2626' }, { x: 0, y: -3, color: '#dc2626' }, { x: 1, y: -3, color: '#dc2626' }, { x: 2, y: -3, color: '#dc2626' }
-    ];
-
-    // Grey base pattern (wider oval)
-    const greyPattern = [
-      { x: -3, y: -3, color: '#9ca3af', z: -0.3 }, { x: -2, y: -3, color: '#9ca3af', z: -0.3 }, { x: -1, y: -3, color: '#d1d5db', z: -0.3 }, { x: 0, y: -3, color: '#d1d5db', z: -0.3 }, { x: 1, y: -3, color: '#d1d5db', z: -0.3 }, { x: 2, y: -3, color: '#9ca3af', z: -0.3 }, { x: 3, y: -3, color: '#9ca3af', z: -0.3 },
-      { x: -4, y: -4, color: '#9ca3af', z: -0.3 }, { x: -3, y: -4, color: '#d1d5db', z: -0.3 }, { x: -2, y: -4, color: '#e5e7eb', z: -0.3 }, { x: -1, y: -4, color: '#e5e7eb', z: -0.3 }, { x: 0, y: -4, color: '#e5e7eb', z: -0.3 }, { x: 1, y: -4, color: '#e5e7eb', z: -0.3 }, { x: 2, y: -4, color: '#d1d5db', z: -0.3 }, { x: 3, y: -4, color: '#d1d5db', z: -0.3 }, { x: 4, y: -4, color: '#9ca3af', z: -0.3 },
-      { x: -5, y: -5, color: '#6b7280', z: -0.3 }, { x: -4, y: -5, color: '#9ca3af', z: -0.3 }, { x: -3, y: -5, color: '#d1d5db', z: -0.3 }, { x: -2, y: -5, color: '#d1d5db', z: -0.3 }, { x: -1, y: -5, color: '#d1d5db', z: -0.3 }, { x: 0, y: -5, color: '#d1d5db', z: -0.3 }, { x: 1, y: -5, color: '#d1d5db', z: -0.3 }, { x: 2, y: -5, color: '#d1d5db', z: -0.3 }, { x: 3, y: -5, color: '#9ca3af', z: -0.3 }, { x: 4, y: -5, color: '#9ca3af', z: -0.3 }, { x: 5, y: -5, color: '#6b7280', z: -0.3 },
-      { x: -4, y: -6, color: '#6b7280', z: -0.3 }, { x: -3, y: -6, color: '#6b7280', z: -0.3 }, { x: -2, y: -6, color: '#9ca3af', z: -0.3 }, { x: -1, y: -6, color: '#9ca3af', z: -0.3 }, { x: 0, y: -6, color: '#9ca3af', z: -0.3 }, { x: 1, y: -6, color: '#9ca3af', z: -0.3 }, { x: 2, y: -6, color: '#9ca3af', z: -0.3 }, { x: 3, y: -6, color: '#6b7280', z: -0.3 }, { x: 4, y: -6, color: '#6b7280', z: -0.3 }
-    ];
-
-    // Add red button pixels (elevated when not pressed)
-    redPattern.forEach(pixel => {
-      pixelData.push({
-        position: [pixel.x * pixelSize, pixel.y * pixelSize, isPressed ? 0.05 : 0.15],
-        color: pixel.color,
-        height: isPressed ? 0.1 : 0.3
-      });
-    });
-
-    // Add grey base pixels
-    greyPattern.forEach(pixel => {
-      pixelData.push({
-        position: [pixel.x * pixelSize, pixel.y * pixelSize, pixel.z || -0.15],
-        color: pixel.color,
-        height: 0.2
-      });
-    });
-
-    return pixelData;
-  }, [isPressed]);
-
   useFrame(() => {
     if (meshRef.current) {
-      // Animate the button press by moving it down slightly
-      const pressDepth = isPressed ? -0.05 : 0;
+      // Animate the button press by moving it down
+      const pressDepth = isPressed ? -0.1 : 0;
       meshRef.current.position.z = pressDepth;
       
       // Add subtle rotation based on scroll
@@ -68,14 +22,47 @@ const PixelatedButton = ({ isPressed, scrollProgress }: { isPressed: boolean; sc
     }
   });
 
+  const buttonHeight = isPressed ? 0.2 : 0.35;
+
   return (
     <group ref={meshRef}>
-      {pixels.map((pixel, index) => (
-        <mesh key={index} position={pixel.position}>
-          <boxGeometry args={[0.11, 0.11, pixel.height]} />
-          <meshLambertMaterial color={pixel.color} />
-        </mesh>
-      ))}
+      {/* Main red button - ellipsoid shape */}
+      <mesh position={[0, 0, buttonHeight / 2]} scale={[1.2, 0.8, 1]}>
+        <sphereGeometry args={[0.8, 32, 16]} />
+        <meshPhongMaterial 
+          color="#dc2626" 
+          shininess={20}
+          specular="#ffffff"
+        />
+      </mesh>
+      
+      {/* Button highlight on top */}
+      <mesh position={[0.2, 0.15, buttonHeight + 0.1]} scale={[0.6, 0.4, 0.3]}>
+        <sphereGeometry args={[0.3, 16, 8]} />
+        <meshBasicMaterial 
+          color="#fca5a5" 
+          transparent 
+          opacity={0.7}
+        />
+      </mesh>
+      
+      {/* Grey base platform - elliptical */}
+      <mesh position={[0, 0, -0.15]} scale={[1.6, 1.2, 1]}>
+        <cylinderGeometry args={[0.8, 0.9, 0.3, 32]} />
+        <meshPhongMaterial color="#9ca3af" />
+      </mesh>
+      
+      {/* Base highlight ring */}
+      <mesh position={[0, 0, -0.05]} scale={[1.5, 1.1, 1]}>
+        <torusGeometry args={[0.75, 0.05, 16, 32]} />
+        <meshPhongMaterial color="#d1d5db" />
+      </mesh>
+      
+      {/* Base shadow ring */}
+      <mesh position={[0, 0, -0.25]} scale={[1.7, 1.3, 1]}>
+        <torusGeometry args={[0.8, 0.03, 16, 32]} />
+        <meshLambertMaterial color="#6b7280" />
+      </mesh>
     </group>
   );
 };
