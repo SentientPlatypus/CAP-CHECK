@@ -19,13 +19,7 @@ interface Message {
 // Demo content for AI reading
 const aiContent = [
   "Welcome to our AI-powered content verification system. This technology analyzes statements in real-time to determine their accuracy.",
-  "Using advanced language models and fact-checking algorithms, we can identify potentially misleading or false information as it's presented.",
-  "The system provides immediate feedback, highlighting verified facts in green and flagging suspicious claims in red for further review.",
-  "This technology represents a significant step forward in combating misinformation and promoting accurate information sharing.",
-  "By combining artificial intelligence with human oversight, we create a more trustworthy information ecosystem for everyone.",
-  "The real-time analysis happens instantly, allowing for immediate corrections and clarifications when needed.",
-  "This system can be applied to news articles, social media posts, educational content, and any form of digital communication.",
-  "The goal is to empower users with accurate information and help them make informed decisions based on verified facts."
+  "
 ];
 
 const MessageInterface = () => {
