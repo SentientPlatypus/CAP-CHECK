@@ -48,13 +48,25 @@ const ImageCarousel = () => {
   }, []);
 
   const skipGallery = () => {
-    if (sectionRef.current) {
-      const sectionBottom = sectionRef.current.offsetTop + sectionRef.current.offsetHeight;
-      window.scrollTo({
-        top: sectionBottom,
-        behavior: 'smooth'
-      });
-    }
+    if (!sectionRef.current) return;
+    const sectionBottom = sectionRef.current.offsetTop + sectionRef.current.offsetHeight;
+
+    const startY = window.pageYOffset;
+    const targetY = sectionBottom;
+    const duration = 2600; // slower smooth scroll (ms)
+    const startTime = performance.now();
+
+    const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const eased = easeInOutCubic(progress);
+      window.scrollTo(0, startY + (targetY - startY) * eased);
+      if (progress < 1) requestAnimationFrame(step);
+    };
+
+    requestAnimationFrame(step);
   };
 
   // Calculate current image index based on scroll progress
