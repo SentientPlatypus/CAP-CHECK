@@ -127,25 +127,8 @@ const MessageInterface = () => {
     };
 
     const handleCapCheckStart = () => {
-      // Add CAP CHECK analyzing message when cap check starts
-      const capCheckMessage: Message = {
-        id: `cap-check-${Date.now()}`,
-        text: 'CAP CHECK',
-        sender: 'left',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, capCheckMessage]);
-      
-      // Add analyzing status after a short delay
-      setTimeout(() => {
-        const analyzingMessage: Message = {
-          id: `analyzing-${Date.now()}`,
-          text: '⚠️ ANALYZING...',
-          sender: 'left',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, analyzingMessage]);
-      }, 100);
+      // Use the external triggerCapCheck function
+      triggerCapCheck();
     };
 
     const handleStartTextReader = () => {
@@ -212,6 +195,26 @@ const MessageInterface = () => {
     }
   };
 
+  // Trigger CAP CHECK + ANALYZING for any message
+  const triggerCapCheck = () => {
+    const timestamp = Date.now();
+    const capCheckMessage: Message = {
+      id: `cap-check-${timestamp}`,
+      text: 'CAP CHECK',
+      sender: 'left',
+      timestamp: new Date()
+    };
+    
+    const analyzingMessage: Message = {
+      id: `analyzing-${timestamp + 1}`,
+      text: '⚠️ ANALYZING...',
+      sender: 'left',
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, capCheckMessage, analyzingMessage]);
+  };
+
   const handleSend = () => {
     if (!input.trim()) return;
     
@@ -227,6 +230,11 @@ const MessageInterface = () => {
 
     setMessages(prev => [...prev, newMessage]);
     
+    // Trigger CAP CHECK for every message
+    setTimeout(() => {
+      triggerCapCheck();
+    }, 500);
+    
     // Check if the input is "kkk" and add a new block after it
     if (input.trim().toLowerCase() === 'kkk') {
       setTimeout(() => {
@@ -237,7 +245,7 @@ const MessageInterface = () => {
           timestamp: new Date()
         };
         setMessages(prev => [...prev, newBlockMessage]);
-      }, 500); // Small delay to show the new block after the user message
+      }, 1500); // Delay to show after cap check
     }
     
     setInput('');
