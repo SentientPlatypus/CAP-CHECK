@@ -12,8 +12,7 @@ import { chatActions, chatGlobals } from '@/lib/globalState';
 import { 
   testFlaskConnection, 
   exportToJSON, 
-  exportToText,
-  getDatabaseStatus 
+  exportToText
 } from '@/lib/apiService';
 
 export const DataExportPanel = () => {

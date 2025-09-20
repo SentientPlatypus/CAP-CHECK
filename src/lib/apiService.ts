@@ -108,31 +108,6 @@ export const saveGlobalVariables = async (variables: GlobalVariables): Promise<b
 };
 
 /**
- * Update a single variable in Flask API
- */
-export const updateSingleVariable = async (variableName: string, value: any): Promise<boolean> => {
-  try {
-    const response = await fetch(`${FLASK_API_URL}/variables/${variableName}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ value }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    console.log(`Variable ${variableName} updated in Flask API`);
-    return true;
-  } catch (error) {
-    console.error(`Failed to update ${variableName} in Flask:`, error);
-    return false;
-  }
-};
-
-/**
  * Test Flask API connection
  */
 export const testFlaskConnection = async (): Promise<ConnectionStatus> => {
@@ -157,74 +132,6 @@ export const testFlaskConnection = async (): Promise<ConnectionStatus> => {
     };
   }
 };
-
-/**
- * Get SQLite database status from Flask
- */
-export const getDatabaseStatus = async () => {
-  try {
-    const response = await fetch(`${FLASK_API_URL}/database/status`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to get database status:', error);
-    throw error;
-  }
-};
-
-/**
- * Polling manager for automatic data fetching
- */
-export class PollingManager {
-  private intervalId: NodeJS.Timeout | null = null;
-  private isPolling = false;
-
-  /**
-   * Start polling Flask API for changes
-   */
-  start(callback: (data: GlobalVariables | null) => void, interval: number = 3000) {
-    if (this.isPolling) {
-      console.log('Polling already started');
-      return;
-    }
-
-    this.isPolling = true;
-    console.log(`Starting Flask API polling every ${interval}ms`);
-    
-    this.intervalId = setInterval(async () => {
-      const data = await fetchGlobalVariables();
-      callback(data);
-    }, interval);
-  }
-
-  /**
-   * Stop polling
-   */
-  stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-      this.isPolling = false;
-      console.log('Flask API polling stopped');
-    }
-  }
-
-  /**
-   * Check if currently polling
-   */
-  get isActive() {
-    return this.isPolling;
-  }
-}
 
 /**
  * Export utilities for data export functionality
@@ -277,6 +184,51 @@ For Flask/SQLite Integration:
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+/**
+ * Polling manager for automatic data fetching
+ */
+export class PollingManager {
+  private intervalId: NodeJS.Timeout | null = null;
+  private isPolling = false;
+
+  /**
+   * Start polling Flask API for changes
+   */
+  start(callback: (data: GlobalVariables | null) => void, interval: number = 3000) {
+    if (this.isPolling) {
+      console.log('Polling already started');
+      return;
+    }
+
+    this.isPolling = true;
+    console.log(`Starting Flask API polling every ${interval}ms`);
+    
+    this.intervalId = setInterval(async () => {
+      const data = await fetchGlobalVariables();
+      callback(data);
+    }, interval);
+  }
+
+  /**
+   * Stop polling
+   */
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      this.isPolling = false;
+      console.log('Flask API polling stopped');
+    }
+  }
+
+  /**
+   * Check if currently polling
+   */
+  get isActive() {
+    return this.isPolling;
+  }
+}
 
 // Create and export a singleton polling manager
 export const pollingManager = new PollingManager();
