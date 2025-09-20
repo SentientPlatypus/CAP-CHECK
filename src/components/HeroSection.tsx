@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import { chatActions } from '@/lib/globalState';
 
-const HeroSection = () => {
+const HeroSection = ({ showOverlay }: { showOverlay?: boolean }) => {
   // Track scroll position for parallax effects
   const [scrollY, setScrollY] = useState(0);
   // CAP CHECK modal state
@@ -170,9 +170,10 @@ const HeroSection = () => {
         <div 
           className="text-center z-10 px-8"
           style={{
-            opacity: textOpacity,
+            opacity: showOverlay ? 0 : textOpacity,
             transform: `scale(${textScale})`,
-            transition: 'all 0.1s ease-out'
+            transition: 'all 0.1s ease-out',
+            pointerEvents: showOverlay ? 'none' : 'auto'
           }}
         >
           <h1 className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">

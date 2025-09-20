@@ -79,7 +79,7 @@ const Index = () => {
         </div>
       )}
       
-      <HeroSection />
+      <HeroSection showOverlay={showButton} />
       <ImageCarousel />
       
       {/* Call to Action Section */}
