@@ -4,8 +4,11 @@
  * Interactive chat with AI feedback and text highlighting
  */
 import { useState, useEffect, useRef } from 'react';
-import { Send, Shield, AlertTriangle, Clock, Volume2 } from 'lucide-react';
+import { Send, Shield, AlertTriangle, Clock, Volume2, X } from 'lucide-react';
 import { chatGlobals, chatActions, truthUtils } from '@/lib/globalState';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 // Message data structure
 interface Message {
@@ -46,6 +49,10 @@ const MessageInterface = () => {
 
   // AI Verification Status
   const [aiVerificationStatus, setAiVerificationStatus] = useState<boolean>(false);
+  
+  // Modal state for CAP CHECK
+  const [showModal, setShowModal] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
 
   // Check for API key and fetch AI verification status on mount
   useEffect(() => {
@@ -195,9 +202,18 @@ const MessageInterface = () => {
     }
   };
 
-  // Trigger CAP CHECK + ANALYZING for any message
+  // Trigger CAP CHECK modal
   const triggerCapCheck = () => {
+    setShowModal(true);
+  };
+
+  // Handle AI prompt submission
+  const handleAiPromptSubmit = () => {
+    if (!aiPrompt.trim()) return;
+
     const timestamp = Date.now();
+    
+    // Add CAP CHECK message
     const capCheckMessage: Message = {
       id: `cap-check-${timestamp}`,
       text: 'CAP CHECK',
@@ -205,14 +221,32 @@ const MessageInterface = () => {
       timestamp: new Date()
     };
     
+    // Add ANALYZING message
     const analyzingMessage: Message = {
       id: `analyzing-${timestamp + 1}`,
       text: '⚠️ ANALYZING...',
       sender: 'left',
       timestamp: new Date()
     };
+
+    // Add AI Prompt message
+    const aiPromptMessage: Message = {
+      id: `ai-prompt-${timestamp + 2}`,
+      text: `AI Prompt: ${aiPrompt}`,
+      sender: 'center',
+      timestamp: new Date()
+    };
     
-    setMessages(prev => [...prev, capCheckMessage, analyzingMessage]);
+    setMessages(prev => [...prev, capCheckMessage, analyzingMessage, aiPromptMessage]);
+    
+    // Simulate AI processing and result
+    setTimeout(() => {
+      setCapCheckResult(Math.random() > 0.5); // Random true/false for demo
+    }, 2000);
+    
+    // Close modal and reset
+    setShowModal(false);
+    setAiPrompt('');
   };
 
   const handleSend = () => {
@@ -461,16 +495,43 @@ const MessageInterface = () => {
             </button>
           </div>
           
-          {/* CAP CHECK Button */}
+          {/* CAP CHECK Button with Modal */}
           <div className="text-center mb-6">
-            <button
-              onClick={triggerCapCheck}
-              className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-xl rounded-2xl hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-2 border-orange-400/30"
-            >
-              🚨 CAP CHECK
-            </button>
+            <Dialog open={showModal} onOpenChange={setShowModal}>
+              <DialogTrigger asChild>
+                <button
+                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-xl rounded-2xl hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-2 border-orange-400/30"
+                >
+                  🚨 CAP CHECK
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-center text-2xl font-bold">🚨 CAP CHECK</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <p className="text-center text-muted-foreground">
+                    Enter an AI prompt to analyze the conversation:
+                  </p>
+                  <Textarea
+                    placeholder="e.g., Analyze the truthfulness of the last statement about climate change..."
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    className="min-h-24 resize-none"
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setShowModal(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleAiPromptSubmit} disabled={!aiPrompt.trim()}>
+                      Submit Analysis
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <p className="text-sm text-muted-foreground mt-2">
-              Analyze the last message for truth verification
+              Analyze messages with custom AI prompts
             </p>
           </div>
         </div>
