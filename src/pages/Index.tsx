@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
-import ScrollPhone from '@/components/ScrollPhone';
+import ScrollButton from '@/components/ScrollButton';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -47,7 +47,7 @@ const Index = () => {
               opacity: 1 - scrollProgress * 0.3
             }}
           >
-            <ScrollPhone scrollProgress={scrollProgress} />
+            <ScrollButton scrollProgress={scrollProgress} />
           </div>
         </div>
       )}
