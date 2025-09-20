@@ -4,11 +4,13 @@
  * Centralized variables for chat functionality:
  * - Person A and B input states
  * - Chat explanation/instructions text
+ * - Truth verification for fact-checking statements
  * - Shared state that can be accessed across components
  * 
  * Usage:
  * import { chatGlobals } from '@/lib/globalState';
  * chatGlobals.personOneInput = 'Hello world';
+ * chatGlobals.truthVerification = true;
  * console.log(chatGlobals.chatExplanation);
  */
 
@@ -28,10 +30,16 @@ export const chatGlobals = {
   personTwoInput: '',
   
   /**
+   * Truth verification status for fact-checking
+   * true = statement is factual, false = statement is false/misleading, null = no verification
+   */
+  truthVerification: null as boolean | null,
+  
+  /**
    * Explanation text displayed in the chat interface
    * Describes how the chat system works
    */
-  chatExplanation: 'Switch between Person A and Person B to simulate a conversation. Messages are sent automatically with realistic typing delays and random responses.'
+  chatExplanation: 'This AI-powered fact-checking system analyzes statements in real-time. Switch between Person A and Person B to simulate conversations while the system verifies the truthfulness of each statement.'
 };
 
 /**
@@ -53,6 +61,13 @@ export const chatActions = {
   },
   
   /**
+   * Set truth verification status
+   */
+  setTruthVerification: (isTrue: boolean | null) => {
+    chatGlobals.truthVerification = isTrue;
+  },
+  
+  /**
    * Update the chat explanation text
    */
   setChatExplanation: (explanation: string) => {
@@ -60,11 +75,12 @@ export const chatActions = {
   },
   
   /**
-   * Clear all inputs
+   * Clear all inputs and reset truth verification
    */
   clearAllInputs: () => {
     chatGlobals.personOneInput = '';
     chatGlobals.personTwoInput = '';
+    chatGlobals.truthVerification = null;
   },
   
   /**
@@ -94,5 +110,29 @@ export type ChatSender = 'left' | 'right';
 export interface ChatGlobalsType {
   personOneInput: string;
   personTwoInput: string;
+  truthVerification: boolean | null;
   chatExplanation: string;
 }
+
+/**
+ * Truth verification utilities
+ */
+export const truthUtils = {
+  /**
+   * Get verification badge text based on truth status
+   */
+  getVerificationText: (isTrue: boolean | null) => {
+    if (isTrue === true) return 'VERIFIED TRUE';
+    if (isTrue === false) return 'FLAGGED FALSE';
+    return 'ANALYZING...';
+  },
+  
+  /**
+   * Get verification badge color classes based on truth status
+   */
+  getVerificationColor: (isTrue: boolean | null) => {
+    if (isTrue === true) return 'bg-green-500/20 text-green-400 border-green-500/50';
+    if (isTrue === false) return 'bg-red-500/20 text-red-400 border-red-500/50';
+    return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
+  }
+};

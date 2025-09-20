@@ -17,8 +17,8 @@
  * - Global variable monitoring and auto-reset after message creation
  */
 import { useState, useEffect, useRef } from 'react';
-import { Send } from 'lucide-react';
-import { chatGlobals, chatActions } from '@/lib/globalState';
+import { Send, Shield, AlertTriangle, Clock } from 'lucide-react';
+import { chatGlobals, chatActions, truthUtils } from '@/lib/globalState';
 
 // Message data structure
 interface Message {
@@ -26,6 +26,7 @@ interface Message {
   text: string;
   sender: 'left' | 'right';  // Which side of the chat (Person A/B)
   timestamp: Date;
+  truthVerification?: boolean | null; // Truth status for this message
 }
 
 const MessageInterface = () => {
@@ -65,10 +66,12 @@ const MessageInterface = () => {
           id: Date.now().toString(),
           text: chatGlobals.personOneInput.trim(),
           sender: 'left',
-          timestamp: new Date()
+          timestamp: new Date(),
+          truthVerification: chatGlobals.truthVerification
         };
         setMessages(prev => [...prev, newMessage]);
         chatActions.setPersonOneInput(''); // Reset after adding
+        chatActions.setTruthVerification(null); // Reset verification
         
         // Trigger auto-response
         triggerAutoResponse('left');
@@ -80,10 +83,12 @@ const MessageInterface = () => {
           id: (Date.now() + 1).toString(),
           text: chatGlobals.personTwoInput.trim(),
           sender: 'right',
-          timestamp: new Date()
+          timestamp: new Date(),
+          truthVerification: chatGlobals.truthVerification
         };
         setMessages(prev => [...prev, newMessage]);
         chatActions.setPersonTwoInput(''); // Reset after adding
+        chatActions.setTruthVerification(null); // Reset verification
         
         // Trigger auto-response
         triggerAutoResponse('right');
@@ -195,11 +200,22 @@ const MessageInterface = () => {
                 key={message.id}
                 className={`flex ${message.sender === 'right' ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={message.sender === 'left' ? 'message-bubble-left' : 'message-bubble-right'}>
+                <div className={`${message.sender === 'left' ? 'message-bubble-left' : 'message-bubble-right'} relative`}>
                   <p className="text-sm">{message.text}</p>
-                  <span className="text-xs opacity-60 mt-1 block">
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xs opacity-60">
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    {/* Truth verification badge */}
+                    {message.truthVerification !== undefined && (
+                      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${truthUtils.getVerificationColor(message.truthVerification)}`}>
+                        {message.truthVerification === true && <Shield size={10} />}
+                        {message.truthVerification === false && <AlertTriangle size={10} />}
+                        {message.truthVerification === null && <Clock size={10} />}
+                        <span>{truthUtils.getVerificationText(message.truthVerification)}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
