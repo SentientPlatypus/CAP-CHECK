@@ -68,12 +68,11 @@ const ImageCarousel = () => {
         const maxScroll = Math.max(1, sectionHeight - windowHeight);
         const rawProgress = Math.min(1, Math.max(0, scrolled / maxScroll));
         
-        // Adjust progress to give first image much more time in center
-        // First image stays centered for 50% of scroll, then accelerates through the rest
-        const progress = rawProgress < 0.5 ? rawProgress * 0.1 : 0.05 + (rawProgress - 0.5) * 1.9;
-        const finalProgress = Math.min(1, progress);
+        // Don't start moving carousel until 40% through the section
+        const startThreshold = 0.4;
+        const finalProgress = rawProgress < startThreshold ? 0 : (rawProgress - startThreshold) / (1 - startThreshold);
 
-        // Update progress bar width imperatively
+        // Update progress bar width imperatively (show actual scroll progress)
         if (progressBarRef.current) {
           progressBarRef.current.style.width = `${rawProgress * 100}%`;
         }
