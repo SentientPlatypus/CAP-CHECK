@@ -76,6 +76,12 @@ const ImageCarousel = () => {
         // Calculate center position in the viewport
         const centerProgress = progress * (images.length - 1);
         
+        // Move the entire track horizontally based on scroll progress
+        const imageWidth = 320 + 48; // image width + gap
+        const totalWidth = imageWidth * images.length;
+        const trackTranslateX = -progress * (totalWidth - viewportWidthRef.current) * 0.7;
+        trackRef.current.style.transform = `translate3d(${trackTranslateX}px, 0, 0)`;
+        
         // Update each image scale based on distance from center
         images.forEach((_, index) => {
           const distanceFromCenter = Math.abs(index - centerProgress);
@@ -151,18 +157,19 @@ const ImageCarousel = () => {
       <div ref={wrapperRef} className="sticky top-1/2 -translate-y-1/2 h-80 overflow-hidden">
         <div
           ref={trackRef}
-          className={`flex items-center justify-center gap-12 h-full ${showCarousel ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
+          className={`flex items-center gap-12 h-full ${showCarousel ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
+          style={{ willChange: 'transform', width: 'max-content' }}
         >
           {images.map((img, idx) => (
             <div 
               key={idx} 
-              className="relative rounded-xl overflow-hidden shadow-2xl transition-all duration-300 ease-out"
-              style={{ minWidth: '320px', height: '200px' }}
+              className="relative rounded-xl overflow-hidden shadow-2xl transition-all duration-200 ease-out flex-shrink-0"
+              style={{ width: '320px', height: '200px' }}
             >
               <img
                 src={img}
                 alt={`Gallery image ${idx + 1}`}
-                className="w-80 h-50 object-cover"
+                className="w-full h-full object-cover"
                 loading="lazy"
               />
               <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
