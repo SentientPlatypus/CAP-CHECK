@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
+import PixelButton3D from '@/components/PixelButton3D';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -38,29 +39,16 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Large Red Button covering 50% of landing page */}
+      {/* 3D Pixel Button covering 50% of landing page */}
       {showButton && (
         <div className="fixed left-0 top-0 w-1/2 h-screen z-40 flex items-center justify-center">
           <div 
-            className={`
-              w-80 h-80 rounded-full bg-red-500 border-8 border-red-600
-              shadow-2xl cursor-pointer select-none flex items-center justify-center
-              transition-all duration-300 ease-out
-              ${isPressed 
-                ? 'transform scale-90 shadow-inner bg-red-600 border-red-700' 
-                : 'transform scale-100 shadow-2xl bg-red-500 border-red-600'
-              }
-            `}
+            className="w-96 h-96"
             style={{
-              boxShadow: isPressed 
-                ? 'inset 0 8px 16px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2)' 
-                : '0 12px 24px rgba(0,0,0,0.3), 0 8px 16px rgba(239,68,68,0.4)',
               opacity: 1 - scrollProgress * 0.3
             }}
           >
-            <span className="text-white text-2xl font-bold">
-              {isPressed ? 'PRESSED!' : 'SCROLL DOWN'}
-            </span>
+            <PixelButton3D isPressed={isPressed} scrollProgress={scrollProgress} />
           </div>
         </div>
       )}
