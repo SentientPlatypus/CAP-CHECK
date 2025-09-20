@@ -271,18 +271,6 @@ const MessageInterface = () => {
                   return (
                     <div key={message.id} className="w-full mb-4">
                       <div className="w-full p-6 rounded-lg bg-card/50 border border-border/50">
-                        <div className="text-center mb-4">
-                          <div className="text-lg font-bold text-foreground mb-2">
-                            true or false
-                          </div>
-                          <span className={`text-lg font-bold ${
-                            aiContentVerificationStatus 
-                              ? 'text-green-400' 
-                              : 'text-red-400'
-                          }`}>
-                            {aiContentVerificationStatus ? 'TRUE' : 'FALSE'}
-                          </span>
-                        </div>
                         <p className={`text-base leading-relaxed transition-all duration-300 ${
                           isSpeaking ? 'opacity-100' : 'opacity-100'
                         }`}>
