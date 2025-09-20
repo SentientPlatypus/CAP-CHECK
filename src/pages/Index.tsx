@@ -11,13 +11,53 @@
  * using modern web APIs for smooth animations and interactions.
  */
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
+import redButtonImage from '@/assets/red-button.png';
 
 const Index = () => {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isPressed, setIsPressed] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / docHeight;
+      setScrollProgress(progress);
+      setIsPressed(progress > 0.3); // Button gets "pressed" after 30% scroll
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Scroll-triggered Red Button */}
+      <div className="fixed top-8 right-8 z-50">
+        <div 
+          className={`transition-transform duration-200 ${
+            isPressed ? 'scale-95 brightness-75' : 'scale-100'
+          }`}
+          style={{
+            filter: isPressed ? 'brightness(0.8) contrast(1.2)' : 'none'
+          }}
+        >
+          <img 
+            src={redButtonImage} 
+            alt="Red Button" 
+            className="w-16 h-16 pixelated"
+            style={{ imageRendering: 'pixelated' }}
+          />
+        </div>
+        <div className="text-xs text-center mt-2 text-muted-foreground">
+          Scroll: {Math.round(scrollProgress * 100)}%
+        </div>
+      </div>
+      
       <HeroSection />
       <ImageCarousel />
       
