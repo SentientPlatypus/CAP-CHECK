@@ -53,11 +53,6 @@ const MessageInterface = () => {
 
   // Simulate text-to-speech with highlighting
   const speakText = async (text: string) => {
-    if (!hasApiKey) {
-      alert('Please set your ElevenLabs API key first');
-      return;
-    }
-
     setIsSpeaking(true);
     const words = text.split(' ');
     
@@ -111,18 +106,18 @@ const MessageInterface = () => {
               AI Content Reader
             </h2>
             <p className="text-muted-foreground mb-6">
-              AI content with synchronized text highlighting during reading
+              AI content with synchronized text highlighting {hasApiKey ? 'and voice reading' : '(set API key for voice)'}
             </p>
             
             {/* TTS Controls */}
             <div className="flex justify-center items-center space-x-4 mb-8">
               <button
                 onClick={() => speakText(aiContent.join(' '))}
-                disabled={isSpeaking || !hasApiKey}
+                disabled={isSpeaking}
                 className="flex items-center space-x-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-all"
               >
                 <Volume2 size={20} />
-                <span>{isSpeaking ? 'Reading...' : 'Start Reading'}</span>
+                <span>{isSpeaking ? 'Reading...' : hasApiKey ? 'Start Reading' : 'Demo Reading'}</span>
               </button>
               {!hasApiKey && (
                 <button
