@@ -132,8 +132,8 @@ const MessageInterface = () => {
     };
 
     const handleCapCheckStart = () => {
-      // Use the external triggerCapCheck function
-      triggerCapCheck();
+      // Use the handleCapCheck function
+      handleCapCheck();
     };
 
     const handleStartTextReader = () => {
@@ -198,11 +198,6 @@ const MessageInterface = () => {
       localStorage.setItem('ELEVENLABS_API_KEY', key);
       setHasApiKey(true);
     }
-  };
-
-  // Trigger CAP CHECK modal
-  const triggerCapCheck = () => {
-    setShowModal(true);
   };
 
   // Handle CAP CHECK - exact same as home page
@@ -277,9 +272,9 @@ const MessageInterface = () => {
 
     setMessages(prev => [...prev, newMessage]);
     
-    // Trigger CAP CHECK for every message
+    // Trigger CAP CHECK modal automatically for every message
     setTimeout(() => {
-      triggerCapCheck();
+      handleCapCheck();
     }, 500);
     
     // Check if the input is "kkk" and add a new block after it
