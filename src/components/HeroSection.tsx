@@ -73,11 +73,11 @@ const HeroSection = () => {
           setShowModal(false);
           setShowFlashing(false);
           
-          // Scroll to text reader after modal closes
+          // Jump to text reader after modal closes (instant, no smooth scroll)
           setTimeout(() => {
             const textReaderSection = document.querySelector('[data-section="text-reader"]') as HTMLElement | null;
             if (textReaderSection) {
-              performSmoothScroll(textReaderSection);
+              textReaderSection.scrollIntoView({ behavior: 'auto', block: 'start' });
             }
           }, 300); // Small delay to ensure modal is fully closed
         }, 1500);
