@@ -66,15 +66,20 @@ const ImageCarousel = () => {
         // Progress (no state updates here)
         const scrolled = Math.max(0, -rect.top);
         const maxScroll = Math.max(1, sectionHeight - windowHeight);
-        const progress = Math.min(1, Math.max(0, scrolled / maxScroll));
+        const rawProgress = Math.min(1, Math.max(0, scrolled / maxScroll));
+        
+        // Adjust progress to give first image more time in center
+        // Use a curve that starts slower for the first image
+        const progress = rawProgress < 0.2 ? rawProgress * 0.5 : 0.1 + (rawProgress - 0.2) * 1.125;
+        const finalProgress = Math.min(1, progress);
 
         // Update progress bar width imperatively
         if (progressBarRef.current) {
-          progressBarRef.current.style.width = `${progress * 100}%`;
+          progressBarRef.current.style.width = `${rawProgress * 100}%`;
         }
 
         // Calculate center position in the viewport
-        const centerProgress = progress * (images.length - 1);
+        const centerProgress = finalProgress * (images.length - 1);
         
         // Move the entire track horizontally based on scroll progress
         const imageWidth = 320 + 48; // image width + gap
@@ -83,7 +88,7 @@ const ImageCarousel = () => {
         
         // Start with first image centered, then move through others
         const baseOffset = viewportCenter - firstImageCenter;
-        const scrollOffset = -progress * imageWidth * (images.length - 1);
+        const scrollOffset = -finalProgress * imageWidth * (images.length - 1);
         const trackTranslateX = baseOffset + scrollOffset;
         
         trackRef.current.style.transform = `translate3d(${trackTranslateX}px, 0, 0)`;
@@ -105,7 +110,7 @@ const ImageCarousel = () => {
         });
 
         // Discrete active index for display purposes
-        const newActive = Math.round(progress * (images.length - 1));
+        const newActive = Math.round(finalProgress * (images.length - 1));
         if (newActive !== lastActiveIndexRef.current) {
           lastActiveIndexRef.current = newActive;
           setActiveIndex(newActive);
