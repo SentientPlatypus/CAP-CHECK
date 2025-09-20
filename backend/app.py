@@ -25,8 +25,13 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
-import serial  
+import serial
 import cap_button 
+
+# runing 
+import threading
+import subprocess
+
 
 # ---------------------------
 # App / DB setup
@@ -74,6 +79,14 @@ class FactCheck(db.Model):
 @app.route('/api/health', methods=['GET'])
 def health():
     return jsonify({'ok': True})
+
+# ---------------------------
+# Launching frontend
+# ---------------------------
+def launch_frontend():
+    frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+    subprocess.run(["npm", "start"], cwd=frontend_dir)
+
 
 # ---------------------------
 # Audio endpoints
@@ -193,7 +206,8 @@ def init_db_cmd():
     print('Database initialized.')
 
 
-
+# ------------------------------
+# Global Variable GRANT SHIT
 
 # Global variables to update the the frontend
 class GlobalState(db.Model):
@@ -249,7 +263,13 @@ def api_put_globals():
 #         return jsonify(ok=False, error=str(e)), 500
     
 
+# Launching frontend
+def launch_frontend():
+    frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+    subprocess.run(["npm", "run", "dev"], cwd=frontend_dir)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+    threading.Thread(target=launch_frontend, daemon=True).start()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
