@@ -14,6 +14,7 @@ const images = [carousel1, carousel2, carousel3, carousel4, carousel5, carousel6
 const ImageCarousel = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isGalleryActive, setIsGalleryActive] = useState(false);
+  const [showCarousel, setShowCarousel] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -24,7 +25,11 @@ const ImageCarousel = () => {
       const sectionHeight = sectionRef.current.offsetHeight;
       const windowHeight = window.innerHeight;
       
-      // Show when carousel section is fully visible or mostly visible
+      // Show carousel when section starts coming into view
+      const shouldShowCarousel = rect.top < windowHeight * 0.8;
+      setShowCarousel(shouldShowCarousel);
+      
+      // Show controls when carousel section is fully visible or mostly visible
       const isInView = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
       setIsGalleryActive(isInView);
       
@@ -98,6 +103,7 @@ const ImageCarousel = () => {
   return (
     <section 
       ref={sectionRef}
+      data-section="carousel"
       className="h-[200vh] relative bg-gradient-to-b from-background to-card"
     >
       {/* Fixed title that stays throughout gallery */}
@@ -142,7 +148,11 @@ const ImageCarousel = () => {
 
       {/* Sticky carousel container */}
       <div className="sticky top-1/2 transform -translate-y-1/2 h-80 overflow-hidden">
-        <div className="relative h-full flex justify-center items-center">
+        <div 
+          className={`relative h-full flex justify-center items-center transition-opacity duration-500 ${
+            showCarousel ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
           {images.map((image, index) => (
             <div
               key={index}

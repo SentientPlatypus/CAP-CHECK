@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 
 const HeroSection = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -8,6 +9,17 @@ const HeroSection = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const scrollToCarousel = () => {
+    // Find the carousel section and scroll to it
+    const carouselSection = document.querySelector('[data-section="carousel"]');
+    if (carouselSection) {
+      carouselSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
 
   const textOpacity = Math.max(0, 1 - scrollY / 300);
   const textScale = Math.max(0.5, 1 - scrollY / 600);
@@ -39,9 +51,20 @@ const HeroSection = () => {
         <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
           Experience the future of web interaction with scroll-based animations, immersive carousels, and real-time communication.
         </p>
-        <button className="hero-button text-lg font-semibold">
-          Explore Below
-        </button>
+        
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <button className="hero-button text-lg font-semibold">
+            Explore Below
+          </button>
+          
+          <button
+            onClick={scrollToCarousel}
+            className="bg-secondary/80 hover:bg-secondary text-secondary-foreground px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-border flex items-center space-x-2"
+          >
+            <span>View Gallery</span>
+            <ChevronDown size={20} />
+          </button>
+        </div>
       </div>
       
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
