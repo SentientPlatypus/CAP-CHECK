@@ -10,7 +10,7 @@ import { motion, useScroll, useTransform, useMotionTemplate } from 'framer-motio
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
-import ScrollPhone from '@/components/ScrollPhone';
+import redButton8bit from '@/assets/red-button-8bit.png';
 
 const SECTION_HEIGHT = 1500;
 
@@ -65,9 +65,14 @@ const Index = () => {
           style={{ scale: overlayScale, transformOrigin: 'center' }}
         >
           <div className="container mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 items-center gap-8">
-            {/* Left side - Phone */}
+            {/* Left side - Red Button */}
             <div className="flex justify-center">
-              <ScrollPhone scrollProgress={0} />
+              <img 
+                src={redButton8bit} 
+                alt="8-bit Red Button" 
+                className="w-48 h-auto object-contain"
+                style={{ imageRendering: 'pixelated' }}
+              />
             </div>
 
             {/* Right side - Text */}
