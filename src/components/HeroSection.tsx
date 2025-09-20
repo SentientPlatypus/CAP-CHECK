@@ -4,6 +4,7 @@
  * Landing page hero with interactive scroll effects:
  * - Parallax text fade and scale based on scroll position
  * - Smooth scroll animation to carousel section using cubic easing
+ * - CAP CHECK modal functionality for lie detection demo
  * - Gradient background with radial overlays for visual depth
  * - Animated scroll indicator with pulsing effects
  * 
@@ -13,11 +14,16 @@
  * - Passive scroll listener for better performance
  */
 import { useEffect, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 
 const HeroSection = () => {
   // Track scroll position for parallax effects
   const [scrollY, setScrollY] = useState(0);
+  // CAP CHECK modal state
+  const [showModal, setShowModal] = useState(false);
+  const [showFlashing, setShowFlashing] = useState(false);
+  const [flashingValue, setFlashingValue] = useState<boolean | null>(null);
+  const [finalResult, setFinalResult] = useState<boolean | null>(null);
 
   // Set up scroll listener for parallax effects
   useEffect(() => {
@@ -38,18 +44,32 @@ const HeroSection = () => {
   };
 
   /**
-   * CAP CHECK - Scroll to text reader and activate fact-checking mode
+   * CAP CHECK - Show modal with flashing True/False
    */
   const startCapCheck = () => {
-    const textReaderSection = document.querySelector('[data-section="text-reader"]') as HTMLElement | null;
-    if (!textReaderSection) return;
-
-    performSmoothScroll(textReaderSection);
+    setShowModal(true);
+    setShowFlashing(true);
+    setFlashingValue(true);
     
-    // Trigger CAP CHECK mode in text reader after scroll
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('startCapCheck'));
-    }, 1500);
+    // Flash True/False for 3 seconds
+    let flashCount = 0;
+    const flashInterval = setInterval(() => {
+      setFlashingValue(prev => !prev);
+      flashCount++;
+      
+      if (flashCount >= 6) { // 3 seconds of flashing
+        clearInterval(flashInterval);
+        const result = Math.random() > 0.5; // Random final result
+        setFlashingValue(result);
+        setFinalResult(result);
+        
+        // Hide modal after showing final result for 1 second
+        setTimeout(() => {
+          setShowModal(false);
+          setShowFlashing(false);
+        }, 1000);
+      }
+    }, 500);
   };
 
   /**
@@ -82,60 +102,102 @@ const HeroSection = () => {
   const textScale = Math.max(0.5, 1 - scrollY / 600);  // Scale down to 50% over 600px
 
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      <div 
-        className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"
-        style={{
-          background: `
-            radial-gradient(circle at 30% 40%, hsl(15, 85%, 65%, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 70% 60%, hsl(25, 90%, 70%, 0.1) 0%, transparent 50%),
-            linear-gradient(135deg, hsl(220, 26%, 4%) 0%, hsl(220, 26%, 8%) 100%)
-          `
-        }}
-      />
-      
-      <div 
-        className="text-center z-10 px-8"
-        style={{
-          opacity: textOpacity,
-          transform: `scale(${textScale})`,
-          transition: 'all 0.1s ease-out'
-        }}
-      >
-        <h1 className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-          Interactive
-        </h1>
-        <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-          Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
-        </p>
+    <>
+      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"
+          style={{
+            background: `
+              radial-gradient(circle at 30% 40%, hsl(15, 85%, 65%, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 70% 60%, hsl(25, 90%, 70%, 0.1) 0%, transparent 50%),
+              linear-gradient(135deg, hsl(220, 26%, 4%) 0%, hsl(220, 26%, 8%) 100%)
+            `
+          }}
+        />
         
-        <div className="flex justify-center space-x-4">
-          <button
-            onClick={startCapCheck}
-            className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-red-400/50 flex items-center space-x-2 shadow-lg shadow-red-500/25"
-          >
-            <span className="font-bold text-lg">CAP CHECK</span>
-            <ChevronDown size={20} />
-          </button>
-          <button
-            onClick={scrollToCarousel}
-            className="bg-secondary/80 hover:bg-secondary text-secondary-foreground px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-border flex items-center space-x-2"
-          >
-            <span>View Gallery</span>
-            <ChevronDown size={20} />
-          </button>
+        <div 
+          className="text-center z-10 px-8"
+          style={{
+            opacity: textOpacity,
+            transform: `scale(${textScale})`,
+            transition: 'all 0.1s ease-out'
+          }}
+        >
+          <h1 className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Interactive
+          </h1>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
+          </p>
+          
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={startCapCheck}
+              className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-red-400/50 flex items-center space-x-2 shadow-lg shadow-red-500/25"
+            >
+              <span className="font-bold text-lg">CAP CHECK</span>
+              <ChevronDown size={20} />
+            </button>
+            <button
+              onClick={scrollToCarousel}
+              className="bg-secondary/80 hover:bg-secondary text-secondary-foreground px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-border flex items-center space-x-2"
+            >
+              <span>View Gallery</span>
+              <ChevronDown size={20} />
+            </button>
+          </div>
         </div>
-      </div>
-      
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-        <div className="w-6 h-10 border-2 border-primary rounded-full flex justify-center animate-pulse">
-          <div className="w-1 h-3 bg-primary rounded-full mt-2" 
-               style={{ 
-                 animation: 'bounce 6s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-               }} />
+        
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="w-6 h-10 border-2 border-primary rounded-full flex justify-center animate-pulse">
+            <div className="w-1 h-3 bg-primary rounded-full mt-2" 
+                 style={{ 
+                   animation: 'bounce 6s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                 }} />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Floating Truth Badge - shows after CAP CHECK completes */}
+      {finalResult !== null && !showModal && (
+        <div className="fixed top-6 right-6 z-50 animate-fade-in">
+          <div className={`px-4 py-2 rounded-full border-2 font-bold text-lg shadow-lg ${
+            finalResult 
+              ? 'bg-green-500/20 text-green-400 border-green-500 shadow-green-500/25' 
+              : 'bg-red-500/20 text-red-400 border-red-500 shadow-red-500/25'
+          }`}>
+            {finalResult ? 'TRUE' : 'FALSE'}
+          </div>
+        </div>
+      )}
+
+      {/* CAP CHECK Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-background/95 backdrop-blur-md rounded-2xl p-12 border border-border shadow-2xl max-w-md w-full mx-4 animate-scale-in">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+                CAP CHECK
+              </h1>
+              
+              <div className="mb-8">
+                <div className={`inline-block px-12 py-6 rounded-2xl text-6xl font-bold border-4 transition-all duration-300 ${
+                  showFlashing 
+                    ? (flashingValue ? 'bg-green-500/20 text-green-400 border-green-500 animate-pulse' : 'bg-red-500/20 text-red-400 border-red-500 animate-pulse')
+                    : (flashingValue ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-red-500/20 text-red-400 border-red-500')
+                }`}>
+                  {flashingValue ? 'TRUE' : 'FALSE'}
+                </div>
+              </div>
+              
+              <p className="text-muted-foreground text-lg">
+                AI Analysis in Progress...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
