@@ -80,15 +80,28 @@ const TextReader = () => {
     }
   }, [currentParagraph]);
 
-  // Listen for CAP CHECK results
+  // Listen for CAP CHECK results and auto-start events
   useEffect(() => {
     const handleCapCheckResult = (event: CustomEvent) => {
       setCapCheckResult(event.detail.result);
     };
 
+    const handleStartTextReader = () => {
+      // Auto-start the text reader when triggered by CAP CHECK
+      if (currentParagraph >= podcastText.length) {
+        resetReader(); // Reset if already finished
+      }
+      setIsPlaying(true);
+    };
+
     window.addEventListener('capCheckResult', handleCapCheckResult as EventListener);
-    return () => window.removeEventListener('capCheckResult', handleCapCheckResult as EventListener);
-  }, []);
+    window.addEventListener('startTextReader', handleStartTextReader as EventListener);
+    
+    return () => {
+      window.removeEventListener('capCheckResult', handleCapCheckResult as EventListener);
+      window.removeEventListener('startTextReader', handleStartTextReader as EventListener);
+    };
+  }, [currentParagraph]);
 
   /**
    * Toggle play/pause, or restart if finished

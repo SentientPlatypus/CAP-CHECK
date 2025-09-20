@@ -5,6 +5,7 @@
  * - Parallax text fade and scale based on scroll position
  * - Smooth scroll animation to carousel section using cubic easing
  * - CAP CHECK modal functionality for lie detection demo
+ * - Integration with MessageInterface through global state
  * - Gradient background with radial overlays for visual depth
  * - Animated scroll indicator with pulsing effects
  * 
@@ -15,6 +16,7 @@
  */
 import { useEffect, useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
+import { chatActions } from '@/lib/globalState';
 
 const HeroSection = () => {
   // Track scroll position for parallax effects
@@ -44,9 +46,12 @@ const HeroSection = () => {
   };
 
   /**
-   * CAP CHECK - Show modal with fading True/False, then scroll to Text Reader
+   * CAP CHECK - Show modal with fading True/False, send to chat, then start text reader
    */
   const startCapCheck = () => {
+    // Send "CAP CHECK" message to chat interface
+    chatActions.setPersonOneInput('CAP CHECK');
+    
     setShowModal(true);
     setShowFlashing(true);
     setFlashingValue(true);
@@ -63,10 +68,22 @@ const HeroSection = () => {
         setFlashingValue(result);
         setFinalResult(result);
         
-        // Send result to text reader
-        window.dispatchEvent(new CustomEvent('capCheckResult', { 
-          detail: { result } 
-        }));
+        // Send result to chat interface and text reader
+        setTimeout(() => {
+          const resultText = result ? 'VERIFIED TRUE' : 'FLAGGED FALSE';
+          chatActions.setPersonTwoInput(resultText);
+          chatActions.setTruthVerification(result);
+          
+          // Send result to text reader
+          window.dispatchEvent(new CustomEvent('capCheckResult', { 
+            detail: { result } 
+          }));
+          
+          // Trigger text reader to auto-start
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('startTextReader'));
+          }, 1000);
+        }, 500);
         
         // Hide modal after showing final result for 1.5 seconds
         setTimeout(() => {
