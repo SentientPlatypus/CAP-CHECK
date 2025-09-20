@@ -94,19 +94,6 @@ const MessageInterface = () => {
   useEffect(() => {
     const handleCapCheckResult = (event: CustomEvent) => {
       setCapCheckResult(event.detail.result);
-      
-      // Update the most recent message with the verification result
-      setMessages(prev => {
-        const updated = [...prev];
-        // Find the most recent message from Person A or B (not center/AI)
-        for (let i = updated.length - 1; i >= 0; i--) {
-          if (updated[i].sender === 'left' || updated[i].sender === 'right') {
-            updated[i] = { ...updated[i], truthVerification: event.detail.result };
-            break;
-          }
-        }
-        return updated;
-      });
     };
 
     const handleStartTextReader = () => {
