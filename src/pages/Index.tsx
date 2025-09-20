@@ -43,7 +43,11 @@ const Index = () => {
             <div className="text-left">
               <motion.h1
                 className="font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
-                style={{ fontSize: 'clamp(2rem, 8vw, 5rem)' }}
+                style={{ 
+                  fontSize: 'clamp(2rem, 8vw, 5rem)',
+                  opacity: 1,
+                  transform: 'translateX(0px)'
+                }}
                 initial={{ opacity: 0, x: -100 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
@@ -52,6 +56,10 @@ const Index = () => {
               </motion.h1>
               <motion.p 
                 className="text-lg md:text-xl text-foreground/80 max-w-xl mb-8"
+                style={{
+                  opacity: 1,
+                  transform: 'translateX(0px)'
+                }}
                 initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
@@ -60,6 +68,10 @@ const Index = () => {
               </motion.p>
               <motion.div 
                 className="flex gap-4"
+                style={{
+                  opacity: 1,
+                  transform: 'translateY(0px)'
+                }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
