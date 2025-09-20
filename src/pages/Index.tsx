@@ -20,14 +20,17 @@ import redButtonImage from '@/assets/red-button.png';
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isPressed, setIsPressed] = useState(false);
+  const [showButton, setShowButton] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = scrollTop / docHeight;
+      const heroHeight = window.innerHeight; // Assuming hero section is viewport height
+      const progress = Math.min(scrollTop / heroHeight, 1);
+      
       setScrollProgress(progress);
-      setIsPressed(progress > 0.3); // Button gets "pressed" after 30% scroll
+      setIsPressed(progress > 0.2); // Button gets "pressed" after 20% scroll
+      setShowButton(progress < 1); // Hide when scrolled past landing page
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -36,27 +39,30 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Scroll-triggered Red Button */}
-      <div className="fixed top-8 right-8 z-50">
-        <div 
-          className={`transition-transform duration-200 ${
-            isPressed ? 'scale-95 brightness-75' : 'scale-100'
-          }`}
-          style={{
-            filter: isPressed ? 'brightness(0.8) contrast(1.2)' : 'none'
-          }}
-        >
-          <img 
-            src={redButtonImage} 
-            alt="Red Button" 
-            className="w-16 h-16 pixelated"
-            style={{ imageRendering: 'pixelated' }}
-          />
+      {/* Large Red Button on Left Side */}
+      {showButton && (
+        <div className="fixed left-8 top-1/2 transform -translate-y-1/2 z-50">
+          <div 
+            className={`transition-all duration-300 ${
+              isPressed ? 'scale-90 brightness-75' : 'scale-100'
+            }`}
+            style={{
+              filter: isPressed ? 'brightness(0.7) contrast(1.3)' : 'none',
+              opacity: 1 - scrollProgress * 0.5 // Fade out as we scroll
+            }}
+          >
+            <img 
+              src={redButtonImage} 
+              alt="Red Button" 
+              className="w-32 h-32 pixelated"
+              style={{ imageRendering: 'pixelated' }}
+            />
+          </div>
+          <div className="text-sm text-center mt-2 text-muted-foreground">
+            {isPressed ? 'PRESSED!' : 'Scroll down...'}
+          </div>
         </div>
-        <div className="text-xs text-center mt-2 text-muted-foreground">
-          Scroll: {Math.round(scrollProgress * 100)}%
-        </div>
-      </div>
+      )}
       
       <HeroSection />
       <ImageCarousel />
