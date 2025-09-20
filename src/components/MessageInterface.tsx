@@ -94,6 +94,19 @@ const MessageInterface = () => {
   useEffect(() => {
     const handleCapCheckResult = (event: CustomEvent) => {
       setCapCheckResult(event.detail.result);
+      
+      // Update the most recent message with the verification result
+      setMessages(prev => {
+        const updated = [...prev];
+        // Find the most recent message from Person A or B (not center/AI)
+        for (let i = updated.length - 1; i >= 0; i--) {
+          if (updated[i].sender === 'left' || updated[i].sender === 'right') {
+            updated[i] = { ...updated[i], truthVerification: event.detail.result };
+            break;
+          }
+        }
+        return updated;
+      });
     };
 
     const handleStartTextReader = () => {
@@ -222,16 +235,8 @@ const MessageInterface = () => {
                   return (
                     <div key={message.id} className="w-full mb-4">
                       <div className="w-full p-6 rounded-lg bg-card/50 border border-border/50">
-                        <div className="flex justify-center items-center space-x-4 mb-4">
-                          <div className={`px-6 py-3 rounded-lg font-semibold text-lg border-2 ${
-                            capCheckResult === true 
-                              ? 'bg-green-500/20 text-green-300 border-green-400' 
-                              : capCheckResult === false
-                              ? 'bg-red-500/20 text-red-300 border-red-400'
-                              : 'bg-muted text-muted-foreground border-border'
-                          }`}>
-                            {capCheckResult === true ? 'TRUE' : capCheckResult === false ? 'FALSE' : 'ANALYZING...'}
-                          </div>
+                        <div className="text-center mb-4">
+                          <span className="text-sm text-muted-foreground">AI Content Verification System</span>
                         </div>
                         <p className={`text-base leading-relaxed transition-all duration-300 ${
                           isSpeaking ? 'opacity-100' : 'opacity-100'
