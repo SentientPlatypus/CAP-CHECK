@@ -49,81 +49,79 @@ const HeroSection = () => {
 
   /**
    * CAP CHECK - Show modal with faster True/False flashing, send to chat, then start text reader
-   * On subsequent uses, regenerate AI prompt after the last person's message
+   * Always add new AI block after the newest message when pressed
    */
   const startCapCheck = () => {
-    // Send last user message to backend regardless of first time or subsequent use
+    // Send last user message to backend
     chatActions.sendLastMessageToBackend();
     
-    if (hasUsedCapCheck) {
-      // If CAP CHECK has been used before, regenerate AI prompt after latest message
-      const aiPrompt = "Welcome to our AI-powered content verification system. This technology analyzes statements in real-time to determine their accuracy.";
+    // Always add AI block after newest message when CAP CHECK is pressed
+    const aiPrompt = "Welcome to our AI-powered content verification system. This technology analyzes statements in real-time to determine their accuracy.";
+    
+    // Add AI prompt as a center message after the newest message
+    setTimeout(() => {
+      // Dispatch custom event to add AI content message
+      window.dispatchEvent(new CustomEvent('addAiMessage', { 
+        detail: { message: aiPrompt } 
+      }));
+    }, 200);
+    
+    // If first time, also run the modal flow
+    if (!hasUsedCapCheck) {
+      setHasUsedCapCheck(true);
       
-      // Add AI prompt as a center message after the newest message
-      setTimeout(() => {
-        // Dispatch custom event to add AI content message
-        window.dispatchEvent(new CustomEvent('addAiMessage', { 
-          detail: { message: aiPrompt } 
-        }));
-      }, 200); // Shorter delay to appear right after newest message
+      // Send "CAP CHECK" message to chat interface
+      chatActions.setPersonOneInput('CAP CHECK');
       
-      return;
+      setShowModal(true);
+      setShowFlashing(true);
+      setFlashingValue(true);
+      
+      // Faster flashing between True/False (every 300ms)
+      let fadeCount = 0;
+      const fadeInterval = setInterval(() => {
+        setFlashingValue(prev => !prev);
+        fadeCount++;
+        
+        if (fadeCount >= 6) { // 2 seconds of flashing (6 * 300ms = 1.8s)
+          clearInterval(fadeInterval);
+          const result = Math.random() > 0.3; // 70% chance of FALSE for more apparent display
+          setFlashingValue(result);
+          setFinalResult(result);
+          
+          // Send result to chat interface and text reader
+          setTimeout(() => {
+            const resultText = result ? 'VERIFIED TRUE' : 'FLAGGED FALSE';
+            chatActions.setPersonTwoInput(resultText);
+            chatActions.setTruthVerification(result);
+            
+            // Send result to text reader
+            window.dispatchEvent(new CustomEvent('capCheckResult', { 
+              detail: { result } 
+            }));
+            
+            // Trigger text reader to auto-start
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('startTextReader'));
+            }, 1000);
+          }, 500);
+          
+          // Hide modal after showing final result for 1.5 seconds
+          setTimeout(() => {
+            setShowModal(false);
+            setShowFlashing(false);
+            
+            // Jump to text reader after modal closes (instant, no smooth scroll)
+            setTimeout(() => {
+              const textReaderSection = document.querySelector('[data-section="text-reader"]') as HTMLElement | null;
+              if (textReaderSection) {
+                textReaderSection.scrollIntoView({ behavior: 'auto', block: 'start' });
+              }
+            }, 300); // Small delay to ensure modal is fully closed
+          }, 1500);
+        }
+      }, 300); // Faster fade transition
     }
-    
-    // First time CAP CHECK usage - run normal flow
-    setHasUsedCapCheck(true);
-    
-    // Send "CAP CHECK" message to chat interface
-    chatActions.setPersonOneInput('CAP CHECK');
-    
-    setShowModal(true);
-    setShowFlashing(true);
-    setFlashingValue(true);
-    
-    // Faster flashing between True/False (every 300ms)
-    let fadeCount = 0;
-    const fadeInterval = setInterval(() => {
-      setFlashingValue(prev => !prev);
-      fadeCount++;
-      
-      if (fadeCount >= 6) { // 2 seconds of flashing (6 * 300ms = 1.8s)
-        clearInterval(fadeInterval);
-        const result = Math.random() > 0.3; // 70% chance of FALSE for more apparent display
-        setFlashingValue(result);
-        setFinalResult(result);
-        
-        // Send result to chat interface and text reader
-        setTimeout(() => {
-          const resultText = result ? 'VERIFIED TRUE' : 'FLAGGED FALSE';
-          chatActions.setPersonTwoInput(resultText);
-          chatActions.setTruthVerification(result);
-          
-          // Send result to text reader
-          window.dispatchEvent(new CustomEvent('capCheckResult', { 
-            detail: { result } 
-          }));
-          
-          // Trigger text reader to auto-start
-          setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('startTextReader'));
-          }, 1000);
-        }, 500);
-        
-        // Hide modal after showing final result for 1.5 seconds
-        setTimeout(() => {
-          setShowModal(false);
-          setShowFlashing(false);
-          
-          // Jump to text reader after modal closes (instant, no smooth scroll)
-          setTimeout(() => {
-            const textReaderSection = document.querySelector('[data-section="text-reader"]') as HTMLElement | null;
-            if (textReaderSection) {
-              textReaderSection.scrollIntoView({ behavior: 'auto', block: 'start' });
-            }
-          }, 300); // Small delay to ensure modal is fully closed
-        }, 1500);
-      }
-    }, 300); // Faster fade transition
   };
 
   /**
