@@ -71,7 +71,7 @@ const ImageCarousel = () => {
             if (isGalleryActive && !isSnapping) {
               startSnapAnimation();
             }
-          }, 150);
+          }, 80);
         }
       });
     };
@@ -101,7 +101,7 @@ const ImageCarousel = () => {
     const imageWidth = 368; // 320px + 48px gap
     const containerWidth = window.innerWidth;
     const startOffset = containerWidth / 2 - 160; // Center first image
-    const translateX = startOffset - (progress * imageWidth * (images.length - 1));
+    const translateX = startOffset + (progress * imageWidth * (images.length - 1));
     
     trackRef.current.style.transform = `translate3d(${translateX}px, 0, 0)`;
 
@@ -155,15 +155,15 @@ const ImageCarousel = () => {
     
     const startProgress = currentProgress;
     const progressDiff = targetProgress - startProgress;
-    const duration = 500;
+    const duration = 700; // beefed snapping animation
     const startTime = performance.now();
     
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(1, elapsed / duration);
       
-      // Smooth easing
-      const eased = 1 - Math.pow(1 - progress, 3);
+      // Stronger easing (quintic)
+      const eased = 1 - Math.pow(1 - progress, 5);
       const newProgress = startProgress + progressDiff * eased;
       
       currentProgressRef.current = newProgress;
