@@ -68,8 +68,8 @@ const ImageCarousel = () => {
         const maxScroll = Math.max(1, sectionHeight - windowHeight);
         const rawProgress = Math.min(1, Math.max(0, scrolled / maxScroll));
         
-        // Don't start moving carousel until 40% through the section
-        const startThreshold = 0.4;
+        // Don't start moving carousel until 20% through the section
+        const startThreshold = 0.2;
         const finalProgress = rawProgress < startThreshold ? 0 : (rawProgress - startThreshold) / (1 - startThreshold);
 
         // Update progress bar width imperatively (show actual scroll progress)
