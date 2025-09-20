@@ -11,77 +11,16 @@
  * using modern web APIs for smooth animations and interactions.
  */
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import ParallaxHero from '@/components/ParallaxHero';
 import { Button } from '@/components/ui/button';
-import ScrollPhone from '@/components/ScrollPhone';
 
 const Index = () => {
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isPressed, setIsPressed] = useState(false);
-  const [showButton, setShowButton] = useState(true);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const heroHeight = window.innerHeight;
-      const progress = Math.min(scrollTop / heroHeight, 1);
-      
-      setScrollProgress(progress);
-      setIsPressed(progress > 0.1);
-      setShowButton(progress < 1);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Interactive Phone Animation on left side */}
-      {showButton && (
-        <div className="fixed left-0 top-0 w-1/2 h-screen z-40 flex items-center justify-center">
-          <div 
-            style={{
-              opacity: 1 - scrollProgress * 0.3
-            }}
-          >
-            <ScrollPhone scrollProgress={scrollProgress} />
-          </div>
-        </div>
-      )}
-
-      {/* Title Section on right half */}
-      {showButton && (
-        <div className="fixed right-0 top-0 w-1/2 h-screen z-40 flex items-center justify-start pl-12">
-          <div 
-            className="text-left"
-            style={{
-              opacity: 1 - scrollProgress * 0.3
-            }}
-          >
-            <h1 className="text-8xl font-bold text-purple-500 mb-6">
-              Interactive
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-lg mb-8">
-              Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
-            </p>
-            <div className="flex gap-4">
-              <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium">
-                CAP CHECK ⌄
-              </button>
-              <button className="text-muted-foreground hover:text-foreground px-6 py-3 font-medium">
-                View Gallery ⌄
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <HeroSection showOverlay={showButton} />
       <ParallaxHero />
+      <HeroSection />
       <ImageCarousel />
       
       {/* Call to Action Section */}

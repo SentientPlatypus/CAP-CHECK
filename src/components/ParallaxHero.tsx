@@ -32,16 +32,17 @@ const Hero = () => {
 const CenterImage = () => {
   const { scrollY } = useScroll();
 
-  const clip1 = useTransform(scrollY, [0, 1500], [25, 0]);
-  const clip2 = useTransform(scrollY, [0, 1500], [75, 100]);
+  const clip1 = useTransform(scrollY, [0, 1500], [40, 0]); // Start more closed
+  const clip2 = useTransform(scrollY, [0, 1500], [60, 100]); // Start more closed
 
   const clipPath = useMotionTemplate`polygon(${clip1}% ${clip1}%, ${clip2}% ${clip1}%, ${clip2}% ${clip2}%, ${clip1}% ${clip2}%)`;
 
   const scale = useTransform(
     scrollY,
-    [0, SECTION_HEIGHT + 500],
-    [1, 0.3]
+    [0, SECTION_HEIGHT],
+    [0.3, 1] // Start small, grow to full size
   );
+  
   const opacity = useTransform(
     scrollY,
     [SECTION_HEIGHT, SECTION_HEIGHT + 500],
@@ -57,7 +58,7 @@ const CenterImage = () => {
       }}
     >
       <motion.div
-        className="w-full h-full bg-gradient-to-br from-background via-card to-background relative"
+        className="w-full h-full relative flex"
         style={{
           scale,
           background: `
@@ -67,29 +68,39 @@ const CenterImage = () => {
           `
         }}
       >
-        {/* Landing page content that shrinks */}
-        <div className="absolute inset-0 flex">
-          {/* Phone side */}
-          <div className="w-1/2 h-full flex items-center justify-center">
-            <div className="text-purple-500 text-8xl">📱</div>
+        {/* Phone side */}
+        <div className="w-1/2 h-full flex items-center justify-center">
+          <div className="relative">
+            <div className="w-48 h-96 bg-gradient-to-br from-purple-600 to-purple-800 rounded-[2.5rem] border-4 border-white/20 shadow-2xl flex flex-col items-center justify-center relative overflow-hidden">
+              {/* Phone notch */}
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-20 h-2 bg-black rounded-full"></div>
+              
+              {/* Phone content */}
+              <div className="flex flex-col items-center justify-center h-full px-6">
+                <div className="text-6xl mb-8">⚡</div>
+                <div className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold text-sm">
+                  Get Started
+                </div>
+              </div>
+            </div>
           </div>
-          
-          {/* Text side */}
-          <div className="w-1/2 h-full flex items-center justify-start pl-12">
-            <div className="text-left">
-              <h1 className="text-8xl font-bold text-purple-500 mb-6">
-                Interactive
-              </h1>
-              <p className="text-xl text-muted-foreground max-w-lg mb-8">
-                Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
-              </p>
-              <div className="flex gap-4">
-                <div className="bg-orange-500 text-white px-6 py-3 rounded-lg font-medium">
-                  CAP CHECK ⌄
-                </div>
-                <div className="text-muted-foreground px-6 py-3 font-medium">
-                  View Gallery ⌄
-                </div>
+        </div>
+        
+        {/* Text side */}
+        <div className="w-1/2 h-full flex items-center justify-start pl-12">
+          <div className="text-left">
+            <h1 className="text-8xl font-bold text-purple-500 mb-6">
+              Interactive
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-lg mb-8">
+              Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
+            </p>
+            <div className="flex gap-4">
+              <div className="bg-orange-500 text-white px-6 py-3 rounded-lg font-medium">
+                CAP CHECK ⌄
+              </div>
+              <div className="text-muted-foreground px-6 py-3 font-medium">
+                View Gallery ⌄
               </div>
             </div>
           </div>
