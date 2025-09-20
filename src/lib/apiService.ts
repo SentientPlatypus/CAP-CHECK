@@ -108,6 +108,30 @@ export const saveGlobalVariables = async (variables: GlobalVariables): Promise<b
 };
 
 /**
+ * Fetch AI verification status from Flask API
+ */
+export const fetchAiVerificationStatus = async (): Promise<boolean> => {
+  try {
+    const response = await fetch(`${FLASK_API_URL}/ai-verification-status`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.isTrue || false; // Default to false if not specified
+  } catch (error) {
+    console.log('Failed to fetch AI verification status:', error);
+    return false; // Default to false on error
+  }
+};
+
+/**
  * Send the last user message to Flask API for CAP CHECK processing
  */
 export const sendLastMessageToFlask = async (message: string, sender: 'left' | 'right'): Promise<boolean> => {

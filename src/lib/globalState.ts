@@ -18,6 +18,7 @@ import {
   fetchGlobalVariables, 
   saveGlobalVariables, 
   sendLastMessageToFlask,
+  fetchAiVerificationStatus,
   pollingManager,
   type GlobalVariables 
 } from './apiService';
@@ -231,6 +232,13 @@ export const chatActions = {
     if (text.trim()) {
       lastUserMessage = { text: text.trim(), sender };
     }
+  },
+
+  /**
+   * Fetch AI verification status from backend
+   */
+  fetchAiVerificationStatus: async () => {
+    return await fetchAiVerificationStatus();
   }
 };
 

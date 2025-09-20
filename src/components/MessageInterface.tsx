@@ -39,10 +39,21 @@ const MessageInterface = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [hasApiKey, setHasApiKey] = useState(false);
 
-  // Check for API key on mount
+  // AI Verification Status
+  const [aiVerificationStatus, setAiVerificationStatus] = useState<boolean>(false);
+
+  // Check for API key and fetch AI verification status on mount
   useEffect(() => {
     const apiKey = localStorage.getItem('ELEVENLABS_API_KEY');
     setHasApiKey(!!apiKey);
+    
+    // Fetch AI verification status from backend
+    const fetchVerificationStatus = async () => {
+      const status = await chatActions.fetchAiVerificationStatus();
+      setAiVerificationStatus(status);
+    };
+    
+    fetchVerificationStatus();
   }, []);
 
   // Smooth scroll to bottom
@@ -239,7 +250,13 @@ const MessageInterface = () => {
                     <div key={message.id} className="w-full mb-4">
                       <div className="w-full p-6 rounded-lg bg-card/50 border border-border/50">
                         <div className="text-center mb-4">
-                          <span className="text-sm text-muted-foreground">AI Content Verification System</span>
+                          <span className={`text-lg font-bold ${
+                            aiVerificationStatus 
+                              ? 'text-green-400' 
+                              : 'text-red-400'
+                          }`}>
+                            {aiVerificationStatus ? 'TRUE' : 'FALSE'}
+                          </span>
                         </div>
                         <p className={`text-base leading-relaxed transition-all duration-300 ${
                           isSpeaking ? 'opacity-100' : 'opacity-100'
