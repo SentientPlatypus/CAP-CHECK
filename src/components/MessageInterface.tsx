@@ -18,8 +18,7 @@ interface Message {
 
 // Demo content for AI reading
 const aiContent = [
-  "Welcome to our AI-powered content verification system. This technology analyzes statements in real-time to determine their accuracy.",
-  "
+  "Welcome to our AI-powered content verification system. This technology analyzes statements in real-time to determine their accuracy."
 ];
 
 const MessageInterface = () => {
