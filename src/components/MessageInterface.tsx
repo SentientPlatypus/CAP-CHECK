@@ -4,6 +4,7 @@
  * Interactive chat interface demonstrating real-time messaging:
  * - Dual-sender system (Person A/B) with toggle functionality
  * - Auto-response system with random replies and typing indicators
+ * - Global state integration - automatically adds messages when global variables change
  * - Smooth auto-scrolling to newest messages
  * - Message timestamps and bubble styling
  * - Keyboard shortcuts (Enter to send, Shift+Enter for new line)
@@ -13,9 +14,11 @@
  * - Automatic scroll-to-bottom on new messages
  * - Responsive design with gradient sends button
  * - Real-time timestamp formatting
+ * - Global variable monitoring and auto-reset after message creation
  */
 import { useState, useEffect, useRef } from 'react';
 import { Send } from 'lucide-react';
+import { chatGlobals, chatActions } from '@/lib/globalState';
 
 // Message data structure
 interface Message {
@@ -51,6 +54,76 @@ const MessageInterface = () => {
   }, [messages, isTyping]);
 
   /**
+   * Monitor global variables and automatically add messages when they change
+   * Resets variables after adding them to chat
+   */
+  useEffect(() => {
+    const checkGlobalInputs = () => {
+      // Check Person A input
+      if (chatGlobals.personOneInput.trim()) {
+        const newMessage: Message = {
+          id: Date.now().toString(),
+          text: chatGlobals.personOneInput.trim(),
+          sender: 'left',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, newMessage]);
+        chatActions.setPersonOneInput(''); // Reset after adding
+        
+        // Trigger auto-response
+        triggerAutoResponse('left');
+      }
+      
+      // Check Person B input
+      if (chatGlobals.personTwoInput.trim()) {
+        const newMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: chatGlobals.personTwoInput.trim(),
+          sender: 'right',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, newMessage]);
+        chatActions.setPersonTwoInput(''); // Reset after adding
+        
+        // Trigger auto-response
+        triggerAutoResponse('right');
+      }
+    };
+
+    // Check for changes every 100ms
+    const interval = setInterval(checkGlobalInputs, 100);
+    return () => clearInterval(interval);
+  }, []);
+
+  /**
+   * Trigger auto-response from the opposite sender
+   * Simulates real-time conversation with 500ms + 2s delays
+   */
+  const triggerAutoResponse = (fromSender: 'left' | 'right') => {
+    setTimeout(() => {
+      setIsTyping(true);  // Show typing indicator
+      setTimeout(() => {
+        // Random response selection
+        const responses = [
+          'That\'s interesting!',
+          'I totally agree!',
+          'Thanks for sharing!',
+          'Cool perspective!',
+          'Tell me more about that.',
+        ];
+        const response: Message = {
+          id: (Date.now() + Math.random()).toString(),
+          text: responses[Math.floor(Math.random() * responses.length)],
+          sender: fromSender === 'left' ? 'right' : 'left',  // Opposite sender
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, response]);
+        setIsTyping(false);
+      }, 2000);  // 2 second typing simulation
+    }, 500);     // 0.5 second delay before typing starts
+  };
+
+  /**
    * Send message and trigger auto-response
    * Simulates real-time conversation with 500ms + 2s delays
    */
@@ -67,28 +140,8 @@ const MessageInterface = () => {
     setMessages(prev => [...prev, newMessage]);
     setInput('');
 
-    // Simulate response from the other person after delays
-    setTimeout(() => {
-      setIsTyping(true);  // Show typing indicator
-      setTimeout(() => {
-        // Random response selection
-        const responses = [
-          'That\'s interesting!',
-          'I totally agree!',
-          'Thanks for sharing!',
-          'Cool perspective!',
-          'Tell me more about that.',
-        ];
-        const response: Message = {
-          id: (Date.now() + 1).toString(),
-          text: responses[Math.floor(Math.random() * responses.length)],
-          sender: currentSender === 'left' ? 'right' : 'left',  // Opposite sender
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, response]);
-        setIsTyping(false);
-      }, 2000);  // 2 second typing simulation
-    }, 500);     // 0.5 second delay before typing starts
+    // Trigger auto-response
+    triggerAutoResponse(currentSender);
   };
 
   /**
@@ -108,6 +161,9 @@ const MessageInterface = () => {
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Real-time Communication
           </h2>
+          <p className="text-muted-foreground mb-4 max-w-2xl mx-auto">
+            {chatGlobals.chatExplanation}
+          </p>
           <div className="flex justify-center space-x-4 mb-8">
             <button
               onClick={() => setCurrentSender('left')}
