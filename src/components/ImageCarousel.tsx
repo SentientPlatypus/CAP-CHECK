@@ -78,8 +78,14 @@ const ImageCarousel = () => {
         
         // Move the entire track horizontally based on scroll progress
         const imageWidth = 320 + 48; // image width + gap
-        const totalWidth = imageWidth * images.length;
-        const trackTranslateX = -progress * (totalWidth - viewportWidthRef.current) * 0.7;
+        const viewportCenter = viewportWidthRef.current / 2;
+        const firstImageCenter = imageWidth / 2; // Center of first image
+        
+        // Start with first image centered, then move through others
+        const baseOffset = viewportCenter - firstImageCenter;
+        const scrollOffset = -progress * imageWidth * (images.length - 1);
+        const trackTranslateX = baseOffset + scrollOffset;
+        
         trackRef.current.style.transform = `translate3d(${trackTranslateX}px, 0, 0)`;
         
         // Update each image scale based on distance from center
