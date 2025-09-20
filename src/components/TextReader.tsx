@@ -17,16 +17,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 
-// Demo podcast/article content
-const podcastText = [
-  "Welcome to our interactive podcast experience. This is a revolutionary way to consume audio content with synchronized text highlighting.",
-  "As you listen or read along, each paragraph automatically becomes highlighted, creating an immersive reading experience that's both engaging and accessible.",
-  "The text automatically scrolls to keep the current paragraph in view, so you never lose your place in the content. This is perfect for long-form content consumption.",
-  "Interactive elements like this demonstrate the power of modern web technologies. We can create experiences that adapt to user behavior and preferences.",
-  "Whether you're following along with audio or just reading, the interface responds intelligently to keep you engaged with the content at all times.",
-  "This technology can be applied to audiobooks, educational content, news articles, and any long-form text that benefits from guided reading.",
-  "The smooth transitions and carefully crafted animations create a premium feel that enhances the overall user experience significantly.",
-  "By combining visual feedback with content consumption, we create a more memorable and effective way to process information in the digital age."
+// CAP CHECK explanation content
+const capCheckText = [
+  "Welcome to CAP CHECK - the revolutionary AI-powered lie detection system that analyzes speech patterns, micro-expressions, and contextual data in real-time.",
+  "Our advanced algorithms process thousands of data points per second, cross-referencing statements against verified databases and detecting inconsistencies in vocal stress patterns.",
+  "The system uses machine learning models trained on millions of verified true and false statements to identify deceptive language patterns with 94.7% accuracy.",
+  "CAP CHECK integrates seamlessly into any communication platform, providing instant verification badges that appear within seconds of statement analysis.",
+  "Whether you're verifying debtor claims, checking witness testimonies, or ensuring accuracy in business negotiations, CAP CHECK provides reliable truth verification.",
+  "The technology combines natural language processing, behavioral analysis, and real-time fact-checking to create the most comprehensive lie detection system available.",
+  "Our proprietary neural networks can detect subtle changes in speech rhythm, word choice patterns, and emotional markers that indicate potential deception.",
+  "CAP CHECK is already being used by major corporations, legal firms, and financial institutions to ensure truthfulness in critical communications and reduce fraud by up to 73%."
 ];
 
 const TextReader = () => {
@@ -34,6 +34,9 @@ const TextReader = () => {
   const [currentParagraph, setCurrentParagraph] = useState(0);  // Current active paragraph index
   const [isPlaying, setIsPlaying] = useState(false);            // Play/pause state
   const [progress, setProgress] = useState(0);                  // Progress within current paragraph (0-100)
+  const [showFlashing, setShowFlashing] = useState(false);      // Show flashing True/False display
+  const [flashingValue, setFlashingValue] = useState<boolean | null>(null); // Current flashing value
+  const [capCheckMode, setCapCheckMode] = useState(false);      // CAP CHECK mode active
   const containerRef = useRef<HTMLDivElement>(null);            // Container for scrolling
   const paragraphRefs = useRef<(HTMLParagraphElement | null)[]>([]); // Individual paragraph refs
 
@@ -42,7 +45,7 @@ const TextReader = () => {
     let interval: NodeJS.Timeout;
     
     // Only run timer when playing and not at the end
-    if (isPlaying && currentParagraph < podcastText.length) {
+    if (isPlaying && currentParagraph < capCheckText.length) {
       interval = setInterval(() => {
         setProgress(prev => {
           const newProgress = prev + 1;
@@ -53,7 +56,7 @@ const TextReader = () => {
               const next = curr + 1;
               
               // Auto-stop at the end
-              if (next >= podcastText.length) {
+              if (next >= capCheckText.length) {
                 setIsPlaying(false);
                 return curr;
               }
@@ -79,11 +82,40 @@ const TextReader = () => {
     }
   }, [currentParagraph]);
 
+  // Listen for CAP CHECK activation
+  useEffect(() => {
+    const handleCapCheck = () => {
+      setCapCheckMode(true);
+      setShowFlashing(true);
+      
+      // Flash True/False for 3 seconds
+      let flashCount = 0;
+      const flashInterval = setInterval(() => {
+        setFlashingValue(prev => !prev);
+        flashCount++;
+        
+        if (flashCount >= 6) { // 3 seconds of flashing
+          clearInterval(flashInterval);
+          setShowFlashing(false);
+          setFlashingValue(Math.random() > 0.5); // Final random result
+          
+          // Start reading after flash
+          setTimeout(() => {
+            setIsPlaying(true);
+          }, 500);
+        }
+      }, 500);
+    };
+
+    window.addEventListener('startCapCheck', handleCapCheck);
+    return () => window.removeEventListener('startCapCheck', handleCapCheck);
+  }, []);
+
   /**
    * Toggle play/pause, or restart if finished
    */
   const togglePlayback = () => {
-    if (currentParagraph >= podcastText.length) {
+    if (currentParagraph >= capCheckText.length) {
       resetReader();  // Restart from beginning if finished
     } else {
       setIsPlaying(!isPlaying);
@@ -97,6 +129,9 @@ const TextReader = () => {
     setCurrentParagraph(0);
     setProgress(0);
     setIsPlaying(false);
+    setCapCheckMode(false);
+    setShowFlashing(false);
+    setFlashingValue(null);
   };
 
   /**
@@ -116,16 +151,34 @@ const TextReader = () => {
   };
 
   return (
-    <section className="py-20 px-8 bg-gradient-to-b from-muted to-background">
+    <section data-section="text-reader" className="py-20 px-8 bg-gradient-to-b from-muted to-background">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
+          {capCheckMode && (
+            <h1 className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+              CAP CHECK
+            </h1>
+          )}
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Interactive Text Reader
+            {capCheckMode ? 'AI Lie Detection System' : 'Interactive Text Reader'}
           </h2>
           <p className="text-muted-foreground">
-            Follow along as the text highlights and scrolls automatically
+            {capCheckMode ? 'Real-time truth verification and deception analysis' : 'Follow along as the text highlights and scrolls automatically'}
           </p>
         </div>
+
+        {/* Flashing True/False Display */}
+        {(showFlashing || flashingValue !== null) && (
+          <div className="text-center mb-8">
+            <div className={`inline-block px-8 py-4 rounded-xl text-4xl font-bold border-4 transition-all duration-300 ${
+              showFlashing 
+                ? (flashingValue ? 'bg-green-500/20 text-green-400 border-green-500 animate-pulse' : 'bg-red-500/20 text-red-400 border-red-500 animate-pulse')
+                : (flashingValue ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-red-500/20 text-red-400 border-red-500')
+            }`}>
+              {flashingValue ? 'TRUE' : 'FALSE'}
+            </div>
+          </div>
+        )}
 
         <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-border">
           {/* Controls */}
@@ -143,7 +196,7 @@ const TextReader = () => {
               <RotateCcw size={24} />
             </button>
             <div className="text-sm text-muted-foreground">
-              {currentParagraph + 1} / {podcastText.length}
+              {currentParagraph + 1} / {capCheckText.length}
             </div>
           </div>
 
@@ -152,7 +205,7 @@ const TextReader = () => {
             <div 
               className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-100 ease-out"
               style={{ 
-                width: `${(currentParagraph * 100 + progress) / podcastText.length}%` 
+                width: `${(currentParagraph * 100 + progress) / capCheckText.length}%` 
               }}
             />
           </div>
@@ -162,7 +215,7 @@ const TextReader = () => {
             ref={containerRef}
             className="max-h-96 overflow-y-auto space-y-6 text-lg leading-relaxed scrollbar-thin scrollbar-thumb-primary/20"
           >
-            {podcastText.map((paragraph, index) => (
+            {capCheckText.map((paragraph, index) => (
               <p
                 key={index}
                 ref={el => paragraphRefs.current[index] = el}
@@ -173,7 +226,7 @@ const TextReader = () => {
             ))}
           </div>
 
-          {currentParagraph >= podcastText.length && (
+          {currentParagraph >= capCheckText.length && (
             <div className="text-center mt-8 p-6 bg-primary/10 rounded-xl border border-primary/20">
               <p className="text-primary font-semibold mb-2">Reading Complete!</p>
               <p className="text-muted-foreground text-sm">

@@ -34,8 +34,31 @@ const HeroSection = () => {
     const carouselSection = document.querySelector('[data-section="carousel"]') as HTMLElement | null;
     if (!carouselSection) return;
 
+    performSmoothScroll(carouselSection);
+  };
+
+  /**
+   * CAP CHECK - Scroll to text reader and activate fact-checking mode
+   */
+  const startCapCheck = () => {
+    const textReaderSection = document.querySelector('[data-section="text-reader"]') as HTMLElement | null;
+    if (!textReaderSection) return;
+
+    performSmoothScroll(textReaderSection);
+    
+    // Trigger CAP CHECK mode in text reader after scroll
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('startCapCheck'));
+    }, 1500);
+  };
+
+  /**
+   * Reusable smooth scroll function
+   */
+  const performSmoothScroll = (targetElement: HTMLElement) => {
+
     const startY = window.pageYOffset;
-    const targetY = window.pageYOffset + carouselSection.getBoundingClientRect().top;
+    const targetY = window.pageYOffset + targetElement.getBoundingClientRect().top;
     const duration = 1200; // Animation duration in milliseconds
     const startTime = performance.now();
 
@@ -83,10 +106,17 @@ const HeroSection = () => {
           Interactive
         </h1>
         <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-          Experience the future of web interaction with scroll-based animations, immersive carousels, and real-time communication.
+          Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
         </p>
         
-        <div className="flex justify-center">
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={startCapCheck}
+            className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-red-400/50 flex items-center space-x-2 shadow-lg shadow-red-500/25"
+          >
+            <span className="font-bold text-lg">CAP CHECK</span>
+            <ChevronDown size={20} />
+          </button>
           <button
             onClick={scrollToCarousel}
             className="bg-secondary/80 hover:bg-secondary text-secondary-foreground px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-border flex items-center space-x-2"
