@@ -10,17 +10,33 @@
  * Each component is designed to be self-contained and performant,
  * using modern web APIs for smooth animations and interactions.
  */
+import { Link } from 'react-router-dom';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
-import MessageInterface from '@/components/MessageInterface';
-import TextReader from '@/components/TextReader';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <HeroSection />
       <ImageCarousel />
-      <MessageInterface />
+      
+      {/* Call to Action Section */}
+      <section className="py-20 bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            Ready to Experience Real-time Communication?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Try our AI-powered chat interface with built-in fact-checking and verification system.
+          </p>
+          <Link to="/chat">
+            <Button size="lg" className="gap-2">
+              Start Chatting
+            </Button>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 };
