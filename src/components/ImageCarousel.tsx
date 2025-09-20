@@ -92,7 +92,8 @@ const ImageCarousel = () => {
         transform: `translate3d(${finalX}px, 0, 0) scale(${scale})`,
         opacity: 0,
         zIndex: 1,
-        willChange: 'transform, opacity'
+        willChange: 'transform, opacity',
+        transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out'
       };
     }
     
@@ -103,7 +104,8 @@ const ImageCarousel = () => {
       transform: `translate3d(${finalX}px, 0, 0) scale(${scale})`,
       opacity,
       zIndex,
-      willChange: 'transform, opacity'
+      willChange: 'transform, opacity',
+      transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out'
     };
   };
 
