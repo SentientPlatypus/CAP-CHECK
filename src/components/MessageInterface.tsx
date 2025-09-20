@@ -111,7 +111,12 @@ const MessageInterface = () => {
     };
 
     const handleStartTextReader = () => {
-      speakText(aiContent.join(' '));
+      // Find the newest AI message (last center message) and speak it
+      const centerMessages = messages.filter(m => m.sender === 'center');
+      const newestAiMessage = centerMessages[centerMessages.length - 1];
+      if (newestAiMessage) {
+        speakText(newestAiMessage.text);
+      }
     };
 
     const handleAddAiMessage = (event: CustomEvent) => {
@@ -263,10 +268,14 @@ const MessageInterface = () => {
 
           {/* Chat Messages */}
           <div className="h-96 overflow-y-auto mb-6 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
-            {messages.map((message) => {
+            {messages.map((message, index) => {
               if (message.sender === 'center') {
-                if (message.id === 'ai-content') {
-                  // AI Content with highlighting
+                // Find the last center message to apply highlighting to the newest AI prompt
+                const centerMessages = messages.filter(m => m.sender === 'center');
+                const isNewestAiMessage = message === centerMessages[centerMessages.length - 1];
+                
+                if (isNewestAiMessage) {
+                  // AI Content with highlighting (newest AI message)
                   const words = message.text.split(' ');
                   return (
                     <div key={message.id} className="w-full mb-4">
@@ -294,7 +303,7 @@ const MessageInterface = () => {
                     </div>
                   );
                 } else {
-                  // Regular center message
+                  // Regular center message (older AI messages)
                   return (
                     <div key={message.id} className="w-full">
                       <div className="w-full p-4 rounded-lg bg-card/80 border border-border/50 text-muted-foreground">
