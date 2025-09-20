@@ -21,6 +21,9 @@ const aiContent = [
   "Welcome to our AI-powered content verification system. This technology analyzes statements in real-time to determine their accuracy."
 ];
 
+// AI verification display status (for now always FALSE)
+const aiContentVerificationStatus = false;
+
 const MessageInterface = () => {
   // Chat state management
   const [messages, setMessages] = useState<Message[]>([
@@ -270,11 +273,11 @@ const MessageInterface = () => {
                       <div className="w-full p-6 rounded-lg bg-card/50 border border-border/50">
                         <div className="text-center mb-4">
                           <span className={`text-lg font-bold ${
-                            aiVerificationStatus 
+                            aiContentVerificationStatus 
                               ? 'text-green-400' 
                               : 'text-red-400'
                           }`}>
-                            {aiVerificationStatus ? 'TRUE' : 'FALSE'}
+                            {aiContentVerificationStatus ? 'TRUE' : 'FALSE'}
                           </span>
                         </div>
                         <p className={`text-base leading-relaxed transition-all duration-300 ${
