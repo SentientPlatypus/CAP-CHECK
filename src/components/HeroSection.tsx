@@ -155,14 +155,31 @@ const HeroSection = ({ showOverlay }: { showOverlay?: boolean }) => {
 
   return (
     <>
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">        
+        {/* Clean Apple-style gradient background */}
         <div 
-          className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"
+          className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(circle at 30% 40%, hsl(15, 85%, 65%, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 70% 60%, hsl(25, 90%, 70%, 0.1) 0%, transparent 50%),
-              linear-gradient(135deg, hsl(220, 26%, 4%) 0%, hsl(220, 26%, 8%) 100%)
+              linear-gradient(135deg, 
+                hsl(280, 85%, 65%) 0%, 
+                hsl(320, 85%, 70%) 25%, 
+                hsl(250, 30%, 12%) 75%, 
+                hsl(250, 25%, 8%) 100%
+              )
+            `
+          }}
+        />
+        
+        {/* Subtle overlay for depth */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: `
+              radial-gradient(circle at 50% 0%, 
+                hsl(280, 85%, 65%) 0%, 
+                transparent 50%
+              )
             `
           }}
         />
