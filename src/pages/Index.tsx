@@ -16,6 +16,7 @@ import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
 import PixelButton3D from '@/components/PixelButton3D';
+import ScrollPhone from '@/components/ScrollPhone';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -49,6 +50,19 @@ const Index = () => {
             }}
           >
             <PixelButton3D isPressed={isPressed} scrollProgress={scrollProgress} />
+          </div>
+        </div>
+      )}
+
+      {/* Floating Phone Animation on right side */}
+      {showButton && (
+        <div className="fixed right-0 top-0 w-1/2 h-screen z-40 flex items-center justify-center">
+          <div 
+            style={{
+              opacity: 1 - scrollProgress * 0.3
+            }}
+          >
+            <ScrollPhone scrollProgress={scrollProgress} />
           </div>
         </div>
       )}
