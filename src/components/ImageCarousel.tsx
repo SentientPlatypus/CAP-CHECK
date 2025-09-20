@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 
 // Import all carousel images
 import carousel1 from '@/assets/carousel-1.jpg';
@@ -12,89 +11,135 @@ import carousel6 from '@/assets/carousel-6.jpg';
 const images = [carousel1, carousel2, carousel3, carousel4, carousel5, carousel6];
 
 const ImageCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      
+      const rect = sectionRef.current.getBoundingClientRect();
+      const sectionHeight = sectionRef.current.offsetHeight;
+      const windowHeight = window.innerHeight;
+      
+      // Calculate how much of the section has been scrolled through
+      const scrolled = Math.max(0, windowHeight - rect.top);
+      const maxScroll = sectionHeight + windowHeight;
+      const progress = Math.min(1, Math.max(0, scrolled / maxScroll));
+      
+      setScrollProgress(progress);
+    };
 
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial call
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const getImageClass = (index: number) => {
-    const diff = Math.abs(index - currentIndex);
-    if (index === currentIndex) return 'carousel-item active';
-    if (diff === 1 || diff === images.length - 1) return 'carousel-item side';
-    return 'carousel-item far';
+  // Calculate current image index based on scroll progress
+  const getCurrentImageIndex = () => {
+    return Math.floor(scrollProgress * (images.length - 1));
   };
 
   const getImageStyle = (index: number) => {
-    const diff = index - currentIndex;
-    const normalizedDiff = diff > images.length / 2 ? diff - images.length : 
-                          diff < -images.length / 2 ? diff + images.length : diff;
+    const currentIndex = getCurrentImageIndex();
+    const totalImages = images.length;
+    
+    // Calculate horizontal offset based on scroll progress
+    const baseOffset = scrollProgress * (totalImages - 1) * -200;
+    const imageOffset = index * 200;
+    const finalX = baseOffset + imageOffset;
+    
+    // Calculate scale and opacity based on distance from center
+    const distanceFromCenter = Math.abs(index - scrollProgress * (totalImages - 1));
+    const scale = Math.max(0.4, 1 - distanceFromCenter * 0.3);
+    const opacity = Math.max(0.2, 1 - distanceFromCenter * 0.4);
+    
+    // Z-index based on how close to center
+    const zIndex = Math.max(1, 10 - Math.floor(distanceFromCenter * 2));
     
     return {
-      transform: `translateX(${normalizedDiff * 120}px)`,
-      zIndex: index === currentIndex ? 10 : Math.max(0, 5 - Math.abs(normalizedDiff))
+      transform: `translateX(${finalX}px) scale(${scale})`,
+      opacity,
+      zIndex,
+      transition: 'opacity 0.1s ease-out'
     };
   };
 
-  useEffect(() => {
-    const interval = setInterval(nextSlide, 4000);
-    return () => clearInterval(interval);
-  }, []);
+  const getImageSize = (index: number) => {
+    const currentIndex = getCurrentImageIndex();
+    const distanceFromCenter = Math.abs(index - scrollProgress * (images.length - 1));
+    
+    if (distanceFromCenter < 0.5) {
+      return 'w-96 h-64'; // Large for current image
+    } else if (distanceFromCenter < 1.5) {
+      return 'w-72 h-48'; // Medium for adjacent images
+    } else {
+      return 'w-48 h-32'; // Small for distant images
+    }
+  };
 
   return (
-    <section className="py-20 px-8 bg-gradient-to-b from-background to-card">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-          Immersive Gallery
+    <section 
+      ref={sectionRef}
+      className="h-[200vh] relative bg-gradient-to-b from-background to-card"
+    >
+      {/* Title that fades out as we scroll */}
+      <div 
+        className="text-center py-20"
+        style={{
+          opacity: Math.max(0, 1 - scrollProgress * 2),
+          transform: `translateY(${scrollProgress * 50}px)`
+        }}
+      >
+        <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          Scroll to Explore Gallery
         </h2>
-        
-        <div className="relative h-80 flex justify-center items-center overflow-hidden">
+        <p className="text-muted-foreground mt-4">
+          Keep scrolling to see the horizontal carousel in action
+        </p>
+      </div>
+
+      {/* Sticky carousel container */}
+      <div className="sticky top-1/2 transform -translate-y-1/2 h-80 overflow-hidden">
+        <div className="relative h-full flex justify-center items-center">
           {images.map((image, index) => (
             <div
               key={index}
-              className={getImageClass(index)}
+              className="absolute transition-transform duration-100 ease-out"
               style={getImageStyle(index)}
             >
-              <img
-                src={image}
-                alt={`Gallery image ${index + 1}`}
-                className="w-64 h-40 object-cover cursor-pointer"
-                onClick={() => setCurrentIndex(index)}
-              />
+              <div className="relative rounded-xl overflow-hidden shadow-2xl">
+                <img
+                  src={image}
+                  alt={`Gallery image ${index + 1}`}
+                  className={`${getImageSize(index)} object-cover`}
+                />
+                {/* Image overlay with index */}
+                <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                  {index + 1}
+                </div>
+              </div>
             </div>
           ))}
-          
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-secondary/80 hover:bg-secondary text-foreground p-3 rounded-full transition-all duration-200 hover:scale-110 z-20"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-secondary/80 hover:bg-secondary text-foreground p-3 rounded-full transition-all duration-200 hover:scale-110 z-20"
-          >
-            <ChevronRight size={24} />
-          </button>
         </div>
-        
-        <div className="flex justify-center mt-8 space-x-2">
-          {images.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                index === currentIndex
-                  ? 'bg-primary scale-125'
-                  : 'bg-muted-foreground/40 hover:bg-muted-foreground/60'
-              }`}
-            />
-          ))}
+      </div>
+
+      {/* Progress indicator */}
+      <div className="sticky bottom-8 flex justify-center">
+        <div className="bg-background/80 backdrop-blur-sm rounded-full px-6 py-3 border border-border">
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-muted-foreground">Progress:</span>
+            <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-100"
+                style={{ width: `${scrollProgress * 100}%` }}
+              />
+            </div>
+            <span className="text-sm text-foreground font-mono">
+              {Math.floor(scrollProgress * 100)}%
+            </span>
+          </div>
         </div>
       </div>
     </section>
