@@ -460,6 +460,19 @@ const MessageInterface = () => {
               <Send size={24} />
             </button>
           </div>
+          
+          {/* CAP CHECK Button */}
+          <div className="text-center mb-6">
+            <button
+              onClick={triggerCapCheck}
+              className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-xl rounded-2xl hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-2 border-orange-400/30"
+            >
+              🚨 CAP CHECK
+            </button>
+            <p className="text-sm text-muted-foreground mt-2">
+              Analyze the last message for truth verification
+            </p>
+          </div>
         </div>
       </div>
     </section>
