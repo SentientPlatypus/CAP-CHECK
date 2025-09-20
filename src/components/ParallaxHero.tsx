@@ -32,21 +32,22 @@ const Hero = () => {
 const CenterImage = () => {
   const { scrollY } = useScroll();
 
-  const clip1 = useTransform(scrollY, [0, 1500], [40, 0]);
-  const clip2 = useTransform(scrollY, [0, 1500], [60, 100]);
+  const clip1 = useTransform(scrollY, [0, 1500], [0, 0]); // Start fully open
+  const clip2 = useTransform(scrollY, [0, 1500], [100, 100]); // Start fully open
 
   const clipPath = useMotionTemplate`polygon(${clip1}% ${clip1}%, ${clip2}% ${clip1}%, ${clip2}% ${clip2}%, ${clip1}% ${clip2}%)`;
 
   const scale = useTransform(
     scrollY,
-    [0, SECTION_HEIGHT],
-    [0.7, 1.2] // Start bigger (0.7 instead of 0.3), grow more
+    [0, SECTION_HEIGHT * 0.8],
+    [0.8, 1.1] // Start at good visible size, grow moderately
   );
   
+  // Keep the landing page visible much longer as background
   const opacity = useTransform(
     scrollY,
-    [SECTION_HEIGHT + 800, SECTION_HEIGHT + 1200], // Stay visible longer
-    [1, 0]
+    [SECTION_HEIGHT + 1500, SECTION_HEIGHT + 2000], // Stay visible much longer
+    [0.8, 0] // Keep some opacity even when fading
   );
 
   return (
