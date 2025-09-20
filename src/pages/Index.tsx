@@ -11,7 +11,6 @@ import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
-import BubbleText from '@/components/BubbleText';
 import redButton8bit from '@/assets/red-button-8bit.png';
 
 const SECTION_HEIGHT = 1500;
@@ -80,11 +79,12 @@ const Index = () => {
 
             {/* Right side - Text */}
             <div className="text-left">
-              <BubbleText 
-                text="CAP CHECK" 
-                className="mb-6"
+              <h1
+                className="font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
                 style={{ fontSize: 'clamp(2rem, 8vw, 5rem)' }}
-              />
+              >
+                Interactive
+              </h1>
               <p className="text-lg md:text-xl text-foreground/80 max-w-xl mb-8">
                 Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
               </p>
