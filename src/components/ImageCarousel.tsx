@@ -68,18 +68,31 @@ const ImageCarousel = () => {
         const maxScroll = Math.max(1, sectionHeight - windowHeight);
         const progress = Math.min(1, Math.max(0, scrolled / maxScroll));
 
-        // Move track (translate only the big track, not each item)
-        const maxTranslate = Math.max(0, contentWidthRef.current - viewportWidthRef.current);
-        const translateX = -progress * maxTranslate;
-        trackRef.current.style.transform = `translate3d(${translateX}px, 0, 0)`;
-        trackRef.current.style.willChange = 'transform';
-
         // Update progress bar width imperatively
         if (progressBarRef.current) {
           progressBarRef.current.style.width = `${progress * 100}%`;
         }
 
-        // Discrete active index (for CSS transitions only when index changes)
+        // Calculate center position in the viewport
+        const centerProgress = progress * (images.length - 1);
+        
+        // Update each image scale based on distance from center
+        images.forEach((_, index) => {
+          const distanceFromCenter = Math.abs(index - centerProgress);
+          
+          // Scale: 1.0 at center, gets smaller the further away
+          const scale = Math.max(0.3, 1 - distanceFromCenter * 0.25);
+          const opacity = Math.max(0.2, 1 - distanceFromCenter * 0.3);
+          
+          const imageEl = trackRef.current?.children[index] as HTMLElement;
+          if (imageEl) {
+            imageEl.style.transform = `scale(${scale})`;
+            imageEl.style.opacity = opacity.toString();
+            imageEl.style.willChange = 'transform, opacity';
+          }
+        });
+
+        // Discrete active index for display purposes
         const newActive = Math.round(progress * (images.length - 1));
         if (newActive !== lastActiveIndexRef.current) {
           lastActiveIndexRef.current = newActive;
@@ -104,22 +117,6 @@ const ImageCarousel = () => {
     window.scrollTo(0, sectionBottom);
   };
 
-  const sizeClass = (index: number) => {
-    const d = Math.abs(index - activeIndex);
-    const base = 'rounded-xl overflow-hidden shadow-2xl transition-transform duration-500 ease-out will-change-transform';
-    if (d === 0) return `${base} scale-100 opacity-100 z-30`;
-    if (d === 1) return `${base} scale-95 opacity-90 z-20`;
-    if (d === 2) return `${base} scale-90 opacity-70 z-10`;
-    return `${base} scale-75 opacity-50 z-0`;
-  };
-
-  const boxSizeClass = (index: number) => {
-    const d = Math.abs(index - activeIndex);
-    if (d === 0) return 'w-96 h-64';
-    if (d === 1) return 'w-80 h-52';
-    if (d === 2) return 'w-64 h-40';
-    return 'w-48 h-32';
-  };
 
   return (
     <section
@@ -154,17 +151,23 @@ const ImageCarousel = () => {
       <div ref={wrapperRef} className="sticky top-1/2 -translate-y-1/2 h-80 overflow-hidden">
         <div
           ref={trackRef}
-          className={`flex items-center gap-8 px-8 ${showCarousel ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
-          style={{ willChange: 'transform' }}
+          className={`flex items-center justify-center gap-12 h-full ${showCarousel ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
         >
           {images.map((img, idx) => (
-            <div key={idx} className={sizeClass(idx)}>
+            <div 
+              key={idx} 
+              className="relative rounded-xl overflow-hidden shadow-2xl transition-all duration-300 ease-out"
+              style={{ minWidth: '320px', height: '200px' }}
+            >
               <img
                 src={img}
                 alt={`Gallery image ${idx + 1}`}
-                className={`${boxSizeClass(idx)} object-cover`}
+                className="w-80 h-50 object-cover"
                 loading="lazy"
               />
+              <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                {idx + 1}
+              </div>
             </div>
           ))}
         </div>
