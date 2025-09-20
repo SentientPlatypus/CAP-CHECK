@@ -229,9 +229,6 @@ const MessageInterface = () => {
     
     setMessages(prev => [...prev, capCheckMessage, analyzingMessage]);
     
-    // Close modal immediately
-    setShowModal(false);
-    
     // Try to get result from backend, default to false
     try {
       // Attempt backend connection (for future implementation)
@@ -533,43 +530,14 @@ const MessageInterface = () => {
             </button>
           </div>
           
-          {/* CAP CHECK Button with Confirmation Modal */}
+          {/* CAP CHECK Button - Direct Action */}
           <div className="text-center mb-6">
-            <Dialog open={showModal} onOpenChange={setShowModal}>
-              <DialogTrigger asChild>
-                <button
-                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-xl rounded-2xl hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-2 border-orange-400/30"
-                >
-                  🚨 CAP CHECK
-                </button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-center text-2xl font-bold">🚨 CAP CHECK</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-6">
-                  <p className="text-center text-muted-foreground">
-                    This will analyze the last message for truthfulness using AI verification.
-                  </p>
-                  
-                  <div className="flex space-x-4">
-                    <Button
-                      onClick={handleCapCheck}
-                      className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 text-lg"
-                    >
-                      🔍 Start Analysis
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowModal(false)}
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <button
+              onClick={handleCapCheck}
+              className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-xl rounded-2xl hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-2 border-orange-400/30"
+            >
+              🚨 CAP CHECK
+            </button>
             <p className="text-sm text-muted-foreground mt-2">
               AI-powered fact checking with backend verification
             </p>
