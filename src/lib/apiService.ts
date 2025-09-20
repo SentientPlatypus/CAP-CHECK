@@ -6,7 +6,7 @@
  */
 
 // Base Flask API URL configuration
-let FLASK_API_URL = 'http://localhost:5000';
+let FLASK_API_URL = 'http://localhost:5001';
 
 /**
  * Type definitions for API responses and data structures
