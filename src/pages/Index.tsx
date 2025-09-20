@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import ImageCarousel from '@/components/ImageCarousel';
 import { Button } from '@/components/ui/button';
-import PixelButton3D from '@/components/PixelButton3D';
+import ScrollPhone from '@/components/ScrollPhone';
 
 const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -39,21 +39,47 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* 3D Pixel Button covering 50% of landing page */}
+      {/* Interactive Phone Animation on left side */}
       {showButton && (
         <div className="fixed left-0 top-0 w-1/2 h-screen z-40 flex items-center justify-center">
           <div 
-            className="w-96 h-96"
             style={{
               opacity: 1 - scrollProgress * 0.3
             }}
           >
-            <PixelButton3D isPressed={isPressed} scrollProgress={scrollProgress} />
+            <ScrollPhone scrollProgress={scrollProgress} />
+          </div>
+        </div>
+      )}
+
+      {/* Title Section on right half */}
+      {showButton && (
+        <div className="fixed right-0 top-0 w-1/2 h-screen z-40 flex items-center justify-start pl-12">
+          <div 
+            className="text-left"
+            style={{
+              opacity: 1 - scrollProgress * 0.3
+            }}
+          >
+            <h1 className="text-8xl font-bold text-purple-500 mb-6">
+              Interactive
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-lg mb-8">
+              Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
+            </p>
+            <div className="flex gap-4">
+              <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium">
+                CAP CHECK ⌄
+              </button>
+              <button className="text-muted-foreground hover:text-foreground px-6 py-3 font-medium">
+                View Gallery ⌄
+              </button>
+            </div>
           </div>
         </div>
       )}
       
-      <HeroSection />
+      <HeroSection showOverlay={showButton} />
       <ImageCarousel />
       
       {/* Call to Action Section */}
