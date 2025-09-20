@@ -272,11 +272,6 @@ const MessageInterface = () => {
 
     setMessages(prev => [...prev, newMessage]);
     
-    // Trigger CAP CHECK modal automatically for every message
-    setTimeout(() => {
-      handleCapCheck();
-    }, 500);
-    
     // Check if the input is "kkk" and add a new block after it
     if (input.trim().toLowerCase() === 'kkk') {
       setTimeout(() => {
@@ -287,7 +282,7 @@ const MessageInterface = () => {
           timestamp: new Date()
         };
         setMessages(prev => [...prev, newBlockMessage]);
-      }, 1500); // Delay to show after cap check
+      }, 1500);
     }
     
     setInput('');
