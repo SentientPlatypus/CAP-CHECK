@@ -192,3 +192,46 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+
+
+
+# Global variables to update the the frontend
+class GlobalState(db.Model):
+    __tablename__ = 'global_state'
+    id = db.Column(db.Integer, primary_key=True)
+    data = db.Column(db.JSON, default=dict)
+
+DEFAULT_GLOBALS = {
+    "personOneInput": "hhhh",
+    "personTwoInput": "",
+    "truthVerification": None,  # true | false | null
+    "chatExplanation": (
+        "This AI-powered fact-checking system analyzes statements in real-time. "
+        "Switch between Person A and Person B to simulate conversations while the "
+        "system verifies the truthfulness of each statement."
+    ),
+}
+
+def _get_or_init_globals():
+    row = GlobalState.query.get(1)
+    if not row:
+        row = GlobalState(id=1, data=DEFAULT_GLOBALS.copy())
+        db.session.add(row)
+        db.session.commit()
+    return row
+
+@app.get("/api/globals")
+def api_get_globals():
+    row = _get_or_init_globals()
+    merged = {**DEFAULT_GLOBALS, **(row.data or {})}
+    return jsonify(merged)
+
+@app.post("/api/globals")
+def api_put_globals():
+    patch = request.get_json(force=True) or {}
+    row = _get_or_init_globals()
+    current = {**DEFAULT_GLOBALS, **(row.data or {})}
+    current.update(patch)   # naive merge; add validation if you want
+    row.data = current
+    db.session.commit()
+    return jsonify(current)
