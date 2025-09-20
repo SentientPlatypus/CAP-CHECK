@@ -41,7 +41,7 @@ const ImageCarousel = () => {
         const shouldShowCarousel = rect.top < windowHeight * 0.8;
         if (shouldShowCarousel !== showCarousel) setShowCarousel(shouldShowCarousel);
 
-        const shouldBeActive = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
+        const shouldBeActive = rect.top <= windowHeight * 0.1 && rect.bottom >= windowHeight * 0.9;
         if (shouldBeActive !== isGalleryActive) setIsGalleryActive(shouldBeActive);
 
         // Progress calculation
@@ -67,11 +67,14 @@ const ImageCarousel = () => {
           clearTimeout(scrollTimeoutRef.current);
         }
         
-        scrollTimeoutRef.current = setTimeout(() => {
-          if (shouldBeActive && !isSnapping) {
-            startSnapAnimation();
-          }
-        }, 150);
+        // Only enable snapping when gallery is fully active
+        if (shouldBeActive && progress > 0 && progress < 1) {
+          scrollTimeoutRef.current = setTimeout(() => {
+            if (isGalleryActive && !isSnapping) {
+              startSnapAnimation();
+            }
+          }, 150);
+        }
       });
     };
 
@@ -193,7 +196,7 @@ const ImageCarousel = () => {
     >
       {/* Fixed title & controls */}
       <div
-        className={`fixed top-20 left-1/2 -translate-x-1/2 text-center z-30 transition-opacity duration-300 ${
+        className={`fixed top-20 left-1/2 -translate-x-1/2 text-center z-30 transition-opacity duration-500 ${
           isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -243,7 +246,7 @@ const ImageCarousel = () => {
 
       {/* Progress indicator */}
       <div
-        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-30 transition-opacity duration-300 ${
+        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-30 transition-opacity duration-500 ${
           isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
