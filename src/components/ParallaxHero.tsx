@@ -32,20 +32,20 @@ const Hero = () => {
 const CenterImage = () => {
   const { scrollY } = useScroll();
 
-  const clip1 = useTransform(scrollY, [0, 1500], [40, 0]); // Start more closed
-  const clip2 = useTransform(scrollY, [0, 1500], [60, 100]); // Start more closed
+  const clip1 = useTransform(scrollY, [0, 1500], [40, 0]);
+  const clip2 = useTransform(scrollY, [0, 1500], [60, 100]);
 
   const clipPath = useMotionTemplate`polygon(${clip1}% ${clip1}%, ${clip2}% ${clip1}%, ${clip2}% ${clip2}%, ${clip1}% ${clip2}%)`;
 
   const scale = useTransform(
     scrollY,
     [0, SECTION_HEIGHT],
-    [0.3, 1] // Start small, grow to full size
+    [0.7, 1.2] // Start bigger (0.7 instead of 0.3), grow more
   );
   
   const opacity = useTransform(
     scrollY,
-    [SECTION_HEIGHT, SECTION_HEIGHT + 500],
+    [SECTION_HEIGHT + 800, SECTION_HEIGHT + 1200], // Stay visible longer
     [1, 0]
   );
 
