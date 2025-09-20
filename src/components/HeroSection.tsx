@@ -30,8 +30,8 @@ const HeroSection = () => {
         className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"
         style={{
           background: `
-            radial-gradient(circle at 30% 40%, hsl(260, 100%, 60%, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 70% 60%, hsl(280, 100%, 65%, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 30% 40%, hsl(15, 85%, 65%, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 70% 60%, hsl(25, 90%, 70%, 0.1) 0%, transparent 50%),
             linear-gradient(135deg, hsl(220, 26%, 4%) 0%, hsl(220, 26%, 8%) 100%)
           `
         }}
@@ -67,9 +67,13 @@ const HeroSection = () => {
         </div>
       </div>
       
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-primary rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-pulse" />
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+        <div className="w-6 h-10 border-2 border-primary rounded-full flex justify-center animate-pulse">
+          <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-bounce" 
+               style={{ 
+                 animationDuration: '2s',
+                 animationTimingFunction: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+               }} />
         </div>
       </div>
     </section>

@@ -131,21 +131,6 @@ const ImageCarousel = () => {
         </button>
       </div>
 
-      {/* Top-right skip button */}
-      <div 
-        className={`fixed top-8 right-8 z-30 transition-opacity duration-300 ${
-          isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <button
-          onClick={skipGallery}
-          className="bg-background/80 hover:bg-background text-foreground p-4 rounded-full transition-all duration-200 hover:scale-105 backdrop-blur-sm border border-border shadow-lg"
-          title="Skip Gallery"
-        >
-          <ChevronDown size={24} />
-        </button>
-      </div>
-
       {/* Sticky carousel container */}
       <div className="sticky top-1/2 transform -translate-y-1/2 h-80 overflow-hidden">
         <div 
