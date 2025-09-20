@@ -425,7 +425,7 @@ const MessageInterface = () => {
                   onClick={() => setShowTextReader(false)}
                   className="bg-muted text-muted-foreground px-4 py-2 rounded-lg transition-all duration-200 hover:bg-muted/80"
                 >
-                  Back to Chat
+                  Minimize Reader
                 </button>
               </div>
 
@@ -477,7 +477,7 @@ const MessageInterface = () => {
                 <div className="text-center mt-6 p-4 bg-primary/10 rounded-xl border border-primary/20">
                   <p className="text-primary font-semibold mb-2">Reading Complete!</p>
                   <p className="text-muted-foreground text-sm">
-                    Click reset to start over or back to chat to continue messaging.
+                    Click reset to start over or minimize to continue with other features.
                   </p>
                 </div>
               )}

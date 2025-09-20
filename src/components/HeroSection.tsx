@@ -46,7 +46,7 @@ const HeroSection = () => {
   };
 
   /**
-   * CAP CHECK - Show modal with fading True/False, send to chat, then start text reader
+   * CAP CHECK - Show modal with faster True/False flashing, send to chat, then start text reader
    */
   const startCapCheck = () => {
     // Send "CAP CHECK" message to chat interface
@@ -56,13 +56,13 @@ const HeroSection = () => {
     setShowFlashing(true);
     setFlashingValue(true);
     
-    // Fade between True/False more slowly (every 1.5 seconds)
+    // Faster flashing between True/False (every 300ms)
     let fadeCount = 0;
     const fadeInterval = setInterval(() => {
       setFlashingValue(prev => !prev);
       fadeCount++;
       
-      if (fadeCount >= 4) { // 6 seconds of fading (4 * 1.5s)
+      if (fadeCount >= 6) { // 2 seconds of flashing (6 * 300ms = 1.8s)
         clearInterval(fadeInterval);
         const result = Math.random() > 0.3; // 70% chance of FALSE for more apparent display
         setFlashingValue(result);
@@ -99,7 +99,7 @@ const HeroSection = () => {
           }, 300); // Small delay to ensure modal is fully closed
         }, 1500);
       }
-    }, 1500); // Slower fade transition
+    }, 300); // Faster fade transition
   };
 
   /**
@@ -211,7 +211,7 @@ const HeroSection = () => {
               </h1>
               
               <div className="mb-8">
-                <div className={`inline-block px-12 py-6 rounded-2xl text-6xl font-bold border-4 transition-all duration-1000 ease-in-out ${
+                <div className={`inline-block px-12 py-6 rounded-2xl text-6xl font-bold border-4 transition-all duration-200 ease-in-out ${
                   flashingValue ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-red-500/20 text-red-400 border-red-500'
                 }`}>
                   {flashingValue ? 'TRUE' : 'FALSE'}
