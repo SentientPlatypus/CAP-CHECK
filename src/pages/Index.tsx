@@ -37,6 +37,9 @@ const Index = () => {
     [1, 0]
   );
 
+  // Overlay content scales in sync with background zoom
+  const overlayScale = useTransform(scrollY, [0, SECTION_HEIGHT + 500], [1.2, 1]);
+
   // Show overlay content when past initial section
   useEffect(() => {
     const handleScroll = () => {
@@ -63,32 +66,38 @@ const Index = () => {
         }}
       >
         {/* Overlay content on the fixed background */}
-        <div className="absolute inset-0 flex">
-          {/* Left side - Phone */}
-          <div className="w-1/2 h-full flex items-center justify-center">
-            <ScrollPhone scrollProgress={0} />
-          </div>
+        <motion.div
+          className="absolute inset-0 flex items-center"
+          style={{ scale: overlayScale, transformOrigin: 'center' }}
+        >
+          <div className="container mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 items-center gap-8">
+            {/* Left side - Phone */}
+            <div className="flex justify-center">
+              <ScrollPhone scrollProgress={0} />
+            </div>
 
-          {/* Right side - Text */}
-          <div className="w-1/2 h-full flex items-center justify-start pl-12">
+            {/* Right side - Text */}
             <div className="text-left">
-              <h1 className="text-8xl font-bold text-white mb-6 drop-shadow-2xl">
+              <h1
+                className="font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+                style={{ fontSize: 'clamp(2rem, 8vw, 5rem)' }}
+              >
                 Interactive
               </h1>
-              <p className="text-xl text-white/80 max-w-lg mb-8 drop-shadow-lg">
+              <p className="text-lg md:text-xl text-foreground/80 max-w-xl mb-8">
                 Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
               </p>
               <div className="flex gap-4">
-                <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium shadow-lg">
+                <button className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium shadow-lg transition hover:opacity-90">
                   CAP CHECK ⌄
                 </button>
-                <button className="text-white/80 hover:text-white px-6 py-3 font-medium border border-white/30 rounded-lg backdrop-blur-sm">
+                <button className="bg-secondary text-secondary-foreground px-6 py-3 rounded-lg font-medium border border-border transition hover:opacity-90">
                   View Gallery ⌄
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* Main content that scrolls over the fixed background */}
