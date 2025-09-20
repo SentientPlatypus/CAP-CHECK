@@ -3,9 +3,10 @@ import React, { useEffect, useState } from "react";
 interface BubbleTextProps {
   text: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-const BubbleText = ({ text, className = "" }: BubbleTextProps) => {
+const BubbleText = ({ text, className = "", style }: BubbleTextProps) => {
   const [animatingIndex, setAnimatingIndex] = useState(0);
 
   useEffect(() => {
@@ -17,7 +18,7 @@ const BubbleText = ({ text, className = "" }: BubbleTextProps) => {
   }, [text.length]);
 
   return (
-    <h2 className={`font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent ${className}`}>
+    <h2 className={`font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent ${className}`} style={style}>
       {text.split("").map((char, idx) => (
         <span
           key={idx}
