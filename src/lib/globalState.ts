@@ -18,7 +18,7 @@
  * Global chat state object
  * Contains reactive variables for chat interface
  */
-export const chatGlobals = {
+let chatGlobals = {
   /**
    * Current input text for Person A (left side of chat)
    */
@@ -43,6 +43,45 @@ export const chatGlobals = {
 };
 
 /**
+ * Load global state from JSON file
+ */
+const loadGlobalState = async () => {
+  try {
+    const response = await fetch('/globalState.json');
+    if (response.ok) {
+      const data = await response.json();
+      chatGlobals = { ...chatGlobals, ...data };
+    }
+  } catch (error) {
+    console.log('Using default global state values');
+  }
+};
+
+/**
+ * Save global state to JSON file (for external access)
+ * Note: This creates a downloadable file for external services to access
+ */
+const saveGlobalState = () => {
+  const dataStr = JSON.stringify(chatGlobals, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  
+  // Create download link for external access
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'globalState.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// Initialize state on module load
+loadGlobalState();
+
+export { chatGlobals };
+
+/**
  * Helper functions for managing global chat state
  */
 export const chatActions = {
@@ -51,6 +90,7 @@ export const chatActions = {
    */
   setPersonOneInput: (input: string) => {
     chatGlobals.personOneInput = input;
+    saveGlobalState();
   },
   
   /**
@@ -58,6 +98,7 @@ export const chatActions = {
    */
   setPersonTwoInput: (input: string) => {
     chatGlobals.personTwoInput = input;
+    saveGlobalState();
   },
   
   /**
@@ -65,6 +106,7 @@ export const chatActions = {
    */
   setTruthVerification: (isTrue: boolean | null) => {
     chatGlobals.truthVerification = isTrue;
+    saveGlobalState();
   },
   
   /**
@@ -72,6 +114,7 @@ export const chatActions = {
    */
   setChatExplanation: (explanation: string) => {
     chatGlobals.chatExplanation = explanation;
+    saveGlobalState();
   },
   
   /**
@@ -99,7 +142,21 @@ export const chatActions = {
     } else {
       chatGlobals.personTwoInput = input;
     }
-  }
+    saveGlobalState();
+  },
+
+  /**
+   * Export current state as JSON (for external services)
+   */
+  exportState: () => {
+    saveGlobalState();
+    return chatGlobals;
+  },
+
+  /**
+   * Load state from external JSON file
+   */
+  loadState: loadGlobalState
 };
 
 /**
