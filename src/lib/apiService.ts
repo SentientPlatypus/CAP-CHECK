@@ -232,9 +232,12 @@ Chat Explanation: ${data.chatExplanation}
 class PollingManager {
   private intervalId: NodeJS.Timeout | null = null;
   private isPolling = false;
+  private failureCount = 0;
+  private maxFailures = 3;
+  private retryTimeout: NodeJS.Timeout | null = null;
 
   /**
-   * Start polling Flask API for changes
+   * Start polling Flask API for changes with error handling
    */
   start(callback: (data: GlobalVariables | null) => void, interval: number = 2000) {
     if (this.isPolling) {
@@ -245,6 +248,21 @@ class PollingManager {
     this.isPolling = true;
     this.intervalId = setInterval(async () => {
       const data = await fetchGlobalVariables();
+      
+      if (data === null) {
+        this.failureCount++;
+        console.warn(`Polling failure ${this.failureCount}/${this.maxFailures}`);
+        
+        if (this.failureCount >= this.maxFailures) {
+          console.warn('Too many polling failures, stopping automatic polling');
+          this.stop();
+          this.scheduleRetry(callback, interval);
+          return;
+        }
+      } else {
+        this.failureCount = 0; // Reset on success
+      }
+      
       callback(data);
     }, interval);
 
@@ -252,14 +270,32 @@ class PollingManager {
   }
 
   /**
-   * Stop polling
+   * Schedule a retry after failures with exponential backoff
+   */
+  private scheduleRetry(callback: (data: GlobalVariables | null) => void, interval: number) {
+    const retryDelay = Math.min(30000, 5000 * Math.pow(2, Math.min(this.failureCount - this.maxFailures, 3))); // Max 30s
+    
+    console.log(`Scheduling polling retry in ${retryDelay}ms`);
+    this.retryTimeout = setTimeout(() => {
+      this.failureCount = 0;
+      this.start(callback, interval);
+    }, retryDelay);
+  }
+
+  /**
+   * Stop polling and clear retry timeouts
    */
   stop() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
+    if (this.retryTimeout) {
+      clearTimeout(this.retryTimeout);
+      this.retryTimeout = null;
+    }
     this.isPolling = false;
+    this.failureCount = 0;
     console.log('Stopped polling Flask API');
   }
 

@@ -111,10 +111,15 @@ const stopPolling = () => {
   pollingManager.stop();
 };
 
-// Initialize state on module load
+// Initialize state on module load with conditional polling
 loadGlobalState().then(() => {
-  // Start polling for changes after initial load
-  startPolling();
+  // Only start polling if we successfully loaded state (API is available)
+  if (chatGlobals.chatExplanation && !chatGlobals.chatExplanation.includes('offline mode')) {
+    console.log('Flask API detected, starting polling');
+    startPolling();
+  } else {
+    console.log('Flask API not available, polling disabled');
+  }
 });
 
 export { chatGlobals };
