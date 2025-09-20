@@ -190,11 +190,11 @@ const MessageInterface = () => {
           </div>
         )}
 
-        {/* Chat Interface */}
-        <div className="bg-background/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-border mb-8">
+        {/* Combined Communication & AI Content Reader */}
+        <div className="bg-background/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-border">
           <div className="text-center mb-8">
             <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Real-time Communication
+              Real-time Communication & AI Reader
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
               {chatGlobals.chatExplanation}
@@ -225,7 +225,7 @@ const MessageInterface = () => {
           </div>
 
           {/* Chat Messages */}
-          <div className="h-96 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
+          <div className="h-96 overflow-y-auto mb-6 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
             {messages.map((message) => {
               if (message.sender === 'center') {
                 return (
@@ -274,7 +274,7 @@ const MessageInterface = () => {
             <div ref={messagesEndRef} />
           </div>
           
-          <div className="flex space-x-3">
+          <div className="flex space-x-3 mb-8">
             <input
               type="text"
               value={input}
@@ -290,78 +290,78 @@ const MessageInterface = () => {
               <Send size={20} />
             </button>
           </div>
-        </div>
 
-        {/* AI Content Reader */}
-        <div className="bg-background/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-border">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              AI Content Reader
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              AI content with synchronized text highlighting {hasApiKey ? 'and voice reading' : '(set API key for voice)'}
-            </p>
-            
-            {/* TTS Controls */}
-            <div className="flex justify-center items-center space-x-4 mb-8">
-              <button
-                onClick={() => speakText(aiContent.join(' '))}
-                disabled={isSpeaking}
-                className="flex items-center space-x-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-all"
-              >
-                <Volume2 size={20} />
-                <span>{isSpeaking ? 'Reading...' : hasApiKey ? 'Start Reading' : 'Demo Reading'}</span>
-              </button>
-              {!hasApiKey && (
-                <button
-                  onClick={setApiKey}
-                  className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-all"
-                >
-                  Set API Key
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Content with Word-by-Word Highlighting */}
-          <div className="space-y-6">
-            {aiContent.map((paragraph, paragraphIndex) => {
-              const words = paragraph.split(' ');
-              const paragraphStartIndex = aiContent.slice(0, paragraphIndex)
-                .reduce((acc, p) => acc + p.split(' ').length, 0);
+          {/* AI Content Reader Section */}
+          <div className="border-t border-border/50 pt-8">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                AI Content Reader
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                AI content with synchronized text highlighting {hasApiKey ? 'and voice reading' : '(set API key for voice)'}
+              </p>
               
-              return (
-                <div
-                  key={paragraphIndex}
-                  className={`p-6 rounded-xl border transition-all duration-500 ${
-                    isSpeaking && currentWordIndex >= paragraphStartIndex && 
-                    currentWordIndex < paragraphStartIndex + words.length
-                      ? 'bg-primary/10 border-primary/30 shadow-lg scale-[1.01]'
-                      : 'bg-card/50 border-border/50'
-                  }`}
+              {/* TTS Controls */}
+              <div className="flex justify-center items-center space-x-4 mb-6">
+                <button
+                  onClick={() => speakText(aiContent.join(' '))}
+                  disabled={isSpeaking}
+                  className="flex items-center space-x-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-all"
                 >
-                  <p className="text-lg leading-relaxed">
-                    {words.map((word, wordIdx) => {
-                      const globalWordIndex = paragraphStartIndex + wordIdx;
-                      const isCurrentWord = isSpeaking && globalWordIndex === currentWordIndex;
-                      
-                      return (
-                        <span
-                          key={wordIdx}
-                          className={`transition-all duration-200 ${
-                            isCurrentWord 
-                              ? 'bg-primary text-primary-foreground px-1 rounded shadow-lg transform scale-105' 
-                              : ''
-                          }`}
-                        >
-                          {word}{' '}
-                        </span>
-                      );
-                    })}
-                  </p>
-                </div>
-              );
-            })}
+                  <Volume2 size={20} />
+                  <span>{isSpeaking ? 'Reading...' : hasApiKey ? 'Start Reading' : 'Demo Reading'}</span>
+                </button>
+                {!hasApiKey && (
+                  <button
+                    onClick={setApiKey}
+                    className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-all"
+                  >
+                    Set API Key
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Content with Word-by-Word Highlighting */}
+            <div className="space-y-4">
+              {aiContent.map((paragraph, paragraphIndex) => {
+                const words = paragraph.split(' ');
+                const paragraphStartIndex = aiContent.slice(0, paragraphIndex)
+                  .reduce((acc, p) => acc + p.split(' ').length, 0);
+                
+                return (
+                  <div
+                    key={paragraphIndex}
+                    className={`p-4 rounded-lg border transition-all duration-500 ${
+                      isSpeaking && currentWordIndex >= paragraphStartIndex && 
+                      currentWordIndex < paragraphStartIndex + words.length
+                        ? 'bg-primary/10 border-primary/30 shadow-lg scale-[1.01]'
+                        : 'bg-card/50 border-border/50'
+                    }`}
+                  >
+                    <p className="text-base leading-relaxed">
+                      {words.map((word, wordIdx) => {
+                        const globalWordIndex = paragraphStartIndex + wordIdx;
+                        const isCurrentWord = isSpeaking && globalWordIndex === currentWordIndex;
+                        
+                        return (
+                          <span
+                            key={wordIdx}
+                            className={`transition-all duration-200 ${
+                              isCurrentWord 
+                                ? 'bg-primary text-primary-foreground px-1 rounded shadow-lg transform scale-105' 
+                                : ''
+                            }`}
+                          >
+                            {word}{' '}
+                          </span>
+                        );
+                      })}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
