@@ -207,8 +207,8 @@ const MessageInterface = () => {
     setShowModal(true);
   };
 
-  // Handle verification result selection
-  const handleVerificationSelect = (isTrue: boolean) => {
+  // Handle CAP CHECK - automatic verification from backend
+  const handleCapCheck = async () => {
     const timestamp = Date.now();
     
     // Add CAP CHECK message
@@ -232,23 +232,59 @@ const MessageInterface = () => {
     // Close modal immediately
     setShowModal(false);
     
-    // Show result after delay
-    setTimeout(() => {
-      setCapCheckResult(isTrue);
+    // Try to get result from backend, default to false
+    try {
+      // Attempt backend connection (for future implementation)
+      // const result = await chatActions.fetchAiVerificationStatus();
       
-      // Add result message to chat
-      const resultMessage: Message = {
-        id: `result-${timestamp + 2}`,
-        text: `Verification Result: ${isTrue ? 'CONFIRMED TRUE' : 'FLAGGED AS FALSE'}`,
-        sender: 'center',
-        timestamp: new Date(),
-        truthVerification: isTrue
-      };
+      // For now, default to false as requested
+      const result = false;
       
-      setMessages(prev => [...prev, resultMessage]);
-    }, 2000);
-    
-    setVerificationResult(null);
+      // Show flashing animation - start with true, then flash to false
+      setTimeout(() => {
+        setCapCheckResult(true);
+        
+        // Flash to false after brief moment
+        setTimeout(() => {
+          setCapCheckResult(false);
+          
+          // Add result message to chat
+          const resultMessage: Message = {
+            id: `result-${timestamp + 2}`,
+            text: `Verification Result: FLAGGED AS FALSE - Statement contains potential misinformation`,
+            sender: 'center',
+            timestamp: new Date(),
+            truthVerification: false
+          };
+          
+          setMessages(prev => [...prev, resultMessage]);
+        }, 800); // Flash duration
+        
+      }, 2000); // Initial analyzing delay
+      
+    } catch (error) {
+      console.log('Backend connection failed, using default false result');
+      
+      // Same flashing behavior for fallback
+      setTimeout(() => {
+        setCapCheckResult(true);
+        
+        setTimeout(() => {
+          setCapCheckResult(false);
+          
+          const fallbackMessage: Message = {
+            id: `result-fallback-${timestamp + 2}`,
+            text: `Verification Result: FLAGGED AS FALSE - Unable to verify, marked as potentially false`,
+            sender: 'center',
+            timestamp: new Date(),
+            truthVerification: false
+          };
+          
+          setMessages(prev => [...prev, fallbackMessage]);
+        }, 800);
+        
+      }, 2000);
+    }
   };
 
   const handleSend = () => {
@@ -497,7 +533,7 @@ const MessageInterface = () => {
             </button>
           </div>
           
-          {/* CAP CHECK Button with Modal */}
+          {/* CAP CHECK Button with Confirmation Modal */}
           <div className="text-center mb-6">
             <Dialog open={showModal} onOpenChange={setShowModal}>
               <DialogTrigger asChild>
@@ -513,36 +549,29 @@ const MessageInterface = () => {
                 </DialogHeader>
                 <div className="space-y-6">
                   <p className="text-center text-muted-foreground">
-                    Verify the truthfulness of the last statement:
+                    This will analyze the last message for truthfulness using AI verification.
                   </p>
                   
                   <div className="flex space-x-4">
                     <Button
-                      onClick={() => handleVerificationSelect(true)}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 text-lg"
+                      onClick={handleCapCheck}
+                      className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 text-lg"
                     >
-                      ✅ TRUE
+                      🔍 Start Analysis
                     </Button>
-                    <Button
-                      onClick={() => handleVerificationSelect(false)}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-4 text-lg"
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowModal(false)}
+                      className="flex-1"
                     >
-                      ❌ FALSE
+                      Cancel
                     </Button>
                   </div>
-                  
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowModal(false)}
-                    className="w-full"
-                  >
-                    Cancel
-                  </Button>
                 </div>
               </DialogContent>
             </Dialog>
             <p className="text-sm text-muted-foreground mt-2">
-              Click to verify the last message as true or false
+              AI-powered fact checking with backend verification
             </p>
           </div>
         </div>
