@@ -32,88 +32,29 @@ const Hero = () => {
 const CenterImage = () => {
   const { scrollY } = useScroll();
 
-  const clip1 = useTransform(scrollY, [0, 1500], [25, 0]);
-  const clip2 = useTransform(scrollY, [0, 1500], [75, 100]);
-
-  const clipPath = useMotionTemplate`polygon(${clip1}% ${clip1}%, ${clip2}% ${clip1}%, ${clip2}% ${clip2}%, ${clip1}% ${clip2}%)`;
-
   const backgroundSize = useTransform(
     scrollY,
-    [0, SECTION_HEIGHT + 500],
-    ["170%", "100%"]
-  );
-  
-  // Keep visible much longer like the SpaceX rocket
-  const opacity = useTransform(
-    scrollY,
-    [SECTION_HEIGHT, SECTION_HEIGHT + 500],
-    [1, 0]
+    [0, SECTION_HEIGHT + 800],
+    ["110%", "100%"]
   );
 
   return (
     <motion.div
-      className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden"
+      className="fixed inset-0 -z-10"
       style={{
-        clipPath,
-        opacity,
+        backgroundSize,
+        backgroundImage:
+          "url(https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3)",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
-    >
-      <motion.div
-        className="w-full h-full relative flex"
-        style={{
-          backgroundSize,
-          background: `
-            radial-gradient(circle at 30% 40%, hsl(15, 85%, 65%, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 70% 60%, hsl(25, 90%, 70%, 0.1) 0%, transparent 50%),
-            linear-gradient(135deg, hsl(220, 26%, 4%) 0%, hsl(220, 26%, 8%) 100%)
-          `
-        }}
-      >
-        {/* Phone side */}
-        <div className="w-1/2 h-full flex items-center justify-center">
-          <div className="relative">
-            <div className="w-48 h-96 bg-gradient-to-br from-purple-600 to-purple-800 rounded-[2.5rem] border-4 border-white/20 shadow-2xl flex flex-col items-center justify-center relative overflow-hidden">
-              {/* Phone notch */}
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-20 h-2 bg-black rounded-full"></div>
-              
-              {/* Phone content */}
-              <div className="flex flex-col items-center justify-center h-full px-6">
-                <div className="text-6xl mb-8">⚡</div>
-                <div className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold text-sm">
-                  Get Started
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Text side */}
-        <div className="w-1/2 h-full flex items-center justify-start pl-12">
-          <div className="text-left">
-            <h1 className="text-8xl font-bold text-purple-500 mb-6">
-              Interactive
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-lg mb-8">
-              Experience AI-powered fact-checking technology that detects lies and verifies truth in real-time conversations.
-            </p>
-            <div className="flex gap-4">
-              <div className="bg-orange-500 text-white px-6 py-3 rounded-lg font-medium">
-                CAP CHECK ⌄
-              </div>
-              <div className="text-muted-foreground px-6 py-3 font-medium">
-                View Gallery ⌄
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+    />
   );
 };
 
 const ParallaxImages = () => {
   return (
-    <div className="mx-auto max-w-5xl px-4 pt-[200px]">
+    <div className="relative z-10 mx-auto max-w-5xl px-4 pt-[200px]">
       <ParallaxImg
         src="https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3"
         alt="Tech interface"
