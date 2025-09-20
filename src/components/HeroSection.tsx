@@ -17,6 +17,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import { chatActions } from '@/lib/globalState';
+import heroBackground from '@/assets/hero-background.png';
 
 const HeroSection = ({ showOverlay }: { showOverlay?: boolean }) => {
   // Track scroll position for parallax effects
@@ -156,32 +157,17 @@ const HeroSection = ({ showOverlay }: { showOverlay?: boolean }) => {
   return (
     <>
       <section className="min-h-screen flex items-center justify-center relative overflow-hidden">        
-        {/* Clean Apple-style gradient background */}
+        {/* Hero background image */}
         <div 
-          className="absolute inset-0"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            background: `
-              linear-gradient(135deg, 
-                hsl(280, 85%, 65%) 0%, 
-                hsl(320, 85%, 70%) 25%, 
-                hsl(250, 30%, 12%) 75%, 
-                hsl(250, 25%, 8%) 100%
-              )
-            `
+            backgroundImage: `url(${heroBackground})`
           }}
         />
         
-        {/* Subtle overlay for depth */}
+        {/* Dark overlay for text readability */}
         <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            background: `
-              radial-gradient(circle at 50% 0%, 
-                hsl(280, 85%, 65%) 0%, 
-                transparent 50%
-              )
-            `
-          }}
+          className="absolute inset-0 bg-black/40"
         />
         
         <div 
