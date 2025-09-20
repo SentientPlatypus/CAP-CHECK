@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-// Import all carousel images
+// Images
 import carousel1 from '@/assets/carousel-1.jpg';
 import carousel2 from '@/assets/carousel-2.jpg';
 import carousel3 from '@/assets/carousel-3.jpg';
@@ -12,53 +12,90 @@ import carousel6 from '@/assets/carousel-6.jpg';
 const images = [carousel1, carousel2, carousel3, carousel4, carousel5, carousel6];
 
 const ImageCarousel = () => {
-  const [scrollProgress, setScrollProgress] = useState(0);
+  // Refs for imperative, jank-free updates
+  const sectionRef = useRef<HTMLElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+
+  const contentWidthRef = useRef(0);
+  const viewportWidthRef = useRef(0);
+  const rafIdRef = useRef<number | null>(null);
+  const lastActiveIndexRef = useRef(0);
+
+  // Light state that changes infrequently
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isGalleryActive, setIsGalleryActive] = useState(false);
   const [showCarousel, setShowCarousel] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
+
+  // Measure sizes
+  const measure = () => {
+    const wrapper = wrapperRef.current;
+    const track = trackRef.current;
+    if (!wrapper || !track) return;
+    viewportWidthRef.current = wrapper.clientWidth;
+    contentWidthRef.current = track.scrollWidth;
+  };
 
   useEffect(() => {
-    let rafId: number;
-    
-    const handleScroll = () => {
-      if (rafId) return; // Skip if already scheduled
-      
-      rafId = requestAnimationFrame(() => {
-        if (!sectionRef.current) {
-          rafId = 0;
-          return;
-        }
-        
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (wrapperRef.current) ro.observe(wrapperRef.current);
+    if (trackRef.current) ro.observe(trackRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (rafIdRef.current) return; // throttle to one paint
+      rafIdRef.current = requestAnimationFrame(() => {
+        rafIdRef.current = null;
+        if (!sectionRef.current || !trackRef.current) return;
+
         const rect = sectionRef.current.getBoundingClientRect();
-        const sectionHeight = sectionRef.current.offsetHeight;
         const windowHeight = window.innerHeight;
-        
-        // Show carousel when section starts coming into view
+        const sectionHeight = sectionRef.current.offsetHeight;
+
+        // Visibility controls (update state only when value changes)
         const shouldShowCarousel = rect.top < windowHeight * 0.8;
-        setShowCarousel(shouldShowCarousel);
-        
-        // Show controls when carousel section is fully visible or mostly visible
-        const isInView = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
-        setIsGalleryActive(isInView);
-        
-        // Better progress calculation to ensure we reach 100%
+        if (shouldShowCarousel !== showCarousel) setShowCarousel(shouldShowCarousel);
+
+        const shouldBeActive = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
+        if (shouldBeActive !== isGalleryActive) setIsGalleryActive(shouldBeActive);
+
+        // Progress (no state updates here)
         const scrolled = Math.max(0, -rect.top);
-        const maxScroll = sectionHeight - windowHeight;
+        const maxScroll = Math.max(1, sectionHeight - windowHeight);
         const progress = Math.min(1, Math.max(0, scrolled / maxScroll));
-        
-        setScrollProgress(progress);
-        rafId = 0;
+
+        // Move track (translate only the big track, not each item)
+        const maxTranslate = Math.max(0, contentWidthRef.current - viewportWidthRef.current);
+        const translateX = -progress * maxTranslate;
+        trackRef.current.style.transform = `translate3d(${translateX}px, 0, 0)`;
+        trackRef.current.style.willChange = 'transform';
+
+        // Update progress bar width imperatively
+        if (progressBarRef.current) {
+          progressBarRef.current.style.width = `${progress * 100}%`;
+        }
+
+        // Discrete active index (for CSS transitions only when index changes)
+        const newActive = Math.round(progress * (images.length - 1));
+        if (newActive !== lastActiveIndexRef.current) {
+          lastActiveIndexRef.current = newActive;
+          setActiveIndex(newActive);
+        }
       });
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial call
-    
+    window.addEventListener('scroll', onScroll, { passive: true });
+    // Initial paint
+    onScroll();
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', onScroll);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
-  }, []);
+  }, [isGalleryActive, showCarousel]);
 
   const skipGallery = () => {
     if (!sectionRef.current) return;
@@ -67,70 +104,32 @@ const ImageCarousel = () => {
     window.scrollTo(0, sectionBottom);
   };
 
-  // Calculate current image index based on scroll progress
-  const getCurrentImageIndex = () => {
-    return Math.floor(scrollProgress * (images.length - 1));
+  const sizeClass = (index: number) => {
+    const d = Math.abs(index - activeIndex);
+    const base = 'rounded-xl overflow-hidden shadow-2xl transition-transform duration-500 ease-out will-change-transform';
+    if (d === 0) return `${base} scale-100 opacity-100 z-30`;
+    if (d === 1) return `${base} scale-95 opacity-90 z-20`;
+    if (d === 2) return `${base} scale-90 opacity-70 z-10`;
+    return `${base} scale-75 opacity-50 z-0`;
   };
 
-  const getImageStyle = (index: number) => {
-    const totalImages = images.length;
-    const progressIndex = scrollProgress * (totalImages - 1);
-    
-    // Calculate horizontal offset based on scroll progress
-    const baseOffset = scrollProgress * (totalImages - 1) * -200;
-    const imageOffset = index * 200;
-    const finalX = baseOffset + imageOffset;
-    
-    // Calculate scale and opacity based on distance from center
-    const distanceFromCenter = Math.abs(index - progressIndex);
-    const scale = Math.max(0.4, 1 - distanceFromCenter * 0.3);
-    const opacity = Math.max(0.2, 1 - distanceFromCenter * 0.4);
-    
-    // Only show images that are reasonably close to center
-    if (distanceFromCenter > 3) {
-      return {
-        transform: `translate3d(${finalX}px, 0, 0) scale(${scale})`,
-        opacity: 0,
-        zIndex: 1,
-        willChange: 'transform, opacity',
-        transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out'
-      };
-    }
-    
-    // Z-index based on how close to center
-    const zIndex = Math.max(1, 10 - Math.floor(distanceFromCenter * 2));
-    
-    return {
-      transform: `translate3d(${finalX}px, 0, 0) scale(${scale})`,
-      opacity,
-      zIndex,
-      willChange: 'transform, opacity',
-      transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out'
-    };
-  };
-
-  const getImageSize = (index: number) => {
-    const currentIndex = getCurrentImageIndex();
-    const distanceFromCenter = Math.abs(index - scrollProgress * (images.length - 1));
-    
-    if (distanceFromCenter < 0.5) {
-      return 'w-96 h-64'; // Large for current image
-    } else if (distanceFromCenter < 1.5) {
-      return 'w-72 h-48'; // Medium for adjacent images
-    } else {
-      return 'w-48 h-32'; // Small for distant images
-    }
+  const boxSizeClass = (index: number) => {
+    const d = Math.abs(index - activeIndex);
+    if (d === 0) return 'w-96 h-64';
+    if (d === 1) return 'w-80 h-52';
+    if (d === 2) return 'w-64 h-40';
+    return 'w-48 h-32';
   };
 
   return (
-    <section 
+    <section
       ref={sectionRef}
       data-section="carousel"
       className="h-[200vh] relative bg-gradient-to-b from-background to-card"
     >
-      {/* Fixed title that stays throughout gallery */}
-      <div 
-        className={`fixed top-20 left-1/2 transform -translate-x-1/2 text-center z-30 transition-opacity duration-300 ${
+      {/* Fixed title & controls */}
+      <div
+        className={`fixed top-20 left-1/2 -translate-x-1/2 text-center z-30 transition-opacity duration-300 ${
           isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -140,8 +139,6 @@ const ImageCarousel = () => {
         <p className="text-muted-foreground mb-6">
           Keep scrolling to see the horizontal carousel in action
         </p>
-        
-        {/* Skip button */}
         <button
           onClick={skipGallery}
           className="bg-secondary/80 hover:bg-secondary text-secondary-foreground px-6 py-3 rounded-full transition-all duration-200 hover:scale-105 backdrop-blur-sm border border-border"
@@ -153,45 +150,29 @@ const ImageCarousel = () => {
         </button>
       </div>
 
-      {/* Sticky carousel container */}
-      <div className="sticky top-1/2 transform -translate-y-1/2 h-80 overflow-hidden">
-        <div 
-          className={`relative h-full flex justify-center items-center transition-opacity duration-500 ${
-            showCarousel ? 'opacity-100' : 'opacity-0'
-          }`}
+      {/* Sticky viewport */}
+      <div ref={wrapperRef} className="sticky top-1/2 -translate-y-1/2 h-80 overflow-hidden">
+        <div
+          ref={trackRef}
+          className={`flex items-center gap-8 px-8 ${showCarousel ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
+          style={{ willChange: 'transform' }}
         >
-          {images.map((image, index) => {
-            const distanceFromCenter = Math.abs(index - scrollProgress * (images.length - 1));
-            // Only render images that are close to center for better performance
-            if (distanceFromCenter > 3) return null;
-            
-            return (
-              <div
-                key={index}
-                className="absolute"
-                style={getImageStyle(index)}
-              >
-                <div className="relative rounded-xl overflow-hidden shadow-2xl">
-                  <img
-                    src={image}
-                    alt={`Gallery image ${index + 1}`}
-                    className={`${getImageSize(index)} object-cover`}
-                    loading="lazy"
-                  />
-                  {/* Image overlay with index */}
-                  <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                    {index + 1}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {images.map((img, idx) => (
+            <div key={idx} className={sizeClass(idx)}>
+              <img
+                src={img}
+                alt={`Gallery image ${idx + 1}`}
+                className={`${boxSizeClass(idx)} object-cover`}
+                loading="lazy"
+              />
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Fixed progress indicator */}
-      <div 
-        className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30 transition-opacity duration-300 ${
+      <div
+        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-30 transition-opacity duration-300 ${
           isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -199,13 +180,10 @@ const ImageCarousel = () => {
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">Progress:</span>
             <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-100"
-                style={{ width: `${scrollProgress * 100}%` }}
-              />
+              <div ref={progressBarRef} className="h-full bg-gradient-to-r from-primary to-accent" style={{ width: '0%' }} />
             </div>
             <span className="text-sm text-foreground font-mono">
-              {Math.floor(scrollProgress * 100)}%
+              {activeIndex + 1} / {images.length}
             </span>
           </div>
         </div>
