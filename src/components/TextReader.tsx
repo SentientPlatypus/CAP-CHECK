@@ -34,6 +34,7 @@ const TextReader = () => {
   const [currentParagraph, setCurrentParagraph] = useState(0);  // Current active paragraph index
   const [isPlaying, setIsPlaying] = useState(false);            // Play/pause state
   const [progress, setProgress] = useState(0);                  // Progress within current paragraph (0-100)
+  const [capCheckResult, setCapCheckResult] = useState<boolean | null>(null); // CAP CHECK result display
   const containerRef = useRef<HTMLDivElement>(null);            // Container for scrolling
   const paragraphRefs = useRef<(HTMLParagraphElement | null)[]>([]); // Individual paragraph refs
 
@@ -79,6 +80,16 @@ const TextReader = () => {
     }
   }, [currentParagraph]);
 
+  // Listen for CAP CHECK results
+  useEffect(() => {
+    const handleCapCheckResult = (event: CustomEvent) => {
+      setCapCheckResult(event.detail.result);
+    };
+
+    window.addEventListener('capCheckResult', handleCapCheckResult as EventListener);
+    return () => window.removeEventListener('capCheckResult', handleCapCheckResult as EventListener);
+  }, []);
+
   /**
    * Toggle play/pause, or restart if finished
    */
@@ -116,8 +127,27 @@ const TextReader = () => {
   };
 
   return (
-    <section className="py-20 px-8 bg-gradient-to-b from-muted to-background">
+    <section className="py-20 px-8 bg-gradient-to-b from-muted to-background relative">
       <div className="max-w-4xl mx-auto">
+        {/* CAP CHECK Result Display - More Apparent */}
+        {capCheckResult !== null && (
+          <div className="text-center mb-8 animate-fade-in">
+            <div className={`inline-block px-8 py-4 rounded-2xl text-3xl md:text-4xl font-bold border-4 shadow-2xl ${
+              capCheckResult 
+                ? 'bg-green-500/30 text-green-300 border-green-400 shadow-green-500/50' 
+                : 'bg-red-500/30 text-red-300 border-red-400 shadow-red-500/50'
+            }`}>
+              ANALYSIS RESULT: {capCheckResult ? 'TRUE' : 'FALSE'}
+            </div>
+            {!capCheckResult && (
+              <div className="mt-4 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-300">
+                <p className="text-lg font-semibold">⚠️ DECEPTION DETECTED</p>
+                <p className="text-sm text-red-400 mt-1">Statement flagged as potentially false or misleading</p>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Interactive Text Reader

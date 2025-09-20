@@ -44,32 +44,37 @@ const HeroSection = () => {
   };
 
   /**
-   * CAP CHECK - Show modal with flashing True/False
+   * CAP CHECK - Show modal with fading True/False
    */
   const startCapCheck = () => {
     setShowModal(true);
     setShowFlashing(true);
     setFlashingValue(true);
     
-    // Flash True/False for 3 seconds
-    let flashCount = 0;
-    const flashInterval = setInterval(() => {
+    // Fade between True/False more slowly (every 1.5 seconds)
+    let fadeCount = 0;
+    const fadeInterval = setInterval(() => {
       setFlashingValue(prev => !prev);
-      flashCount++;
+      fadeCount++;
       
-      if (flashCount >= 6) { // 3 seconds of flashing
-        clearInterval(flashInterval);
-        const result = Math.random() > 0.5; // Random final result
+      if (fadeCount >= 4) { // 6 seconds of fading (4 * 1.5s)
+        clearInterval(fadeInterval);
+        const result = Math.random() > 0.3; // 70% chance of FALSE for more apparent display
         setFlashingValue(result);
         setFinalResult(result);
         
-        // Hide modal after showing final result for 1 second
+        // Send result to text reader
+        window.dispatchEvent(new CustomEvent('capCheckResult', { 
+          detail: { result } 
+        }));
+        
+        // Hide modal after showing final result for 1.5 seconds
         setTimeout(() => {
           setShowModal(false);
           setShowFlashing(false);
-        }, 1000);
+        }, 1500);
       }
-    }, 500);
+    }, 1500); // Slower fade transition
   };
 
   /**
@@ -181,10 +186,8 @@ const HeroSection = () => {
               </h1>
               
               <div className="mb-8">
-                <div className={`inline-block px-12 py-6 rounded-2xl text-6xl font-bold border-4 transition-all duration-300 ${
-                  showFlashing 
-                    ? (flashingValue ? 'bg-green-500/20 text-green-400 border-green-500 animate-pulse' : 'bg-red-500/20 text-red-400 border-red-500 animate-pulse')
-                    : (flashingValue ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-red-500/20 text-red-400 border-red-500')
+                <div className={`inline-block px-12 py-6 rounded-2xl text-6xl font-bold border-4 transition-all duration-1000 ease-in-out ${
+                  flashingValue ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-red-500/20 text-red-400 border-red-500'
                 }`}>
                   {flashingValue ? 'TRUE' : 'FALSE'}
                 </div>
