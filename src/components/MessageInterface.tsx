@@ -275,13 +275,13 @@ const MessageInterface = () => {
                           <div className="text-lg font-bold text-foreground mb-2">
                             true or false
                           </div>
-                          <span className={`text-lg font-bold ${
+                          <div className={`text-2xl font-bold mb-4 ${
                             aiContentVerificationStatus 
                               ? 'text-green-400' 
                               : 'text-red-400'
                           }`}>
                             {aiContentVerificationStatus ? 'TRUE' : 'FALSE'}
-                          </span>
+                          </div>
                         </div>
                         <p className={`text-base leading-relaxed transition-all duration-300 ${
                           isSpeaking ? 'opacity-100' : 'opacity-100'
