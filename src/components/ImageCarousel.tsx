@@ -16,14 +16,19 @@ const ImageCarousel = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const rafIdRef = useRef<number | null>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const snapAnimationRef = useRef<number | null>(null);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isGalleryActive, setIsGalleryActive] = useState(false);
   const [showCarousel, setShowCarousel] = useState(false);
+  const [isSnapping, setIsSnapping] = useState(false);
+
+  const currentProgressRef = useRef(0);
 
   useEffect(() => {
     const onScroll = () => {
-      if (rafIdRef.current) return;
+      if (rafIdRef.current || isSnapping) return;
       rafIdRef.current = requestAnimationFrame(() => {
         rafIdRef.current = null;
         if (!sectionRef.current || !trackRef.current) return;
@@ -47,63 +52,26 @@ const ImageCarousel = () => {
         // Delay start of carousel movement
         const startThreshold = 0.15;
         const progress = rawProgress < startThreshold ? 0 : (rawProgress - startThreshold) / (1 - startThreshold);
+        
+        currentProgressRef.current = progress;
 
         // Update progress bar
         if (progressBarRef.current) {
           progressBarRef.current.style.width = `${rawProgress * 100}%`;
         }
 
-        // Calculate current center image
-        const centerIndex = progress * (images.length - 1);
-        const newActiveIndex = Math.round(centerIndex);
-        if (newActiveIndex !== activeIndex) {
-          setActiveIndex(newActiveIndex);
+        updateCarouselPosition(progress);
+
+        // Auto-snap: Clear existing timeout and set new one
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
         }
-
-        // Move track horizontally
-        const imageWidth = 368; // 320px + 48px gap
-        const containerWidth = window.innerWidth;
-        const startOffset = containerWidth / 2 - 160; // Center first image
-        const translateX = startOffset - (progress * imageWidth * (images.length - 1));
         
-        trackRef.current.style.transform = `translate3d(${translateX}px, 0, 0)`;
-
-        // Update image styles
-        images.forEach((_, index) => {
-          const distance = Math.abs(index - centerIndex);
-          const imageEl = trackRef.current?.children[index] as HTMLElement;
-          
-          if (imageEl) {
-            if (distance < 0.1) {
-              // Center image
-              imageEl.style.transform = 'scale(1.25)';
-              imageEl.style.opacity = '1';
-              imageEl.style.filter = 'brightness(1.1) saturate(1.1)';
-              imageEl.style.boxShadow = '0 20px 40px rgba(255, 165, 132, 0.4)';
-              imageEl.style.zIndex = '20';
-            } else if (distance < 1) {
-              // Adjacent images
-              const scale = 1.25 - (distance * 0.4);
-              const opacity = 1 - (distance * 0.4);
-              imageEl.style.transform = `scale(${scale})`;
-              imageEl.style.opacity = opacity.toString();
-              imageEl.style.filter = 'brightness(0.9) saturate(0.9)';
-              imageEl.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.3)';
-              imageEl.style.zIndex = '10';
-            } else {
-              // Far images
-              const scale = Math.max(0.5, 1.25 - (distance * 0.3));
-              const opacity = Math.max(0.3, 1 - (distance * 0.3));
-              imageEl.style.transform = `scale(${scale})`;
-              imageEl.style.opacity = opacity.toString();
-              imageEl.style.filter = 'brightness(0.7) saturate(0.7)';
-              imageEl.style.boxShadow = '0 5px 10px rgba(0, 0, 0, 0.2)';
-              imageEl.style.zIndex = '5';
-            }
-            
-            imageEl.style.transition = 'all 0.3s ease-out';
+        scrollTimeoutRef.current = setTimeout(() => {
+          if (shouldBeActive && !isSnapping) {
+            startSnapAnimation();
           }
-        });
+        }, 150);
       });
     };
 
@@ -113,8 +81,103 @@ const ImageCarousel = () => {
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      if (snapAnimationRef.current) cancelAnimationFrame(snapAnimationRef.current);
     };
-  }, [isGalleryActive, showCarousel, activeIndex]);
+  }, [isGalleryActive, showCarousel, activeIndex, isSnapping]);
+
+  const updateCarouselPosition = (progress: number) => {
+    if (!trackRef.current) return;
+
+    // Calculate current center image
+    const centerIndex = progress * (images.length - 1);
+    const newActiveIndex = Math.round(centerIndex);
+    if (newActiveIndex !== activeIndex) {
+      setActiveIndex(newActiveIndex);
+    }
+
+    // Move track horizontally
+    const imageWidth = 368; // 320px + 48px gap
+    const containerWidth = window.innerWidth;
+    const startOffset = containerWidth / 2 - 160; // Center first image
+    const translateX = startOffset - (progress * imageWidth * (images.length - 1));
+    
+    trackRef.current.style.transform = `translate3d(${translateX}px, 0, 0)`;
+
+    // Update image styles
+    images.forEach((_, index) => {
+      const distance = Math.abs(index - centerIndex);
+      const imageEl = trackRef.current?.children[index] as HTMLElement;
+      
+      if (imageEl) {
+        if (distance < 0.1) {
+          // Center image
+          imageEl.style.transform = 'scale(1.25)';
+          imageEl.style.opacity = '1';
+          imageEl.style.filter = 'brightness(1.1) saturate(1.1)';
+          imageEl.style.boxShadow = '0 20px 40px rgba(255, 165, 132, 0.4)';
+          imageEl.style.zIndex = '20';
+        } else if (distance < 1) {
+          // Adjacent images
+          const scale = 1.25 - (distance * 0.4);
+          const opacity = 1 - (distance * 0.4);
+          imageEl.style.transform = `scale(${scale})`;
+          imageEl.style.opacity = opacity.toString();
+          imageEl.style.filter = 'brightness(0.9) saturate(0.9)';
+          imageEl.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.3)';
+          imageEl.style.zIndex = '10';
+        } else {
+          // Far images
+          const scale = Math.max(0.5, 1.25 - (distance * 0.3));
+          const opacity = Math.max(0.3, 1 - (distance * 0.3));
+          imageEl.style.transform = `scale(${scale})`;
+          imageEl.style.opacity = opacity.toString();
+          imageEl.style.filter = 'brightness(0.7) saturate(0.7)';
+          imageEl.style.boxShadow = '0 5px 10px rgba(0, 0, 0, 0.2)';
+          imageEl.style.zIndex = '5';
+        }
+        
+        imageEl.style.transition = isSnapping ? 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'all 0.3s ease-out';
+      }
+    });
+  };
+
+  const startSnapAnimation = () => {
+    const currentProgress = currentProgressRef.current;
+    const nearestIndex = Math.round(currentProgress * (images.length - 1));
+    const targetProgress = nearestIndex / (images.length - 1);
+    
+    // Don't animate if already very close
+    if (Math.abs(currentProgress - targetProgress) < 0.02) return;
+    
+    setIsSnapping(true);
+    
+    const startProgress = currentProgress;
+    const progressDiff = targetProgress - startProgress;
+    const duration = 500;
+    const startTime = performance.now();
+    
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      
+      // Smooth easing
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const newProgress = startProgress + progressDiff * eased;
+      
+      currentProgressRef.current = newProgress;
+      updateCarouselPosition(newProgress);
+      
+      if (progress < 1) {
+        snapAnimationRef.current = requestAnimationFrame(animate);
+      } else {
+        setIsSnapping(false);
+        snapAnimationRef.current = null;
+      }
+    };
+    
+    snapAnimationRef.current = requestAnimationFrame(animate);
+  };
 
   const skipGallery = () => {
     if (!sectionRef.current) return;
