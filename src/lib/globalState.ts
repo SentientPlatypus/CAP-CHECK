@@ -31,7 +31,7 @@ let chatGlobals: GlobalVariables = {
   /**
    * Current input text for Person A (left side of chat)
    */
-  personOneInput: '',
+  personOneInput: 'hhh',
   
   /**
    * Current input text for Person B (right side of chat)  
@@ -48,7 +48,7 @@ let chatGlobals: GlobalVariables = {
    * Explanation text displayed in the chat interface
    * Describes how the chat system works
    */
-  chatExplanation: 'This AI-powered fact-checking system analyzes statements in real-time. Switch between Person A and Person B to simulate conversations while the system verifies the truthfulness of each statement.'
+  chatExplanation: 'This AI-powered fact-checking system analyzes statements in real-time. Switch between Person A and Person B to simulate conversations while the system verifies the truthfulness of each statement. (Running in offline mode - backend not accessible)'
 };
 
 /**
@@ -60,16 +60,23 @@ let lastUserMessage: { text: string; sender: 'left' | 'right' } | null = null;
  * Load global state from Flask API
  */
 const loadGlobalState = async () => {
-  const data = await fetchGlobalVariables();
-  if (data) {
-    const hasChanges = JSON.stringify(chatGlobals) !== JSON.stringify(data);
-    chatGlobals = { ...data };
-    
-    if (hasChanges) {
-      console.log('Global state updated from Flask API:', data);
-      // Trigger custom event for components to react to changes
-      window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
+  try {
+    const data = await fetchGlobalVariables();
+    if (data) {
+      const hasChanges = JSON.stringify(chatGlobals) !== JSON.stringify(data);
+      chatGlobals = { ...data };
+      
+      if (hasChanges) {
+        console.log('Global state updated from Flask API:', data);
+        // Trigger custom event for components to react to changes
+        window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
+      }
     }
+  } catch (error) {
+    console.warn('Backend not accessible, using fallback data:', error);
+    // Update explanation to indicate offline mode
+    chatGlobals.chatExplanation = 'This AI-powered fact-checking system analyzes statements in real-time. Switch between Person A and Person B to simulate conversations while the system verifies the truthfulness of each statement. (Running in offline mode - backend not accessible)';
+    window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
   }
 };
 
