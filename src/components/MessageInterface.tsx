@@ -46,8 +46,14 @@ const podcastText = [
 
 const MessageInterface = () => {
   // Chat state management
-  // Initial demo messages
+  // Initial demo messages including explanation
   const [messages, setMessages] = useState<Message[]>([
+    { 
+      id: '0', 
+      text: chatGlobals.chatExplanation, 
+      sender: 'center', 
+      timestamp: new Date()
+    },
     { id: '1', text: 'Hey! How are you doing?', sender: 'left', timestamp: new Date() },
     { id: '2', text: 'I\'m great! Just checking out this amazing interface.', sender: 'right', timestamp: new Date() },
     { id: '3', text: 'The animations are so smooth!', sender: 'left', timestamp: new Date() },
@@ -346,8 +352,20 @@ const MessageInterface = () => {
           {/* Chat Messages Area */}
           <div className="h-96 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-primary/20">
             {messages.map((message, index) => {
-              // Full-width text content messages
+              // Full-width messages (explanation text and interactive content)
               if (message.sender === 'center') {
+                // Check if this is explanation text (id '0') or interactive text content
+                if (message.id === '0') {
+                  return (
+                    <div key={message.id} className="w-full">
+                      <div className="w-full p-4 rounded-lg bg-card/80 border border-border/50 text-muted-foreground">
+                        <p className="text-sm leading-relaxed">{message.text}</p>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                // Interactive text content
                 const textIndex = parseInt(message.id.replace('text-', ''));
                 const isActive = textIndex === currentParagraph && isPlaying;
                 const isRead = textIndex < currentParagraph;
