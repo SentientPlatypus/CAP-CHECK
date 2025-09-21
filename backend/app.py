@@ -32,6 +32,7 @@ import cap_button
 import threading
 import subprocess
 from transcriber import LiveTranscriber
+from ml import fact_check, score_arguments
 
 
 # ---------------------------
@@ -143,6 +144,19 @@ def api_transcribe():
     data = my_session.get_transcript()[-20:]
     return jsonify(data)
 
+@app.route("/fact-check", methods=["GET"])
+def fact_check_endpoint():
+   """Example endpoint to run fact-checking on a given text input."""#
+
+   text = request.args.get("text", "").strip()
+   if not text:
+       return jsonify({"error": "No text provided"}), 400
+
+   try:
+       result = fact_check(text)
+       return result
+   except Exception as e:
+       return jsonify({"error": str(e)}), 500
 
 # Launching frontend
 def launch_frontend():
