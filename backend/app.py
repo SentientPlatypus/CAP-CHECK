@@ -149,11 +149,12 @@ def api_transcribe():
     data = my_session.get_transcript()[-20:]
     return jsonify(data)
 
-@app.route("/fact-check", methods=["GET"])
+@app.post("/api/fact-check")
 def fact_check_endpoint():
-   """Example endpoint to run fact-checking on a given text input."""#
+   """Example endpoint to run fact-checking on a given text input."""
 
-   text = request.args.get("text", "").strip()
+   text = request.get_data(as_text=True).strip()
+   print(text)
    if not text:
        return jsonify({"error": "No text provided"}), 400
 
