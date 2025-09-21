@@ -20,6 +20,7 @@ import os
 import json
 import time
 from pathlib import Path
+import sys
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -27,12 +28,16 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import serial
 import cap_button 
+import signal
 
 # runing 
 import threading
 import subprocess
 from transcriber import LiveTranscriber
 from ml import fact_check, score_arguments
+
+
+
 
 
 # ---------------------------
@@ -158,6 +163,11 @@ def fact_check_endpoint():
    except Exception as e:
        return jsonify({"error": str(e)}), 500
 
+def _handle_sigint(sig, frame):
+    print("\nStopping…")
+    my_session.stop()
+    sys.exit(0)
+
 # Launching frontend
 def launch_frontend():
     frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
@@ -167,5 +177,8 @@ if __name__ == '__main__':
     my_session = LiveTranscriber()
     with app.app_context():
         db.create_all()
-    #threading.Thread(target=launch_frontend, daemon=True).start()
+
+    # Graceful Ctrl+C handling
+    signal.signal(signal.SIGINT, _handle_sigint)
+    threading.Thread(target=launch_frontend, daemon=True).start()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

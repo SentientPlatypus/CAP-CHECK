@@ -1,11 +1,20 @@
 import { useEffect, useState , useRef} from "react";
 import { chatActions } from '@/lib/globalState';
 
+// Global flag to prevent multiple session starts
+let globalSessionStarted = false;
+
 function TranscriptLogger() {
   const [started, setStarted] = useState(false);
 
   // First effect → starts transcription
   useEffect(() => {
+    // Prevent multiple session starts
+    if (globalSessionStarted) {
+      setStarted(true);
+      return;
+    }
+
     async function startTranscript() {
       const url = "http://localhost:5000/api/start_transcribe";
       try {
@@ -19,6 +28,7 @@ function TranscriptLogger() {
 
         const data = await res.json();
         console.log("[startTranscript] ✅ Success! Transcript started:", data);
+        globalSessionStarted = true; // Mark as started globally
         setStarted(true); // 🚀 trigger the second effect
       } catch (err) {
         console.error("Fetch error:", err);
@@ -26,8 +36,25 @@ function TranscriptLogger() {
     }
     startTranscript();
   }, []);
-  const lastCount = useRef(0); // how many lines we've already processed
 
+  // Track last processed text for each speaker to avoid repeats
+  const lastSpeakerAText = useRef("");
+  const lastSpeakerBText = useRef("");
+
+  // Helper function to determine if text should be updated
+  const shouldUpdateText = (newText: string, lastText: string): boolean => {
+    if (!lastText) return true; // First time, always update
+    if (newText === lastText) return false; // Exact duplicate
+    
+    // Check if new text is just an extension of the previous (partial transcription)
+    if (newText.length > lastText.length && newText.startsWith(lastText)) {
+      const addedText = newText.slice(lastText.length).trim();
+      return addedText.length > 0; // Only update if meaningful content was added
+    }
+    
+    // Different text entirely
+    return true;
+  };
 
   // Second effect → runs only once `started === true`
   useEffect(() => {
@@ -35,12 +62,10 @@ function TranscriptLogger() {
 
   console.log("TranscriptLogger mounted (polling active)");
   let timer: ReturnType<typeof setInterval>;
-  let lastText = ""; // 👈 remember last so we don’t spam repeats
 
   async function loadTranscript() {
     const url = "http://localhost:5000/api/transcribe";
     try {
-      console.log("GET", url);
       const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) {
         const text = await res.text();
@@ -56,17 +81,33 @@ function TranscriptLogger() {
       // ✅ Latest transcript object
       const latest = data[data.length - 1];
       const speaker = latest.Speaker;
-      const text = latest.Text?.trim();
+      const s = speaker.slice(-1);
 
-      if (!text || text === lastText) return; // skip duplicates
-      lastText = text;
+      const newText = latest.Text?.trim();
 
-      if (speaker.toLowerCase().includes("a")) {
-        console.log("➡️ Setting Person A:", text);
-        chatActions.setPersonOneInput(text);
-      } else if (speaker.toLowerCase().includes("b")) {
-        console.log("➡️ Setting Person B:", text);
-        chatActions.setPersonTwoInput(text);
+      if (!newText) return;
+
+      // Handle Speaker A
+      if (s.includes("A")) {
+        const lastText = lastSpeakerAText.current;
+        
+        // Only update if text is meaningfully different
+        if (shouldUpdateText(newText, lastText)) {
+          console.log("➡️ Setting Person A:", newText);
+          lastSpeakerAText.current = newText;
+          chatActions.setPersonOneInput(newText);
+        }
+      } 
+      // Handle Speaker B
+      else if (s.includes("B")) {
+        const lastText = lastSpeakerBText.current;
+        
+        // Only update if text is meaningfully different
+        if (shouldUpdateText(newText, lastText)) {
+          console.log("➡️ Setting Person B:", newText);
+          lastSpeakerBText.current = newText;
+          chatActions.setPersonTwoInput(newText);
+        }
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -74,7 +115,8 @@ function TranscriptLogger() {
   }
 
   loadTranscript();
-  timer = setInterval(loadTranscript, 1000);
+  // Reduced interval for lower latency
+  timer = setInterval(loadTranscript, 500);
   return () => clearInterval(timer);
 }, [started]);
 
@@ -112,99 +154,3 @@ function TranscriptLogger() {
 }
 
 export default TranscriptLogger;
-
-
-
-
-
-
-// import { useEffect } from "react";
-
-// function TranscriptLogger() {
-//   useEffect(() => {
-//     console.log("TranscriptLogger mounted");
-//     let timer;
-
-//     async function loadTranscript() {
-//       const url = "http://localhost:5000/api/transcribe";
-//       try {
-//         console.log("POST", url);
-//         const res = await fetch(url, {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({})
-//         });
-//         const data = await res.json();
-//         console.log("Transcript:", data);
-//       } catch (err) {
-//         console.error("Fetch error:", err);
-//       }
-//     }
-
-//     loadTranscript();
-//     timer = setInterval(loadTranscript, 1000); // every 2s
-//     return () => clearInterval(timer);
-//   }, []);
-
-//   return null; // no UI
-// }
-
-// export default TranscriptLogger;
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState } from "react";
-
-// function MyComponent() {
-//   const [lines, setLines] = useState([]);
-
-//   useEffect(() => {
-//     let timer;
-
-//     async function loadTranscript() {
-//       try {
-//         const url = "http://localhost:5000/api/transcribe"; // make sure this matches your Flask port
-//         const res = await fetch(url, {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({}) // add payload if your API expects one
-//         });
-
-//         if (!res.ok) {
-//           const body = await res.text().catch(() => "");
-//           console.error(`Fetch ${url} failed: ${res.status} ${res.statusText}`, body);
-//           return;
-//         }
-
-//         const data = await res.json(); // [{ Speaker, Text }, ...]
-//         const all = (Array.isArray(data) ? data : []).map(
-//           r => `${r.Speaker}: ${r.Text}`.trim()
-//         );
-
-//         setLines(all);
-//         console.log(`[${new Date().toISOString()}] Lines:`, all);
-//       } catch (err) {
-//         console.error("Fetch error:", err);
-//       }
-//     }
-
-//     loadTranscript();
-//     timer = setInterval(loadTranscript, 1000);
-//     return () => clearInterval(timer);
-//   }, []);
-
-//   return (
-//     <div>
-//       {lines.map((line, i) => (
-//         <div key={i}>{line}</div>
-//       ))}
-//     </div>
-//   );
-// }
-
-// export default MyComponent;
