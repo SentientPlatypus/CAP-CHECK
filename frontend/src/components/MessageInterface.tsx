@@ -116,28 +116,54 @@ const MessageInterface = () => {
     const checkGlobalInputs = () => {
       // Check Person A input
       if (chatGlobals.personOneInput.trim()) {
-        const newMessage: Message = {
-          id: Date.now().toString(),
-          text: chatGlobals.personOneInput.trim(),
-          sender: 'left',
-          timestamp: new Date(),
-          truthVerification: chatGlobals.truthVerification
-        };
-        setMessages(prev => [...prev, newMessage]);
+        const lastMessage = messages[messages.length - 1];
+        const shouldUpdateExisting = lastMessage && lastMessage.sender === 'left';
+        
+        if (shouldUpdateExisting) {
+          // Update existing message text
+          setMessages(prev => prev.map((msg, index) => 
+            index === prev.length - 1 
+              ? { ...msg, text: chatGlobals.personOneInput.trim(), truthVerification: chatGlobals.truthVerification }
+              : msg
+          ));
+        } else {
+          // Create new message for speaker change
+          const newMessage: Message = {
+            id: Date.now().toString(),
+            text: chatGlobals.personOneInput.trim(),
+            sender: 'left',
+            timestamp: new Date(),
+            truthVerification: chatGlobals.truthVerification
+          };
+          setMessages(prev => [...prev, newMessage]);
+        }
         chatActions.setPersonOneInput('');
         chatActions.setTruthVerification(null);
       }
 
       // Check Person B input
       if (chatGlobals.personTwoInput.trim()) {
-        const newMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: chatGlobals.personTwoInput.trim(),
-          sender: 'right',
-          timestamp: new Date(),
-          truthVerification: chatGlobals.truthVerification
-        };
-        setMessages(prev => [...prev, newMessage]);
+        const lastMessage = messages[messages.length - 1];
+        const shouldUpdateExisting = lastMessage && lastMessage.sender === 'right';
+        
+        if (shouldUpdateExisting) {
+          // Update existing message text
+          setMessages(prev => prev.map((msg, index) => 
+            index === prev.length - 1 
+              ? { ...msg, text: chatGlobals.personTwoInput.trim(), truthVerification: chatGlobals.truthVerification }
+              : msg
+          ));
+        } else {
+          // Create new message for speaker change
+          const newMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            text: chatGlobals.personTwoInput.trim(),
+            sender: 'right',
+            timestamp: new Date(),
+            truthVerification: chatGlobals.truthVerification
+          };
+          setMessages(prev => [...prev, newMessage]);
+        }
         chatActions.setPersonTwoInput('');
         chatActions.setTruthVerification(null);
       }
