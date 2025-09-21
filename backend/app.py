@@ -126,7 +126,7 @@ def start_transcribe():
     # start a transcribe session
     dev_ids = None # autopick 2 devices
     my_session.start(dev_ids=dev_ids)
-    return 200
+    return {"status": "started"}
 
 @app.get("/api/end_transcribe")
 def end_transcribe():
@@ -153,5 +153,5 @@ if __name__ == '__main__':
     my_session = LiveTranscriber()
     with app.app_context():
         db.create_all()
-    threading.Thread(target=launch_frontend, daemon=True).start()
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
+    #threading.Thread(target=launch_frontend, daemon=True).start()
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

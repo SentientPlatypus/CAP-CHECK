@@ -84,17 +84,17 @@ const saveGlobalState = async () => {
  * Start polling Flask API for changes
  */
 const startPolling = () => {
-  pollingManager.start((data) => {
-    if (data) {
-      const hasChanges = JSON.stringify(chatGlobals) !== JSON.stringify(data);
-      chatGlobals = { ...data };
+  // pollingManager.start((data) => {
+  //   if (data) {
+  //     const hasChanges = JSON.stringify(chatGlobals) !== JSON.stringify(data);
+  //     chatGlobals = { ...data };
       
-      if (hasChanges) {
-        console.log('Global state updated from Flask API:', data);
-        window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
-      }
-    }
-  });
+  //     if (hasChanges) {
+  //       console.log('Global state updated from Flask API:', data);
+  //       window.dispatchEvent(new CustomEvent('globalStateChanged', { detail: chatGlobals }));
+  //     }
+  //   }
+  // });
 };
 
 /**
