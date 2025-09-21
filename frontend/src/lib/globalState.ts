@@ -107,7 +107,7 @@ const stopPolling = () => {
 // Initialize state on module load
 loadGlobalState().then(() => {
   // Start polling for changes after initial load
-  startPolling();
+  // startPolling();
 });
 
 export { chatGlobals };
