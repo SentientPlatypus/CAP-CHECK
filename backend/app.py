@@ -48,7 +48,6 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 db = SQLAlchemy(app)
 
-# btn = cap_button.CapButton(port="COM10")  # Commented out for testing - no hardware needed
 
 
 # ---------------------------
@@ -103,7 +102,7 @@ def api_put_globals():
     db.session.commit()
     return jsonify(current)
 
-
+# btn = cap_button.CapButton(port="COM10")  # Commented out for testing - no hardware needed
 #---------------------------
 # Arduino Endpoints - COMMENTED OUT FOR TESTING
 #---------------------------
@@ -114,7 +113,16 @@ def api_put_globals():
 #         return jsonify(ok=True, player=player, command=command)
 #     except Exception as e:
 #         return jsonify(ok=False, error=str(e)), 500
-    
+
+@app.post("/api/transcribe")
+def api_transcribe():
+    # Implement transcription logic here
+    dummy_transcript = [
+        {"Speaker": "Person A", "Text": "This is a dummy transcription."},
+        {"Speaker": "Person B", "Text": "This is another dummy transcription."}
+    ]
+
+    return jsonify(dummy_transcript)
 
 # Launching frontend
 def launch_frontend():
@@ -125,4 +133,4 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     threading.Thread(target=launch_frontend, daemon=True).start()
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))

@@ -58,3 +58,15 @@ class CapButton:
         for msg in msgs:
             self.ser.write(msg.encode("ascii"))
         
+if __name__ == "__main__":
+    import time
+    btn = CapButton()
+    btn.send_command(CapButton.BOTH, CapButton.BLINK_FAST)
+    time.sleep(2)
+    btn.send_command(CapButton.BOTH, CapButton.OFF)
+
+# example flask endpoint usage:
+# @app.get("/api/blinker/<int:player>/<int:command>")
+# def api_blinker(player: int, command: int):
+#     btn = CapButton()
+#     btn.send_command(player, command)
