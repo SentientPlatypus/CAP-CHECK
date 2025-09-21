@@ -31,6 +31,7 @@ import cap_button
 # runing 
 import threading
 import subprocess
+from transcriber import LiveTranscriber
 
 
 # ---------------------------
@@ -102,27 +103,41 @@ def api_put_globals():
     db.session.commit()
     return jsonify(current)
 
-# btn = cap_button.CapButton(port="COM10")  # Commented out for testing - no hardware needed
+try:
+    btn = cap_button.CapButton(port="COM10")  # Commented out for testing - no hardware needed
+except:
+    print("THE BUTTON cannot be defined, maybe Serial not working")
 #---------------------------
 # Arduino Endpoints - COMMENTED OUT FOR TESTING
 #---------------------------
-# @app.get("/api/blinker/<int:player>/<int:command>")
-# def api_blinker(player: int, command: int):
-#     try:
-#         btn.send_command(player, command)
-#         return jsonify(ok=True, player=player, command=command)
-#     except Exception as e:
-#         return jsonify(ok=False, error=str(e)), 500
+@app.get("/api/blinker/<int:player>/<int:command>")
+def api_blinker(player: int, command: int):
+    
 
-@app.post("/api/transcribe")
+    try:
+        btn.send_command(player, command)
+        return jsonify(ok=True, player=player, command=command)
+    except Exception as e:
+        return jsonify(ok=False, error=str(e)), 500
+
+
+@app.get("/api/start_transcribe")
+def start_transcribe():
+    # start a transcribe session
+    dev_ids = None # autopick 2 devices
+    my_session.start(dev_ids=dev_ids)
+    return 200
+
+
+@app.get("/api/transcribe")
 def api_transcribe():
-    # Implement transcription logic here
-    dummy_transcript = [
-        {"Speaker": "Person A", "Text": "This is a dummy transcription."},
-        {"Speaker": "Person B", "Text": "This is another dummy transcription."}
-    ]
+    # TODO: SESSION NEEDS TO START BEFORE THIS IS RUN
+    # Returns all lines (partials + finals). If you want finals only, filter here.
+    # Example to return finals only:
+    # data = [d for d in transcriber.get_transcript() if d["Final"]]
+    data = my_session.get_transcript()[-20:]
+    return jsonify(data)
 
-    return jsonify(dummy_transcript)
 
 # Launching frontend
 def launch_frontend():
@@ -130,6 +145,7 @@ def launch_frontend():
     subprocess.run(["npm", "run", "dev"], cwd=frontend_dir)
 
 if __name__ == '__main__':
+    my_session = LiveTranscriber()
     with app.app_context():
         db.create_all()
     threading.Thread(target=launch_frontend, daemon=True).start()

@@ -72,6 +72,8 @@ ALLOW_OVERLAP = False          # set True to allow both in near-equal loudness
 EWMA_ALPHA = 0.2               # 0..1 (higher = more reactive)
 
 LABELS = ["Speaker A", "Speaker B"]
+API_KEY = "60515d2883e14404b02198487c9d2954"
+
 
 # =========================
 # CLASS
@@ -171,7 +173,7 @@ class LiveTranscriber:
     # ========== Client ==========
 
     def _make_client(self, label: str) -> StreamingClient:
-        api_key = os.environ.get("ASSEMBLYAI_API_KEY")
+        api_key = "60515d2883e14404b02198487c9d2954"
         if not api_key:
             raise RuntimeError("Set ASSEMBLYAI_API_KEY environment variable.")
         aai.settings.api_key = api_key
@@ -467,6 +469,9 @@ class LiveTranscriber:
             # return a shallow copy so callers can't mutate internal list
             return list(self.transcript)
 
+# -
+
+
 
 # =========================
 # FLASK APP
@@ -475,7 +480,7 @@ class LiveTranscriber:
 app = Flask(__name__)
 transcriber = LiveTranscriber()
 
-@app.post("/api/transcribe")
+@app.get("/api/transcribe")
 def api_transcribe():
     # Returns all lines (partials + finals). If you want finals only, filter here.
     # Example to return finals only:
