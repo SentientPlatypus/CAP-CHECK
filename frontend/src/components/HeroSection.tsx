@@ -16,6 +16,7 @@
  */
 import { useEffect, useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { chatActions } from '@/lib/globalState';
 import backgroundImage from '@/assets/8bit-background.png';
 const HeroSection = () => {
@@ -190,12 +191,12 @@ Debate Game
         </p>
           
           <div className="flex justify-center space-x-4">
-            <button onClick={startCapCheck} className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-pixel px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-red-400/50 flex items-center space-x-2 shadow-lg shadow-red-500/25 text-lg" style={{
+            <Link to="/chat-select" className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-pixel px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-red-400/50 flex items-center space-x-2 shadow-lg shadow-red-500/25 text-lg" style={{
             imageRendering: 'pixelated'
           }}>
               <span className="font-bold">START HERE</span>
               <ChevronDown size={20} />
-            </button>
+            </Link>
             <button onClick={scrollToCarousel} className="bg-secondary/80 hover:bg-secondary text-secondary-foreground font-pixel px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm border border-border flex items-center space-x-2" style={{
             imageRendering: 'pixelated'
           }}>

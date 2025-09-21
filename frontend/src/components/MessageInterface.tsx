@@ -86,6 +86,20 @@ const MessageInterface = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [capCheckResult]);
 
+  // Spacebar shortcut for CAP CHECK
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if spacebar is pressed and not in an input field
+      if (event.code === 'Space' && event.target === document.body) {
+        event.preventDefault();
+        handleCapCheck();
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Smooth scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
@@ -198,7 +212,7 @@ const MessageInterface = () => {
     }
   };
 
-  // Handle CAP CHECK - exact same as home page
+  // Handle CAP CHECK - simplified version with centered colored messages
   const handleCapCheck = () => {
     const timestamp = Date.now();
 
@@ -214,7 +228,7 @@ const MessageInterface = () => {
     const analyzingMessage: Message = {
       id: `analyzing-${timestamp + 1}`,
       text: '⚠️ ANALYZING...',
-      sender: 'left',
+      sender: 'center',
       timestamp: new Date()
     };
     setMessages(prev => [...prev, capCheckMessage, analyzingMessage]);
@@ -231,7 +245,30 @@ const MessageInterface = () => {
       if (fadeCount >= 6) {
         // 2 seconds of flashing (6 * 300ms = 1.8s)
         clearInterval(fadeInterval);
-        const result = false; // Default to false as requested
+        
+        // Randomly select result: CAP (false), SUS (null), or FACT (true)
+        const randomResult = Math.random();
+        let result: boolean | null;
+        let resultText: string;
+        let explanation: string;
+        
+        if (randomResult < 0.6) {
+          // 60% chance for CAP (false)
+          result = false;
+          resultText = "🚨 CAP";
+          explanation = "Statement flagged as false or misleading. Multiple sources contradict this claim.";
+        } else if (randomResult < 0.8) {
+          // 20% chance for SUS (null)
+          result = null;
+          resultText = "⚠️ SUS";
+          explanation = "Statement requires further verification. Insufficient evidence to confirm accuracy.";
+        } else {
+          // 20% chance for FACT (true)
+          result = true;
+          resultText = "✅ FACT";
+          explanation = "Statement verified as accurate. Multiple reliable sources support this claim.";
+        }
+        
         setFlashingValue(result);
         setFinalResult(result);
         setCapCheckResult(result);
@@ -241,10 +278,10 @@ const MessageInterface = () => {
           setShowModal(false);
           const resultMessage: Message = {
             id: `result-${timestamp + 2}`,
-            text: `Verification Result: FLAGGED AS FALSE - Statement contains potential misinformation`,
+            text: `${resultText}\n${explanation}`,
             sender: 'center',
             timestamp: new Date(),
-            truthVerification: false
+            truthVerification: result
           };
           setMessages(prev => [...prev, resultMessage]);
         }, 1000);
@@ -300,72 +337,6 @@ const MessageInterface = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-muted/50" />
       
       <div className="max-w-6xl mx-auto relative z-10">
-        {/* Original AI Status - for scroll detection */}
-        {capCheckResult !== null && !showModal && <div ref={statusRef} className="mb-12 animate-slide-up">
-            <div className={`ai-status-card mx-auto max-w-md ${capCheckResult ? 'ai-status-true' : 'ai-status-false'} animate-glow-pulse`}>
-              <div className="text-6xl md:text-7xl font-pixel tracking-tight mb-2" style={{
-            textShadow: '4px 4px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000',
-            imageRendering: 'pixelated'
-          }}>
-                AI: {capCheckResult ? 'TRUE' : 'FALSE'}
-              </div>
-            </div>
-            {!capCheckResult && <div className="mt-8 animate-fade-in" style={{
-          animationDelay: '0.3s'
-        }}>
-                <div className="deception-alert max-w-lg mx-auto">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">
-                      <span className="text-xl">⚠️</span>
-                    </div>
-                    <p className="text-2xl font-pixel text-destructive" style={{
-                imageRendering: 'pixelated'
-              }}>
-                      DECEPTION DETECTED
-                    </p>
-                  </div>
-                  <p className="text-destructive/80 text-lg font-pixel leading-relaxed" style={{
-              imageRendering: 'pixelated'
-            }}>
-                    STATEMENT FLAGGED AS POTENTIALLY FALSE OR MISLEADING
-                  </p>
-                </div>
-              </div>}
-          </div>}
-
-        {/* Sticky AI Status - only visible when scrolled */}
-        {capCheckResult !== null && isStatusSticky && !showModal && <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
-            <div className={`ai-status-card ${capCheckResult ? 'ai-status-true' : 'ai-status-false'} animate-glow-pulse px-6 py-3`}>
-              <div className="text-2xl md:text-3xl font-pixel tracking-tight" style={{
-            textShadow: '2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000',
-            imageRendering: 'pixelated'
-          }}>
-                AI: {capCheckResult ? 'TRUE' : 'FALSE'}
-              </div>
-            </div>
-            {!capCheckResult && <div className="mt-4 animate-fade-in" style={{
-          animationDelay: '0.3s'
-        }}>
-                <div className="deception-alert max-w-sm mx-auto text-center">
-                  <div className="flex items-center justify-center space-x-2 mb-2">
-                    <div className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center">
-                      <span className="text-sm">⚠️</span>
-                    </div>
-                    <p className="text-lg font-pixel text-destructive" style={{
-                imageRendering: 'pixelated'
-              }}>
-                      DECEPTION DETECTED
-                    </p>
-                  </div>
-                  <p className="text-destructive/80 text-sm font-pixel" style={{
-              imageRendering: 'pixelated'
-            }}>
-                    STATEMENT FLAGGED AS POTENTIALLY FALSE OR MISLEADING
-                  </p>
-                </div>
-              </div>}
-          </div>}
-
         {/* Premium Communication Interface */}
         <div className="glass-card rounded-3xl p-10 shadow-2xl border border-border/20">
           <div className="text-center mb-10">
@@ -393,10 +364,49 @@ const MessageInterface = () => {
           <div className="h-64 overflow-y-auto mb-8 space-y-6 scrollbar-thin">
             {messages.map((message, index) => {
             if (message.sender === 'center') {
+              // Check if this is a CAP CHECK result message
+              const isCapResult = message.text.includes('🚨 CAP') || message.text.includes('⚠️ SUS') || message.text.includes('✅ FACT');
+              
+              if (isCapResult) {
+                // CAP CHECK result with color coding
+                const lines = message.text.split('\n');
+                const resultLine = lines[0];
+                const explanationLine = lines[1] || '';
+                
+                let bgColor = 'bg-red-500/20';
+                let borderColor = 'border-red-500';
+                let textColor = 'text-red-400';
+                
+                if (resultLine.includes('SUS')) {
+                  bgColor = 'bg-yellow-500/20';
+                  borderColor = 'border-yellow-500';
+                  textColor = 'text-yellow-400';
+                } else if (resultLine.includes('FACT')) {
+                  bgColor = 'bg-green-500/20';
+                  borderColor = 'border-green-500';
+                  textColor = 'text-green-400';
+                }
+                
+                return <div key={message.id} className="w-full flex justify-center mb-6 animate-fade-in">
+                      <div className={`${bgColor} ${borderColor} border-2 p-6 rounded-2xl max-w-md text-center`}>
+                        <p className={`text-2xl font-pixel ${textColor} mb-2`} style={{
+                      imageRendering: 'pixelated'
+                    }}>
+                          {resultLine}
+                        </p>
+                        {explanationLine && <p className="text-sm font-pixel text-white/80 leading-relaxed" style={{
+                      imageRendering: 'pixelated'
+                    }}>
+                          {explanationLine}
+                        </p>}
+                      </div>
+                    </div>;
+              }
+              
               // Find the last center message to apply highlighting to the newest AI prompt
               const centerMessages = messages.filter(m => m.sender === 'center');
               const isNewestAiMessage = message === centerMessages[centerMessages.length - 1];
-              if (isNewestAiMessage) {
+              if (isNewestAiMessage && !isCapResult) {
                 // AI Content with premium highlighting (newest AI message)
                 const words = message.text.split(' ');
                 return <div key={message.id} className="w-full mb-6 animate-fade-in">
@@ -480,11 +490,6 @@ const MessageInterface = () => {
             textShadow: '2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000',
             imageRendering: 'pixelated'
           }}>🚨 Check CAP 🚨</button>
-            <p className="text-sm font-pixel text-white mt-2 bg-black/60 px-4 py-2 rounded-xl border border-primary/30 inline-block" style={{
-            imageRendering: 'pixelated'
-          }}>
-              AI-POWERED FACT CHECKING WITH BACKEND VERIFICATION
-            </p>
           </div>
         </div>
       </div>
