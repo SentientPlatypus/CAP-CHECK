@@ -128,6 +128,11 @@ def start_transcribe():
     my_session.start(dev_ids=dev_ids)
     return 200
 
+@app.get("/api/end_transcribe")
+def end_transcribe():
+    my_session.stop()
+    return 200
+
 
 @app.get("/api/transcribe")
 def api_transcribe():
