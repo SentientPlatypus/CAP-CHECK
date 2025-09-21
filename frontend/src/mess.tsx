@@ -1,12 +1,9 @@
-import { useEffect,useRef,useState } from "react";
+import { useEffect, useState , useRef} from "react";
 import { chatActions } from '@/lib/globalState';
 
 function TranscriptLogger() {
   const [started, setStarted] = useState(false);
 
-    // Remember last applied values so we don't spam identical writes
-  const lastA = useRef<string | null>(null);
-  const lastB = useRef<string | null>(null);
   // First effect → starts transcription
   useEffect(() => {
     async function startTranscript() {
@@ -32,60 +29,60 @@ function TranscriptLogger() {
 
   // Second effect → runs only once `started === true`
   useEffect(() => {
-    if (!started) return;
+  if (!started) return; // ⏸ wait until started
 
-    console.log("TranscriptLogger mounted (polling active)");
-    let timer: ReturnType<typeof setInterval>;
+  console.log("TranscriptLogger mounted (polling active)");
+  let timer: ReturnType<typeof setInterval>;
+  const lastCount = useRef(0); // how many lines we've already processed
 
-    async function loadTranscript() {
-      const url = "http://localhost:5000/api/transcribe";
-      try {
-        console.log("GET", url);
-        const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Fetch failed:", res.status, res.statusText, text);
-          return;
-        }
-
-        // Backend may return a single string or an array of strings like:
-        // "Speaker A: Hello ..." or "Speaker B: ...".
-        let data = await res.json();
-        if (!Array.isArray(data)) data = [data];
-
-        // find latest line per speaker (if any)
-        const lastLineA = [...data].reverse().find((line: string) =>
-          typeof line === "string" && line.startsWith("Speaker A:")
-        );
-        const lastLineB = [...data].reverse().find((line: string) =>
-          typeof line === "string" && line.startsWith("Speaker B:")
-        );
-
-        if (lastLineA) {
-          const text = lastLineA.replace("Speaker A:", "").trim();
-          if (text && text !== lastA.current) {
-            chatActions.setPersonOneInput(text);
-            lastA.current = text;
-            console.log("➡️ Person A set:", text);
-          }
-        }
-        if (lastLineB) {
-          const text = lastLineB.replace("Speaker B:", "").trim();
-          if (text && text !== lastB.current) {
-            chatActions.setPersonTwoInput(text);
-            lastB.current = text;
-            console.log("➡️ Person B set:", text);
-          }
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
+  async function loadTranscript() {
+    const url = "http://localhost:5000/api/transcribe";
+    try {
+      console.log("GET", url);
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Fetch failed:", res.status, res.statusText, text);
+        return;
       }
-    }
 
-    loadTranscript();
-    timer = setInterval(loadTranscript, 1000); // every 1s
-    return () => clearInterval(timer);
-  }, [started]);
+      let data = await res.json();
+      console.log("Transcript:", data); // ✅ your logging still here
+
+      // Normalize to array of lines
+      if (!Array.isArray(data)) data = [data];
+
+      // Only handle NEW lines since last poll
+      const fresh = data.slice(lastCount.current);
+      if (fresh.length === 0) return;
+      lastCount.current = data.length;
+
+      // Parse speaker lines
+      const re = /^speaker\s*(a|b)\s*:\s*(.*)$/i;
+      for (const line of fresh) {
+        if (typeof line !== "string") continue;
+        const m = line.match(re);
+        if (!m) continue;
+
+        const who = m[1].toUpperCase();
+        const text = m[2].trim();
+        if (!text) continue;
+
+        if (who === "A") {
+          chatActions.setPersonOneInput(text);
+        } else {
+          chatActions.setPersonTwoInput(text);
+        }
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  }
+
+  loadTranscript();
+  timer = setInterval(loadTranscript, 1000); // every 1s
+  return () => clearInterval(timer);
+}, [started]);
 
   //end
     useEffect(() => {
