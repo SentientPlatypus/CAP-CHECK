@@ -131,7 +131,7 @@ def start_transcribe():
 @app.get("/api/end_transcribe")
 def end_transcribe():
     my_session.stop()
-    return 200
+    return {"status": "ended"}
 
 
 @app.get("/api/transcribe")
