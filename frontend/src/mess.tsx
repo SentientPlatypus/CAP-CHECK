@@ -60,7 +60,7 @@ function TranscriptLogger() {
   //end
     useEffect(() => {
     function handleKeyDown(e) {
-      if (e.code === "Space") {
+      if (e.key === "p" || e.key === "P") {
         async function endTranscript() {
           const url = "http://localhost:5000/api/end_transcribe";
           try {
