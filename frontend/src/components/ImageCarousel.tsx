@@ -3,6 +3,7 @@
  * - Scroll-driven, single RAF loop
  * - Lightweight per-frame updates (transform + opacity only)
  * - Uses refs to avoid state churn and listener rebinds
+ * - Cache-busting update
  */
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
@@ -30,6 +31,7 @@ const ImageCarousel = () => {
   const lastActiveIndexRef = useRef(0);
   const isGalleryActiveRef = useRef(false);
   const showCarouselRef = useRef(false);
+  const scrollProgressRef = useRef(0);
 
   // Light state that changes infrequently
   const [activeIndex, setActiveIndex] = useState(0);
@@ -91,13 +93,21 @@ const ImageCarousel = () => {
         const maxScroll = Math.max(1, sectionHeight - windowHeight);
         const rawProgress = Math.min(1, Math.max(0, scrolled / maxScroll));
         
-        // Don't start moving carousel until 20% through the section
-        const startThreshold = 0.2;
-        const finalProgress = rawProgress < startThreshold ? 0 : (rawProgress - startThreshold) / (1 - startThreshold);
+        // Start moving carousel immediately with scroll
+        const finalProgress = rawProgress;
 
         // Update progress bar width imperatively (show actual scroll progress)
         if (progressBarRef.current) {
           progressBarRef.current.style.width = `${rawProgress * 100}%`;
+        }
+
+        // Store scroll progress for use in render
+        scrollProgressRef.current = rawProgress;
+
+        // Update carousel vertical position smoothly
+        if (wrapperRef.current) {
+          const verticalOffset = rawProgress * (sectionHeight - windowHeight);
+          wrapperRef.current.style.top = `${windowHeight / 2 + verticalOffset}px`;
         }
 
         // Calculate center position in the viewport
@@ -169,9 +179,24 @@ const ImageCarousel = () => {
     <section
       ref={sectionRef}
       data-section="carousel"
-      className="h-[200vh] relative"
-      style={{ backgroundColor: '#0a1925' }}
+      className="h-[200vh] relative overflow-hidden"
+      style={{ backgroundColor: '#0a1724' }}
     >
+      {/* Animated sparks background */}
+      <div className="absolute inset-0 pointer-events-none">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className="spark-particle absolute w-1 h-1 bg-primary rounded-full opacity-60"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${3 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+      </div>
       {/* Fixed title & controls */}
       <div
         className={`fixed top-20 left-1/2 -translate-x-1/2 text-center z-30 transition-opacity duration-300 ${
@@ -191,8 +216,14 @@ const ImageCarousel = () => {
         </p>
       </div>
 
-      {/* Sticky viewport */}
-      <div ref={wrapperRef} className="sticky top-1/2 -translate-y-1/2 h-80 overflow-hidden">
+      {/* Moving viewport that follows scroll */}
+      <div 
+        ref={wrapperRef} 
+        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 overflow-hidden"
+        style={{ 
+          willChange: 'top'
+        }}
+      >
         <div
           ref={trackRef}
           className={`flex items-center gap-12 h-full ${showCarousel ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}

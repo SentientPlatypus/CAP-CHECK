@@ -8,7 +8,6 @@ import Chat from "./pages/Chat";
 import Chat2 from "./pages/Chat2";
 import ChatSelect from "./pages/ChatSelect";
 import NotFound from "./pages/NotFound";
-import TranscriptLogger from "./mess.tsx"
 
 const queryClient = new QueryClient();
 
@@ -17,7 +16,6 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <TranscriptLogger />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

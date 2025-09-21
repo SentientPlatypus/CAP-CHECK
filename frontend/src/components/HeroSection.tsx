@@ -18,7 +18,8 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { chatActions } from '@/lib/globalState';
-import backgroundImage from '@/assets/8bit-background.png';
+import backgroundImage from '@/assets/snowy-mountain-background.png';
+import ScrollButton2D from './ScrollButton2D';
 const HeroSection = () => {
   // Track scroll position for parallax effects
   const [scrollY, setScrollY] = useState(0);
@@ -207,10 +208,8 @@ Debate Game
         </div>
         
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="w-6 h-10 border-2 border-primary rounded-full flex justify-center animate-pulse">
-            <div className="w-1 h-3 bg-primary rounded-full mt-2" style={{
-            animation: 'bounce 6s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-          }} />
+          <div className="scale-150">
+            <ScrollButton2D scrollY={scrollY} />
           </div>
         </div>
       </section>

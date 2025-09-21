@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Shield, AlertTriangle, Clock, Volume2 } from 'lucide-react';
 import { chatGlobals, chatActions, truthUtils } from '@/lib/globalState';
+import debatePixelArt from '@/assets/debate-pixel-art.png';
 
 // Message data structure
 interface Message {
@@ -216,10 +217,10 @@ const MessageInterface = () => {
   const handleCapCheck = () => {
     const timestamp = Date.now();
 
-    // Add CAP CHECK message
+    // Add CAP Check message
     const capCheckMessage: Message = {
       id: `cap-check-${timestamp}`,
-      text: 'CAP CHECK',
+      text: 'CAP Check',
       sender: 'left',
       timestamp: new Date()
     };
@@ -333,12 +334,91 @@ const MessageInterface = () => {
       animationDelay: '4s'
     }} />
       
-      {/* Premium gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-muted/50" />
+      {/* Premium animated pixel background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-muted/50">
+        {/* Animated background particles */}
+        {Array.from({ length: 40 }).map((_, i) => (
+          <div
+            key={i}
+            className="debate-particle absolute w-1 h-1 bg-primary/60 rounded-sm animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`,
+              imageRendering: 'pixelated'
+            }}
+          />
+        ))}
+
+        {/* Pixel art debating people */}
+        {/* Left debater */}
+        <div 
+          className="pixel-person absolute left-10 top-1/3 w-12 h-16 bg-gradient-to-b from-blue-400 to-blue-600 rounded-sm opacity-30 animate-pulse"
+          style={{ 
+            clipPath: 'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
+            imageRendering: 'pixelated',
+            animationDelay: '0.5s'
+          }}
+        >
+          {/* Pixelated face */}
+          <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-sm"></div>
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 w-0.5 h-0.5 bg-black rounded-sm"></div>
+          {/* Speech bubble */}
+          <div className="absolute -top-6 -right-4 w-8 h-4 bg-white/80 rounded-sm text-[6px] flex items-center justify-center font-pixel text-black">
+            FACT?
+          </div>
+        </div>
+
+        {/* Right debater */}
+        <div 
+          className="pixel-person absolute right-10 top-2/3 w-12 h-16 bg-gradient-to-b from-red-400 to-red-600 rounded-sm opacity-30 animate-pulse"
+          style={{ 
+            clipPath: 'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
+            imageRendering: 'pixelated',
+            animationDelay: '1s'
+          }}
+        >
+          <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-sm"></div>
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 w-0.5 h-0.5 bg-black rounded-sm"></div>
+          {/* Speech bubble */}
+          <div className="absolute -top-6 -left-4 w-8 h-4 bg-white/80 rounded-sm text-[6px] flex items-center justify-center font-pixel text-black">
+            CAP!
+          </div>
+        </div>
+
+        {/* Additional floating pixels */}
+        {Array.from({ length: 15 }).map((_, i) => (
+          <div
+            key={`floating-${i}`}
+            className="absolute w-2 h-2 bg-primary/40 rounded-sm animate-bounce"
+            style={{
+              left: `${20 + Math.random() * 60}%`,
+              top: `${20 + Math.random() * 60}%`,
+              animationDelay: `${Math.random() * 2}s`,
+              animationDuration: `${3 + Math.random() * 2}s`,
+              imageRendering: 'pixelated'
+            }}
+          />
+        ))}
+      </div>
       
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Premium Communication Interface */}
-        <div className="glass-card rounded-3xl p-10 shadow-2xl border border-border/20">
+        <div className="glass-card rounded-3xl p-10 shadow-2xl border border-border/20 relative">
+          {/* Pixel art debaters in corner */}
+          <div className="absolute -top-2 -right-2">
+            <img 
+              src={debatePixelArt}
+              alt="Pixel art of two people debating"
+              className="w-40 h-auto opacity-80 hover:opacity-100 transition-all duration-300 hover:scale-105"
+              style={{ 
+                imageRendering: 'pixelated',
+                filter: 'drop-shadow(3px 3px 6px rgba(0,0,0,0.4))',
+                transform: 'rotate(8deg)'
+              }}
+            />
+          </div>
           <div className="text-center mb-10">
             <h2 className="text-4xl md:text-5xl font-pixel mb-6 text-white animate-slide-up" style={{
             textShadow: '4px 4px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000',
@@ -361,7 +441,7 @@ const MessageInterface = () => {
           </div>
 
           {/* Premium Chat Messages */}
-          <div className="h-64 overflow-y-auto mb-8 space-y-6 scrollbar-thin">
+          <div className="h-64 overflow-y-auto mb-8 space-y-6 scrollbar-thin border border-border/40 rounded-xl p-4 bg-black/10">
             {messages.map((message, index) => {
             if (message.sender === 'center') {
               // Check if this is a CAP CHECK result message
@@ -489,14 +569,14 @@ const MessageInterface = () => {
             <button onClick={handleCapCheck} className="px-8 py-4 bg-gradient-to-r from-red-500 to-orange-500 text-white font-pixel text-xl rounded-2xl hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-2 border-red-400/50" style={{
             textShadow: '2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000',
             imageRendering: 'pixelated'
-          }}>🚨 Check CAP 🚨</button>
+          }}>🚨 CAP CHECK 🚨</button>
           </div>
         </div>
       </div>
 
       {/* CAP CHECK Modal - Exact same as home page */}
       {showModal && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-background/95 backdrop-blur-md rounded-2xl p-12 border border-primary/50 shadow-2xl max-w-md w-full mx-4 animate-scale-in">
+          <div className="bg-background/95 backdrop-blur-md rounded-2xl p-16 border border-primary/50 shadow-2xl max-w-2xl w-full mx-4 animate-scale-in">
             <div className="text-center">
               <h1 className="text-4xl md:text-6xl font-pixel mb-8 text-white" style={{
             textShadow: '4px 4px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000',
