@@ -24,14 +24,20 @@ const Index = () => {
       {/* Call to Action Section */}
       <section className="py-20 bg-gradient-to-b from-background to-muted/20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold mb-6 animate-slide-from-left pixelated">
+          <h2 className="text-2xl font-bold mb-6 animate-slide-from-left font-pixel text-white" 
+              style={{ 
+                textShadow: '4px 4px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000',
+                imageRendering: 'pixelated'
+              }}>
             READY TO EXPERIENCE REAL-TIME COMMUNICATION?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-from-right font-mono">
+          <p className="text-lg mb-8 max-w-2xl mx-auto animate-slide-from-right font-pixel text-white bg-black/60 px-6 py-3 rounded-xl border border-primary/30"
+             style={{ imageRendering: 'pixelated' }}>
             Try our AI-powered chat interface with built-in fact-checking and verification system.
           </p>
           <Link to="/chat-select">
-            <Button className="hero-button animate-retro-glow">
+            <Button className="hero-button animate-retro-glow font-pixel" 
+                    style={{ imageRendering: 'pixelated' }}>
               CHOOSE CHAT EXPERIENCE
             </Button>
           </Link>

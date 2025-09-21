@@ -8,46 +8,49 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 26% 4%;
-    --foreground: 210 40% 98%;
+    /* 8-bit themed colors inspired by the pixel art background */
+    --background: 210 60% 8%;
+    --foreground: 180 100% 95%;
 
-    --card: 220 26% 6%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 40% 15%;
+    --card-foreground: 180 100% 95%;
 
-    --popover: 220 26% 6%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 40% 15%;
+    --popover-foreground: 180 100% 95%;
 
-    --primary: 270 80% 65%;
-    --primary-foreground: 210 40% 98%;
+    /* Cyan/teal from the mountain peaks and trees */
+    --primary: 180 100% 70%;
+    --primary-foreground: 210 60% 8%;
 
-    --secondary: 220 26% 12%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 240 30% 20%;
+    --secondary-foreground: 180 100% 95%;
 
-    --muted: 220 26% 8%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 30% 18%;
+    --muted-foreground: 180 50% 65%;
 
-    --accent: 310 85% 68%;
-    --accent-foreground: 210 40% 98%;
+    /* Green from the forest/trees in the image */
+    --accent: 150 80% 50%;
+    --accent-foreground: 210 60% 8%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 180 100% 95%;
 
-    --border: 220 26% 12%;
-    --input: 220 26% 8%;
-    --ring: 270 80% 65%;
+    --border: 180 30% 25%;
+    --input: 220 40% 12%;
+    --ring: 180 100% 70%;
 
     --radius: 1rem;
 
-    /* Premium design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(270, 80%, 65%) 0%, hsl(310, 85%, 68%) 50%, hsl(340, 75%, 65%) 100%);
-    --gradient-background: linear-gradient(135deg, hsl(220, 26%, 4%) 0%, hsl(235, 30%, 8%) 50%, hsl(250, 25%, 6%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(220, 26%, 6%) 0%, hsl(235, 30%, 10%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-    --gradient-border: linear-gradient(135deg, hsl(270, 80%, 65%) 0%, hsl(310, 85%, 68%) 100%);
+    /* 8-bit design tokens inspired by pixel art */
+    --gradient-primary: linear-gradient(135deg, hsl(180, 100%, 70%) 0%, hsl(150, 80%, 50%) 100%);
+    --gradient-background: linear-gradient(135deg, hsl(210, 60%, 8%) 0%, hsl(220, 50%, 12%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(220, 40%, 15%) 0%, hsl(210, 40%, 18%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(77, 255, 255, 0.1) 0%, rgba(77, 255, 255, 0.05) 100%);
+    --gradient-border: linear-gradient(135deg, hsl(180, 100%, 70%) 0%, hsl(150, 80%, 50%) 100%);
     
-    --glow-primary: 0 0 40px hsl(270, 80%, 65% / 0.4), 0 0 80px hsl(270, 80%, 65% / 0.2);
-    --glow-accent: 0 0 50px hsl(310, 85%, 68% / 0.3), 0 0 100px hsl(310, 85%, 68% / 0.1);
-    --glow-success: 0 0 30px hsl(142, 76%, 36% / 0.6);
+    --glow-primary: 0 0 40px hsl(180, 100%, 70% / 0.4), 0 0 80px hsl(180, 100%, 70% / 0.2);
+    --glow-accent: 0 0 50px hsl(150, 80%, 50% / 0.3), 0 0 100px hsl(150, 80%, 50% / 0.1);
+    --glow-success: 0 0 30px hsl(150, 80%, 50% / 0.6);
     --glow-error: 0 0 30px hsl(0, 84%, 60% / 0.6);
     
     --blur-glass: blur(16px);

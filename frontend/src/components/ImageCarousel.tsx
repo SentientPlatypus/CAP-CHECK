@@ -66,20 +66,23 @@ const ImageCarousel = () => {
         const sectionHeight = sectionRef.current.offsetHeight;
 
         // Visibility controls (update state only when value changes)
-        const shouldShowCarousel = rect.top < windowHeight * 0.8;
+        const shouldBeActive = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
+        const shouldShowCarousel = shouldBeActive; // Only show carousel when scroll text is active
+        
         if (shouldShowCarousel !== showCarouselRef.current) {
           showCarouselRef.current = shouldShowCarousel;
           setShowCarousel(shouldShowCarousel);
         }
 
-        const shouldBeActive = rect.top <= 0 && rect.bottom >= windowHeight * 0.5;
-        if (shouldBeActive !== isGalleryActiveRef.current) {
-          isGalleryActiveRef.current = shouldBeActive;
-          setIsGalleryActive(shouldBeActive);
+        // Progress bar should disappear when we scroll completely past the section
+        const shouldShowProgress = rect.bottom > windowHeight * 0.2;
+        if (shouldShowProgress !== isGalleryActiveRef.current) {
+          isGalleryActiveRef.current = shouldShowProgress;
+          setIsGalleryActive(shouldShowProgress);
         }
 
         // Bail out early when the carousel isn't in its sticky active window
-        if (!shouldBeActive) {
+        if (!shouldShowCarousel) {
           return;
         }
 
@@ -166,29 +169,26 @@ const ImageCarousel = () => {
     <section
       ref={sectionRef}
       data-section="carousel"
-      className="h-[200vh] relative bg-gradient-to-b from-background to-card"
+      className="h-[200vh] relative"
+      style={{ backgroundColor: '#0a1925' }}
     >
       {/* Fixed title & controls */}
       <div
         className={`fixed top-20 left-1/2 -translate-x-1/2 text-center z-30 transition-opacity duration-300 ${
-          isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          isGalleryActive && activeIndex < images.length - 1 && showCarousel ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+        <h2 className="text-4xl font-bold font-pixel text-white mb-4"
+            style={{ 
+              textShadow: '4px 4px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000',
+              imageRendering: 'pixelated'
+            }}>
           Scroll to Explore Gallery
         </h2>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-white font-pixel mb-6 bg-black/60 px-4 py-2 rounded-xl"
+           style={{ imageRendering: 'pixelated' }}>
           Keep scrolling to see the horizontal carousel in action
         </p>
-        <button
-          onClick={skipGallery}
-          className="bg-secondary/80 hover:bg-secondary text-secondary-foreground px-6 py-3 rounded-full transition-all duration-200 hover:scale-105 backdrop-blur-sm border border-border"
-        >
-          <div className="flex items-center space-x-2">
-            <span>Skip Gallery</span>
-            <ChevronDown size={18} />
-          </div>
-        </button>
       </div>
 
       {/* Sticky viewport */}
@@ -221,24 +221,6 @@ const ImageCarousel = () => {
         </div>
       </div>
 
-      {/* Fixed progress indicator */}
-      <div
-        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-30 transition-opacity duration-300 ${
-          isGalleryActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className="bg-background/80 backdrop-blur-sm rounded-full px-6 py-3 border border-border">
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">Progress:</span>
-            <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-              <div ref={progressBarRef} className="h-full bg-gradient-to-r from-primary to-accent" style={{ width: '0%' }} />
-            </div>
-            <span className="text-sm text-foreground font-mono">
-              {activeIndex + 1} / {images.length}
-            </span>
-          </div>
-        </div>
-      </div>
     </section>
   );
 };
