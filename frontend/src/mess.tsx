@@ -26,14 +26,16 @@ function TranscriptLogger() {
     }
     startTranscript();
   }, []);
+  const lastCount = useRef(0); // how many lines we've already processed
+
 
   // Second effect → runs only once `started === true`
   useEffect(() => {
-  if (!started) return; // ⏸ wait until started
+  if (!started) return;
 
   console.log("TranscriptLogger mounted (polling active)");
   let timer: ReturnType<typeof setInterval>;
-  const lastCount = useRef(0); // how many lines we've already processed
+  let lastText = ""; // 👈 remember last so we don’t spam repeats
 
   async function loadTranscript() {
     const url = "http://localhost:5000/api/transcribe";
@@ -47,32 +49,24 @@ function TranscriptLogger() {
       }
 
       let data = await res.json();
-      console.log("Transcript:", data); // ✅ your logging still here
+      console.log("Transcript:", data);
 
-      // Normalize to array of lines
-      if (!Array.isArray(data)) data = [data];
+      if (!Array.isArray(data) || data.length === 0) return;
 
-      // Only handle NEW lines since last poll
-      const fresh = data.slice(lastCount.current);
-      if (fresh.length === 0) return;
-      lastCount.current = data.length;
+      // ✅ Latest transcript object
+      const latest = data[data.length - 1];
+      const speaker = latest.Speaker;
+      const text = latest.Text?.trim();
 
-      // Parse speaker lines
-      const re = /^speaker\s*(a|b)\s*:\s*(.*)$/i;
-      for (const line of fresh) {
-        if (typeof line !== "string") continue;
-        const m = line.match(re);
-        if (!m) continue;
+      if (!text || text === lastText) return; // skip duplicates
+      lastText = text;
 
-        const who = m[1].toUpperCase();
-        const text = m[2].trim();
-        if (!text) continue;
-
-        if (who === "A") {
-          chatActions.setPersonOneInput(text);
-        } else {
-          chatActions.setPersonTwoInput(text);
-        }
+      if (speaker.toLowerCase().includes("a")) {
+        console.log("➡️ Setting Person A:", text);
+        chatActions.setPersonOneInput(text);
+      } else if (speaker.toLowerCase().includes("b")) {
+        console.log("➡️ Setting Person B:", text);
+        chatActions.setPersonTwoInput(text);
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -80,7 +74,7 @@ function TranscriptLogger() {
   }
 
   loadTranscript();
-  timer = setInterval(loadTranscript, 1000); // every 1s
+  timer = setInterval(loadTranscript, 1000);
   return () => clearInterval(timer);
 }, [started]);
 
