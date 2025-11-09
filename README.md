@@ -1,73 +1,28 @@
-# Welcome to your Lovable project
+# CAP-CHECK  
+**A Real-Time Debate and Conversation Analyzer**  
+*Built with Python, Flask, React, and Raspberry Pi*
 
-## Project info
+![CAP-CHECK Photo](capcheck.png)
+---
+## Overview  
+**CAP-CHECK** is a wearable system created during the **Cornell Makeathon (Mar 2025)** that analyzes live debates and conversations to detect potential exaggerations or “cap.”  
+The device uses **dual microphones** to capture dialogue, **AssemblyAI** for transcription, and a **web dashboard** with **LED indicators** to visualize “cap levels” in real time.  
+The project explores how speech processing and embedded systems can make human interaction analysis more engaging and interactive.
 
-**URL**: https://lovable.dev/projects/0081818e-34fe-4707-a0c5-26fab5839bdd
+---
 
-## How can I edit this code?
+## Tech Stack  
+- **Programming Languages:** Python, TypeScript  
+- **Frameworks & Tools:** Flask, React, WebSocket  
+- **APIs:** AssemblyAI (Speech-to-Text)  
+- **Hardware:** Raspberry Pi 4, Dual I2S Microphones, LED Matrix  
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## How It Works
+1. **Capture Audio** – Dual microphones record speakers simultaneously from different directions.  
+2. **Transcribe Speech** – Audio is streamed to **AssemblyAI** for real-time transcription.  
+3. **Analyze Conversation** – The backend applies tone and text heuristics (no ML) to flag possible exaggerations.  
+4. **Visualize Results** – The **React** dashboard displays the transcript while the **Raspberry Pi LEDs** show the “cap level” live.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0081818e-34fe-4707-a0c5-26fab5839bdd) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/0081818e-34fe-4707-a0c5-26fab5839bdd) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
