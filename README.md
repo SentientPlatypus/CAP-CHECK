@@ -26,3 +26,5 @@ The project explores how speech processing and embedded systems can make human i
 4. **Visualize Results** – The **React** dashboard displays the transcript while the **Raspberry Pi LEDs** show the “cap level” live.
 
 ---
+
+**Live Demo:** [https://cap-check-one.vercel.app](https://cap-check-one.vercel.app)
